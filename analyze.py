@@ -1,15 +1,12 @@
 from pieces import MOVE_UP_COLOR
-from utils import get_opp_color, get_pieces_eval, get_piece_moves, cell_name
-
-
-# 1. Kings can be taken both
-# 2. No pieces on board of one color
-# 3. 
-
+from utils import get_opp_color, get_pieces_eval, get_piece_moves
 
 
 # - implement true check and mate
 # - evaluation with brute force with good takes
+# - second and third line
+# - auto up color
+# - determine left up field
 
 MAX_EVALUATION = 1000
 MAX_DEEP = 4

@@ -60,9 +60,6 @@ def get_opp_color(color):
 
 
 def get_pieces_hash(pieces):
-    if pieces is None:
-        return -1137
-
     return hash(json.dumps(sorted(pieces.items())))
 
 def get_piece_moves(pieces, position):

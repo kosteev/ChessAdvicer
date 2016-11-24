@@ -36,7 +36,6 @@ def get_board():
         if xy_min:
                 break
 
-    #print sorted(stats.items(), key=lambda x: x[1])[-5:]
     if not xy_min:
         return None
 

@@ -10,7 +10,7 @@ BOARD_COLORDS = {
     BLACK: 'grey'
 }
 
-MOVE_UP_COLOR = WHITE
+MOVE_UP_COLOR = BLACK
 
 PIECES = {
     'rook': {
