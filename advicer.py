@@ -6,14 +6,14 @@ import pyscreenshot
 import termcolor
 
 from analyze import dfs
-from pieces import PIECES, COLORS, WHITE, BLACK, BOARD_COLORDS, equal_count, MOVE_UP_COLOR
-from utils import get_pieces_eval, cell_name, get_pieces_hash
+from pieces import PIECES, WHITE, BLACK, BOARD_COLORDS, equal_count
+from utils import get_pieces_eval, get_pieces_hash, format_move
 
 
 # 1. TODO: (kosteev) Optimize get_board
 
 
-def get_board():
+def get_board_image():
     white = (239, 217, 183)
     yellow = (206, 209, 113)
 
@@ -37,16 +37,39 @@ def get_board():
                 break
 
     if not xy_min:
-        return None
+        return None, None
 
     xy_max = (xy_min[0] + 8 * 128, xy_min[1] + 8 * 128)
 
+    or_xy_min = (xy_min[0] + 3 * 128 + 128 / 2 - 10, xy_max[1] + 5)
+    or_xy_max = (or_xy_min[0] + 20, or_xy_min[1] + 20)
+
+    or_im = im.crop(list(or_xy_min) + list(or_xy_max))
+    stats = defaultdict(int)
+    for x in xrange(or_im.width):
+        for y in xrange(or_im.height):
+            r, g, b, _ = or_im.im.getpixel((x, y))
+            stats[(r, g, b)] += 1
+
+    move_up_color = None
+    grey = (137, 137, 137)
+    if abs(stats[grey] - 84) < 5:
+        # D
+        move_up_color = WHITE
+    else:
+        # E
+        move_up_color = BLACK
+
     im = im.crop(list(xy_min) + list(xy_max))
 
-    return im
+    return im, move_up_color
 
 
-def get_pieces(board):
+def get_board():
+    board, move_up_color = get_board_image()
+    if not board:
+        return None
+
     board.load()
 
     size = (board.width + 4) / 8 # round to nearest integer 
@@ -73,14 +96,17 @@ def get_pieces(board):
                 elif equal_count(stats_b[(c, r)], info['count'][1]):
                     pieces[(c, r)] = (piece_name, BLACK)
 
-    return pieces
+    return {
+        'pieces': pieces,
+        'move_up_color': move_up_color
+    }
 
 
-def print_board(pieces):
+def print_board(board):
     for y in xrange(8):
         line = ''
         for x in xrange(8):
-            p = pieces.get((x, y))
+            p = board['pieces'].get((x, y))
             if p is None:
                 line += '.'
             else:
@@ -96,21 +122,18 @@ while True:
     iteration += 1
 
     board = get_board()
-    pieces = None
-    if board:
-        pieces = get_pieces(board)
 
-    new_hash = get_pieces_hash(pieces)
+    new_hash = get_pieces_hash(board)
     if prev_hash == new_hash:
         continue
     prev_hash = new_hash
 
-    if pieces:
+    if board:
         os.system('clear')
         print 'Iteration: {}'.format(iteration)
 
-        print_board(pieces)
-        init_eval = get_pieces_eval(pieces, MOVE_UP_COLOR)
+        print_board(board)
+        init_eval = get_pieces_eval(board)
 
         print
         print 'Evaluation: {}'.format(init_eval)
@@ -118,14 +141,14 @@ while True:
         data = {
             'nodes': 0
         }
-        result = dfs(pieces, MOVE_UP_COLOR, data, lines=3)
+        result = dfs(board, board['move_up_color'], data, lines=5)
         print 'Nodes = {}'.format(data['nodes'])
 
         for ind, line in enumerate(result):
             print '{}. ({}) {}'.format(
                 ind + 1, line[0],
                 '; '.join(
-                    ['{} -> {}'.format(cell_name(move[0]), cell_name(move[1]))
+                    [format_move(move, board['move_up_color'])
                      for move in reversed(line[1])]))
     else:
         print 'No board found'

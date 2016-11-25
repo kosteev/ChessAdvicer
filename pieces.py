@@ -10,8 +10,6 @@ BOARD_COLORDS = {
     BLACK: 'grey'
 }
 
-MOVE_UP_COLOR = BLACK
-
 PIECES = {
     'rook': {
         'count': [2022, 4196],
