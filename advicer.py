@@ -134,21 +134,23 @@ while True:
 
         print_board(board)
         init_eval = get_pieces_eval(board)
+        move_up_color = board['move_up_color']
 
         print
+        print '{} goes up'.format(move_up_color)
         print 'Evaluation: {}'.format(init_eval)
 
         data = {
             'nodes': 0
         }
-        result = dfs(board, board['move_up_color'], data, lines=5)
+        result = dfs(board, move_up_color, data, lines=5)
         print 'Nodes = {}'.format(data['nodes'])
 
         for ind, line in enumerate(result):
             print '{}. ({}) {}'.format(
                 ind + 1, line[0],
                 '; '.join(
-                    [format_move(move, board['move_up_color'])
+                    [format_move(move, move_up_color)
                      for move in reversed(line[1])]))
     else:
         print 'No board found'
