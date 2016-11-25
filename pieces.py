@@ -5,7 +5,7 @@ WHITE = 'white'
 BLACK = 'black'
 COLORS = [WHITE, BLACK]
 
-BOARD_COLORDS = {
+BOARD_COLORS = {
     WHITE: 'cyan',
     BLACK: 'grey'
 }

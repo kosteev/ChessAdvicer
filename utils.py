@@ -1,6 +1,14 @@
 import json
+from collections import defaultdict
 
-from pieces import PIECES, WHITE, BLACK
+import pyautogui
+import pyscreenshot
+import termcolor
+
+from pieces import PIECES, WHITE, BLACK, equal_count, BOARD_COLORS
+
+
+CELL_SIZE = 128
 
 
 MOVES = {}
@@ -34,13 +42,13 @@ MOVES['knight'] = [
 MAX_EVALUATION = 1000
 
 
-def get_pieces_eval(board):
+def get_pieces_eval(board, move_color):
     '''
     pieces = {(1, 2): ('rook', 'white)}
     '''
     total = 0
     for (piece, color) in board['pieces'].values():
-        if color == board['move_up_color']:
+        if color == move_color:
             total += PIECES[piece]['value']
         else:
             total -= PIECES[piece]['value']
@@ -102,8 +110,7 @@ def get_piece_moves(board, position):
 
     ???
     1. on passan
-    2. pawn 8-th rank in different pieces
-    3. 0-0 | 0-0-0
+    2. 0-0 | 0-0-0
     '''
     pieces = board['pieces']
     piece, move_color = pieces[position]
@@ -148,3 +155,134 @@ def get_piece_moves(board, position):
                 moves.append(forward_moves)
 
     return moves
+
+
+def focus_board(board):
+    x = board['xy'][0] - 10
+    y = board['xy'][1] - 10
+
+    pyautogui.click(x / 2, y / 2)
+
+
+def click_cell(board, position):
+    x = board['xy'][0] + (position[0] + 0.5) * CELL_SIZE
+    y = board['xy'][1] + (position[1] + 0.5) * CELL_SIZE
+
+    pyautogui.click(x / 2, y / 2)
+
+
+def make_move(board, position, new_position):
+    original_position = pyautogui.position()
+
+    focus_board(board)
+    click_cell(board, position)
+    click_cell(board, new_position)
+
+    pyautogui.click(original_position)
+
+
+def get_board_data():
+    white = (239, 217, 183)
+    yellow = (206, 209, 113)
+
+    im = pyscreenshot.grab()
+    im.load()
+
+    xy_min = None
+
+    #stats = defaultdict(int)
+    for x in xrange(im.width):
+        for y in xrange(im.height):
+            r, g, b, _ = im.im.getpixel((x, y))
+            #stats[(r, g, b)] += 1
+            if (r, g, b) in [white, yellow]:
+                if (xy_min is None or
+                        xy_min > (x, y)):
+                    xy_min = (x, y)
+            if xy_min:
+                break
+        if xy_min:
+                break
+
+    if not xy_min:
+        return None
+
+    xy_max = (xy_min[0] + 8 * CELL_SIZE, xy_min[1] + 8 * CELL_SIZE)
+
+    or_xy_min = (xy_min[0] + 3 * CELL_SIZE + CELL_SIZE / 2 - 10, xy_max[1] + 5)
+    or_xy_max = (or_xy_min[0] + 20, or_xy_min[1] + 20)
+
+    or_im = im.crop(list(or_xy_min) + list(or_xy_max))
+    stats = defaultdict(int)
+    for x in xrange(or_im.width):
+        for y in xrange(or_im.height):
+            r, g, b, _ = or_im.im.getpixel((x, y))
+            stats[(r, g, b)] += 1
+
+    move_up_color = None
+    grey = (137, 137, 137)
+    if abs(stats[grey] - 84) < 5:
+        # D
+        move_up_color = WHITE
+    else:
+        # E
+        move_up_color = BLACK
+
+    im = im.crop(list(xy_min) + list(xy_max))
+
+    return {
+        'im': im,
+        'xy': xy_min,
+        'move_up_color': move_up_color
+    }
+
+
+def get_board():
+    board_data = get_board_data()
+    if not board_data:
+        return None
+
+    board = board_data['im']
+    board.load()
+
+    size = (board.width + 4) / 8 # round to nearest integer
+
+    stats_w = defaultdict(int)
+    stats_b = defaultdict(int)
+    for x in xrange(board.width):
+        for y in xrange(board.height):
+            cell = (x / size, y / size)
+            pixel = board.im.getpixel((x, y))
+
+            if pixel == (255, 255, 255, 255):
+                stats_w[cell] += 1
+
+            if pixel == (0, 0, 0, 255):
+                stats_b[cell] += 1
+
+    pieces = {}
+    for c in xrange(8):
+        for r in xrange(8):
+            for piece_name, info in PIECES.items():
+                if equal_count(stats_b[(c, r)], info['count'][0]):
+                    pieces[(c, r)] = (piece_name, WHITE)
+                elif equal_count(stats_b[(c, r)], info['count'][1]):
+                    pieces[(c, r)] = (piece_name, BLACK)
+
+    return {
+        'xy': board_data['xy'],
+        'pieces': pieces,
+        'move_up_color': board_data['move_up_color']
+    }
+
+
+def print_board(board):
+    for y in xrange(8):
+        line = ''
+        for x in xrange(8):
+            p = board['pieces'].get((x, y))
+            if p is None:
+                line += '.'
+            else:
+                line += termcolor.colored(PIECES[p[0]]['title'], BOARD_COLORS[p[1]])
+        print line

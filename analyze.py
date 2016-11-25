@@ -6,7 +6,7 @@ from utils import get_opp_color, get_pieces_eval, get_piece_moves
 # - auto up color
 
 MAX_EVALUATION = 1000
-MAX_DEEP = 4  # 2*n for checkmate in `n` moves
+MAX_DEEP = 5  # 2*n for checkmate in `n` moves
 
 
 def on_board((c, r)):
@@ -107,7 +107,7 @@ def generate_next_pieces(
                     del pieces[position]
 
                     finish = False
-                    if not is_check(pieces, opp_move_color):
+                    if not is_check(board, opp_move_color):
                         finish = yield {
                             'position': position,
                             'new_position': new_position,
