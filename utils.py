@@ -172,19 +172,22 @@ def click_cell(board, position):
 
 
 def make_move(board, position, new_position):
-    original_position = pyautogui.position()
+    # original_position = pyautogui.position()
 
     focus_board(board)
     click_cell(board, position)
     click_cell(board, new_position)
 
-    pyautogui.click(original_position)
+    # pyautogui.click(original_position)
 
+
+WHITE_COLOR = (255, 255, 255)
+BLACK_COLOR = (0, 0, 0)
+WHITE_BOARD_COLOR = (239, 217, 183)
+YELLOW_WHITE_BOARD_COLOR = (206, 209, 113)
+YELLOW_BLACK_BOARD_COLOR = (170, 161, 67)
 
 def get_board_data():
-    white = (239, 217, 183)
-    yellow = (206, 209, 113)
-
     im = pyscreenshot.grab()
     im.load()
 
@@ -195,7 +198,7 @@ def get_board_data():
         for y in xrange(im.height):
             r, g, b, _ = im.im.getpixel((x, y))
             #stats[(r, g, b)] += 1
-            if (r, g, b) in [white, yellow]:
+            if (r, g, b) in [WHITE_BOARD_COLOR, YELLOW_WHITE_BOARD_COLOR]:
                 if (xy_min is None or
                         xy_min > (x, y)):
                     xy_min = (x, y)
@@ -207,10 +210,13 @@ def get_board_data():
     if not xy_min:
         return None
 
+    # left-top corner pixel is not our
+    xy_min = xy_min[0], xy_min[1] - 2
     xy_max = (xy_min[0] + 8 * CELL_SIZE, xy_min[1] + 8 * CELL_SIZE)
 
+    # Determine orientation
     or_xy_min = (xy_min[0] + 3 * CELL_SIZE + CELL_SIZE / 2 - 10, xy_max[1] + 5)
-    or_xy_max = (or_xy_min[0] + 20, or_xy_min[1] + 20)
+    or_xy_max = (or_xy_min[0] + 20, or_xy_min[1] + 22)
 
     or_im = im.crop(list(or_xy_min) + list(or_xy_max))
     stats = defaultdict(int)
@@ -222,16 +228,16 @@ def get_board_data():
     move_up_color = None
     grey = (137, 137, 137)
     if abs(stats[grey] - 84) < 5:
-        # D
+        # D - 84
         move_up_color = WHITE
     else:
-        # E
+        # E - 59
         move_up_color = BLACK
 
-    im = im.crop(list(xy_min) + list(xy_max))
+    board_image = im.crop(list(xy_min) + list(xy_max))
 
     return {
-        'im': im,
+        'board_image': board_image,
         'xy': xy_min,
         'move_up_color': move_up_color
     }
@@ -242,37 +248,55 @@ def get_board():
     if not board_data:
         return None
 
-    board = board_data['im']
-    board.load()
+    board_image = board_data['board_image']
 
-    size = (board.width + 4) / 8 # round to nearest integer
+    size = (board_image.width + 4) / 8 # round to nearest integer
 
-    stats_w = defaultdict(int)
-    stats_b = defaultdict(int)
-    for x in xrange(board.width):
-        for y in xrange(board.height):
+    stats = defaultdict(lambda: defaultdict(int))
+    for x in xrange(board_image.width):
+        for y in xrange(board_image.height):
             cell = (x / size, y / size)
-            pixel = board.im.getpixel((x, y))
+            pixel = board_image.im.getpixel((x, y))
 
-            if pixel == (255, 255, 255, 255):
-                stats_w[cell] += 1
+            stats[cell][(pixel[0], pixel[1], pixel[2])] += 1
 
-            if pixel == (0, 0, 0, 255):
-                stats_b[cell] += 1
-
+    move_color = None
+    yellow_r = None
     pieces = {}
     for c in xrange(8):
         for r in xrange(8):
+            cell_info = stats[(c, r)]
             for piece_name, info in PIECES.items():
-                if equal_count(stats_b[(c, r)], info['count'][0]):
+                if equal_count(cell_info[BLACK_COLOR], info['count'][0]):
                     pieces[(c, r)] = (piece_name, WHITE)
-                elif equal_count(stats_b[(c, r)], info['count'][1]):
+                elif equal_count(cell_info[BLACK_COLOR], info['count'][1]):
                     pieces[(c, r)] = (piece_name, BLACK)
+
+            # Determine whose move
+            if (cell_info[YELLOW_WHITE_BOARD_COLOR] or
+                    cell_info[YELLOW_BLACK_BOARD_COLOR]):
+                yellow_r = r
+                if (c, r) in pieces:
+                    move_color = get_opp_color(pieces[(c, r)][1])
+
+    move_up_color = board_data['move_up_color']
+    if move_color is None:
+        if yellow_r is None:
+            # Initial position
+            move_color = WHITE
+        elif yellow_r == 0:
+            move_color = move_up_color
+        elif yellow_r == 7:
+            move_color = get_opp_color(move_up_color)
+        else:
+            # !!!!!!!!!!!!!
+            raise Exception('Can not determine move color')
 
     return {
         'xy': board_data['xy'],
         'pieces': pieces,
-        'move_up_color': board_data['move_up_color']
+        'move_up_color': move_up_color,
+        'move_color': move_color
     }
 
 
@@ -286,3 +310,17 @@ def print_board(board):
             else:
                 line += termcolor.colored(PIECES[p[0]]['title'], BOARD_COLORS[p[1]])
         print line
+
+
+def get_move_color(board):
+    move_up_color = board['move_up_color']
+    move_color = get_opp_color(move_up_color)  # By default
+    for position, (_, color) in board['pieces'].items():
+        if color != move_up_color:
+            continue
+
+        focus_board(board)
+        click_cell(board, position)
+        break
+
+    return move_color

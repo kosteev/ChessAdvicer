@@ -6,23 +6,22 @@ from utils import get_opp_color, get_pieces_eval, get_piece_moves
 # - auto up color
 
 MAX_EVALUATION = 1000
-MAX_DEEP = 5  # 2*n for checkmate in `n` moves
 
 
 def on_board((c, r)):
     return 0 <= c < 8 and 0 <= r < 8 
 
 
-def dfs(board, move_color, data, alpha=None, deep=0, lines=1):
+def dfs(board, move_color, data, max_deep, alpha=None, deep=0, lines=1):
     '''
     alpha is related to opp color
+    max_deep - 2*n for checkmate in `n` moves
     '''
     if alpha is None:
         alpha = -MAX_EVALUATION
 
-    data['nodes'] += 1
-
-    if deep == MAX_DEEP:
+    if deep == max_deep:
+        data['nodes'] += 1
         return [[get_pieces_eval(board, move_color), []]]
 
     opp_move_color = get_opp_color(move_color)
@@ -31,7 +30,8 @@ def dfs(board, move_color, data, alpha=None, deep=0, lines=1):
     gen = generate_next_pieces(board, move_color)
     for move in gen:
         results_cand = dfs(
-            board, opp_move_color, data, alpha=result[-1][0] if result else None, deep=deep + 1)
+            board, opp_move_color, data, max_deep,
+            alpha=result[-1][0] if result else None, deep=deep + 1)
         result_cand = results_cand[0]
         result_cand[0] *= -1
         result_cand[1].append(move)
@@ -40,6 +40,7 @@ def dfs(board, move_color, data, alpha=None, deep=0, lines=1):
         result.sort(key=lambda (e, ms): e, reverse=True)
         result = result[:lines]
 
+        # TODO: (kosteev) cut two deep recursion
         if result[0][0] >= -1 * alpha:
             try:
                 gen.send(True)
