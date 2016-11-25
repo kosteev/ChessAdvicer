@@ -15,7 +15,7 @@ from utils import get_pieces_eval, cell_name, get_pieces_hash
 
 def get_board():
     white = (239, 217, 183)
-    white2 = (238, 216, 185)
+    yellow = (206, 209, 113)
 
     im = pyscreenshot.grab()
     im.load()
@@ -27,7 +27,7 @@ def get_board():
         for y in xrange(im.height):
             r, g, b, _ = im.im.getpixel((x, y))
             #stats[(r, g, b)] += 1
-            if (r, g, b) in [white, white2]:
+            if (r, g, b) in [white, yellow]:
                 if (xy_min is None 
                         or xy_min > (x, y)):
                     xy_min = (x, y)
@@ -110,7 +110,7 @@ while True:
         print 'Iteration: {}'.format(iteration)
 
         print_board(pieces)
-        init_eval = get_pieces_eval(pieces)
+        init_eval = get_pieces_eval(pieces, MOVE_UP_COLOR)
 
         print
         print 'Evaluation: {}'.format(init_eval)
@@ -118,15 +118,15 @@ while True:
         data = {
             'nodes': 0
         }
-        moves, evaluation = dfs(pieces, MOVE_UP_COLOR, data)
+        result = dfs(pieces, MOVE_UP_COLOR, data, lines=3)
         print 'Nodes = {}'.format(data['nodes'])
 
-        if not moves:
-            print 'No move', evaluation
-        else:
-            print 'eval: {}'.format(evaluation) 
-            for move in moves:
-                print '{} -> {}'.format(cell_name(move[0]), cell_name(move[1]))
+        for ind, line in enumerate(result):
+            print '{}. ({}) {}'.format(
+                ind + 1, line[0],
+                '; '.join(
+                    ['{} -> {}'.format(cell_name(move[0]), cell_name(move[1]))
+                     for move in reversed(line[1])]))
     else:
         print 'No board found'
     print

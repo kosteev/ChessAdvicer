@@ -6,59 +6,55 @@ from utils import get_opp_color, get_pieces_eval, get_piece_moves
 # - evaluation with brute force with good takes
 # - second and third line
 # - auto up color
-# - determine left up field
 
 MAX_EVALUATION = 1000
-MAX_DEEP = 4
+MAX_DEEP = 4  # 2*n for checkmate in `n` moves
 
 
 def on_board((c, r)):
     return 0 <= c < 8 and 0 <= r < 8 
 
 
-def dfs(pieces, move_color, data, alpha=None, deep=0):
-    '''
-    Not less than 
-    '''
+def dfs(pieces, move_color, data, alpha=None, deep=0, lines=1):
     if alpha is None:
         alpha = -MAX_EVALUATION
 
     data['nodes'] += 1
 
     if deep == MAX_DEEP:
-        return [], get_pieces_eval(pieces)
+        return [[get_pieces_eval(pieces, move_color), []]]
 
     opp_move_color = get_opp_color(move_color)
-    sign = 1 if move_color == MOVE_UP_COLOR else -1
 
-    evaluation_plus = None
-    best_moves = []
+    result = [] # Sorted by desc, (eval, moves). Related to move color
     gen = generate_next_pieces(pieces, move_color)
     for move in gen:
-        best_moves_cand, evaluation_cand = dfs(
-            pieces, opp_move_color, data, alpha=evaluation_plus, deep=deep + 1)
-        evaluation_cand_plus = sign * evaluation_cand
+        results_cand = dfs(
+            pieces, opp_move_color, data, alpha=result[-1][0] if result else None, deep=deep + 1)
+        result_cand = results_cand[0]
+        result_cand[0] *= -1
+        result_cand[1].append(move)
+        result.append(result_cand)
 
-        if not evaluation_plus or evaluation_plus < evaluation_cand_plus:
-            evaluation_plus = evaluation_cand_plus
-            best_moves = [move] + best_moves_cand
+        result.sort(key=lambda (e, ms): e, reverse=True)
+        result = result[:lines]
 
-        if evaluation_plus >= -1 * alpha:
+        if result[0][0] >= -1 * alpha:
             try:
                 gen.send(True)
             except StopIteration:
                 pass
             break
 
-    if evaluation_plus is None:
+    if not result:
         if is_check(pieces, opp_move_color):
             # Checkmate
-            evaluation_plus = -(MAX_EVALUATION - deep)
+            result = [[-(MAX_EVALUATION - deep), []]]
         else:
             # Draw
-            evaluation_plus = 0
+            result = [[0, []]]
 
-    return best_moves, sign * evaluation_plus
+    return result
 
 
 def is_check(pieces, move_color):
@@ -109,9 +105,9 @@ def generate_next_pieces(
                     del pieces[position]
                     if (pieces[new_position][0] == 'pawn' and
                             new_position[1] in [0, 7]):
-                        # Promote to queen
-                        # TODO: (kosteev) consider other promotions
-                        pieces[new_position] = ('queen', pieces[new_position][1])
+                        # Promote to new piece
+                        print diff
+                        pieces[new_position] = (diff[2], pieces[new_position][1])
     
                     finish = False
                     if not is_check(pieces, opp_move_color):

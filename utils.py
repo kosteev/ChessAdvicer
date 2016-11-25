@@ -5,26 +5,26 @@ from pieces import PIECES, MOVE_UP_COLOR, WHITE, BLACK
 
 MOVES = {}
 MOVES['rook'] = [
-    [(0, x) for x in xrange(1, 8)],
-    [(0, -x) for x in xrange(1, 8)],
-    [(x, 0) for x in xrange(1, 8)],
-    [(-x, 0) for x in xrange(1, 8)]
+    [(0, x, None) for x in xrange(1, 8)],
+    [(0, -x, None) for x in xrange(1, 8)],
+    [(x, 0, None) for x in xrange(1, 8)],
+    [(-x, 0, None) for x in xrange(1, 8)]
 ]
 MOVES['bishop'] = [
-    [(x, x) for x in xrange(1, 8)],
-    [(x, -x) for x in xrange(1, 8)],
-    [(-x, x) for x in xrange(1, 8)],
-    [(-x, -x) for x in xrange(1, 8)]
+    [(x, x, None) for x in xrange(1, 8)],
+    [(x, -x, None) for x in xrange(1, 8)],
+    [(-x, x, None) for x in xrange(1, 8)],
+    [(-x, -x, None) for x in xrange(1, 8)]
 ]
 MOVES['queen'] = MOVES['rook'] + MOVES['bishop']
 MOVES['king'] = [
-    [(x, y)]
+    [(x, y, None)]
     for x in xrange(-1, 2)
     for y in xrange(-1, 2)
     if x != 0 or y != 0
 ]
 MOVES['knight'] = [
-    [(s1 * x, s2 * (3-x))]
+    [(s1 * x, s2 * (3-x), None)]
     for x in xrange(1, 3)
     for s1 in [-1, 1]
     for s2 in [-1, 1]
@@ -34,13 +34,13 @@ MOVES['knight'] = [
 MAX_EVALUATION = 1000
 
 
-def get_pieces_eval(pieces):
+def get_pieces_eval(pieces, move_color):
     '''
     pieces = {(1, 2): ('rook', 'white)}
     '''
     total = 0
     for (piece, color) in pieces.values():
-        if color == MOVE_UP_COLOR:
+        if color == move_color:
             total += PIECES[piece]['value']
         else:
             total -= PIECES[piece]['value']
@@ -60,6 +60,9 @@ def get_opp_color(color):
 
 
 def get_pieces_hash(pieces):
+    if pieces is None:
+        return -1337
+
     return hash(json.dumps(sorted(pieces.items())))
 
 def get_piece_moves(pieces, position):
@@ -70,7 +73,7 @@ def get_piece_moves(pieces, position):
 
     ???
     1. on passan
-    2. pawn 8-th rank
+    2. pawn 8-th rank in different pieces
     3. 0-0 | 0-0-0
     '''
     piece, move_color = pieces[position]
@@ -91,15 +94,23 @@ def get_piece_moves(pieces, position):
             new_position = (position[0] + x, position[1] + sign)
             if (new_position in pieces
                     and pieces[new_position][1] == opp_move_color):
-                moves.append([(x, sign)])
+                moves.append([(x, sign, None)])
 
         # Second move forward
+        # Check if position is empty, to avoid treating as take
         if (position[0], position[1] + sign) not in pieces:
-            forward_moves = [(0, sign)]
-            if ((position[0], position[1] + 2 * sign) not in pieces and
-                    position[1] - sign in [0, 7]):
-                # Move on two steps
-                forward_moves.append((0, 2 * sign))
-            moves.append(forward_moves)
+            if position[1] + sign in [0, 7]:
+                # Last rank
+                for piece in PIECES:
+                    if piece not in ['king', 'pawn']:
+                        moves.append([(0, sign, piece)])
+            else:
+                forward_moves = [(0, sign, None)]
+                if ((position[0], position[1] + 2 * sign) not in pieces and
+                        position[1] - sign in [0, 7]):
+                    # Move on two steps
+                    forward_moves.append((0, 2 * sign, None))
+
+                moves.append(forward_moves)
 
     return moves
