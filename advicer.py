@@ -2,7 +2,7 @@ import os
 import sys
 import time
 
-from analyze import dfs
+from analyze import Analyzer
 from utils import get_pieces_eval, get_pieces_hash, format_move, make_move, get_board, \
     print_board
 
@@ -10,7 +10,9 @@ from utils import get_pieces_eval, get_pieces_hash, format_move, make_move, get_
 if __name__ == '__main__':
     # ...
     max_deep = int(sys.argv[1])
-    play = len(sys.argv) > 2 and (sys.argv[2] == '1')
+    lines = int(sys.argv[2])
+    play = len(sys.argv) > 3 and (sys.argv[3] == '1')
+    analyzer = Analyzer(max_deep=max_deep, lines=lines)
 
     iteration = 0
     prev_hash = None
@@ -54,19 +56,21 @@ if __name__ == '__main__':
             }
             # TODO: (kosteev) write in the process of dfs working
             start_time = time.time()
-            evaluation, moves = dfs(
-                board, move_up_color, data, max_deep, lines=5)
+            result = analyzer.dfs(
+                board, move_color, data)
             end_time = time.time()
 
             print 'Time = {:.3}, nodes = {}'.format(end_time - start_time, data['nodes'])
 
-            print '{}. ({}) {}'.format(
-                1, evaluation,
-                '; '.join(
-                    [format_move(move, move_up_color)
-                     for move in reversed(moves)]))
+            for ind, line in enumerate(result):
+                print '{}. ({}) {}'.format(
+                    ind + 1, line['evaluation'],
+                    '; '.join(
+                        [format_move(move, move_up_color)
+                         for move in reversed(line['moves'])]))
 
             if play:
+                moves = result[0]['moves']
                 if moves:
                     move = moves[-1]
                     make_move(board, move['position'], move['new_position'])

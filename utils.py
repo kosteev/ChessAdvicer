@@ -187,12 +187,15 @@ def make_move(board, position, new_position):
 
 WHITE_COLOR = (255, 255, 255)
 BLACK_COLOR = (0, 0, 0)
-WHITE_BOARD_COLOR = (239, 217, 183)
+WHITE_BOARD_COLOR = (239, 216, 183)
 YELLOW_WHITE_BOARD_COLOR = (206, 209, 113)
 YELLOW_BLACK_BOARD_COLOR = (170, 161, 67)
 
 def get_board_data():
-    im = pyscreenshot.grab()
+    from PIL import ImageGrab
+    # TODO: (kosteev) what is faster ???
+    im = ImageGrab.grab()
+    #im = pyscreenshot.grab()
     im.load()
 
     xy_min = None
@@ -231,12 +234,14 @@ def get_board_data():
 
     move_up_color = None
     grey = (137, 137, 137)
-    if abs(stats[grey] - 84) < 5:
+    if abs(stats[grey] - 84) < 2:
         # D - 84
         move_up_color = WHITE
-    else:
+    elif abs(stats[grey] - 59) < 2:
         # E - 59
         move_up_color = BLACK
+    else:
+        raise Exception('Can not determine move up color')
 
     board_image = im.crop(list(xy_min) + list(xy_max))
 
@@ -271,9 +276,9 @@ def get_board():
         for r in xrange(8):
             cell_info = stats[(c, r)]
             for piece_name, info in PIECES.items():
-                if equal_count(cell_info[BLACK_COLOR], info['count'][0]):
+                if equal_count(get_color_count(cell_info, BLACK_COLOR), info['count'][0]):
                     pieces[(c, r)] = (piece_name, WHITE)
-                elif equal_count(cell_info[BLACK_COLOR], info['count'][1]):
+                elif equal_count(get_color_count(cell_info, BLACK_COLOR), info['count'][1]):
                     pieces[(c, r)] = (piece_name, BLACK)
 
             # Determine whose move
@@ -303,6 +308,17 @@ def get_board():
         'move_up_color': move_up_color,
         'move_color': move_color
     }
+
+
+def get_color_count(stats, color):
+    result = 0
+    deviation = 1
+    for x in xrange(-deviation, deviation + 1):
+        for y in xrange(-deviation, deviation + 1):
+            for z in xrange(-deviation, deviation + 1):
+                result += stats[(color[0] + x, color[1] + y, color[2] + z)]
+
+    return result
 
 
 def print_board(board):

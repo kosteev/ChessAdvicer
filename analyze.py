@@ -1,4 +1,5 @@
 from pieces import WHITE, BLACK, PIECES
+from profile import line_profile
 from utils import get_opp_color, get_pieces_eval, get_piece_moves, color_sign
 
 
@@ -21,44 +22,41 @@ class Analyzer(object):
     def dfs(self, board, move_color, data, alpha=None, deep=0):
         '''
         alpha - to reduce brute force
-            if alpha is None dfs will return always eval not None
+            if alpha is None dfs will return always list not 0-length
         max_deep - 2*n for checkmate in `n` moves
 
         TODO: (kosteev) write tests
         '''
         data['nodes'] += 1
         if deep == self.max_deep:
-            return get_pieces_eval(board), []
+            return [{
+                'evaluation': get_pieces_eval(board),
+                'moves': []
+            }]
 
         opp_move_color = get_opp_color(move_color)
 
         gen = self.generate_next_pieces(board, move_color)
-        best_evaluation = None
-        best_moves = None
+        result = []
+        lines = self.lines if deep == 0 else 1
         for move in gen:
             cand = self.dfs(
                 board, opp_move_color, data,
-                alpha=best_evaluation, deep=deep + 1)
+                alpha=result[-1]['evaluation'] if len(result) == lines else None, deep=deep + 1)
             if cand is None:
                 # Not found better move
                 continue
-            cand_evaluation, cand_moves = cand
 
-            if move_color == WHITE:
-                if (best_evaluation is None or
-                        best_evaluation < cand_evaluation):
-                    best_evaluation = cand_evaluation
-                    best_moves = cand_moves + [move]
-            else:
-                if (best_evaluation is None or
-                        best_evaluation > cand_evaluation):
-                    best_evaluation = cand_evaluation
-                    best_moves = cand_moves + [move]
+            result.append(cand[0])
+            result[-1]['moves'].append(move)
+            result.sort(
+                key=lambda x: x['evaluation'], reverse=(move_color==WHITE))
+            result = result[:lines]
 
             # TODO: (kosteev) cut two deep recursion
             if alpha is not None:
-                if (move_color == BLACK and best_evaluation <= alpha or
-                        move_color == WHITE and best_evaluation >= alpha):
+                if (move_color == BLACK and result[0]['evaluation'] <= alpha or
+                        move_color == WHITE and result[0]['evaluation'] >= alpha):
                     try:
                         gen.send(True)
                     except StopIteration:
@@ -66,17 +64,21 @@ class Analyzer(object):
                     return None
 
         sign = color_sign(move_color)
-        if best_evaluation is None:
+        if not result:
             if self.is_check(board, opp_move_color):
                 # Checkmate
-                best_evaluation = -sign * (MAX_EVALUATION - deep)
-                best_moves = []
+                result = [{
+                    'evaluation': -sign * (MAX_EVALUATION - deep),
+                    'moves': []
+                }]
             else:
                 # Draw
-                best_evaluation = 0
-                best_moves = []
+                result = [{
+                    'evaluation': 0,
+                    'moves': []
+                }]
 
-        return best_evaluation, best_moves
+        return result
 
     @staticmethod
     def is_check(board, move_color):

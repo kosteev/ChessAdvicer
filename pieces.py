@@ -44,7 +44,7 @@ PIECES = {
     'pawn': {
         'count': [912, 3867],
         'value': 1,
-        'priority': 1,
+        'priority': 9,
         'title': 'P',
     }
 }
