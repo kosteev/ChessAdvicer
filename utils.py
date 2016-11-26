@@ -42,13 +42,17 @@ MOVES['knight'] = [
 MAX_EVALUATION = 1000
 
 
-def get_pieces_eval(board, move_color):
+def color_sign(color):
+    return 1 if color == WHITE else -1
+
+
+def get_pieces_eval(board):
     '''
     pieces = {(1, 2): ('rook', 'white)}
     '''
     total = 0
     for (piece, color) in board['pieces'].values():
-        if color == move_color:
+        if color == WHITE:
             total += PIECES[piece]['value']
         else:
             total -= PIECES[piece]['value']
@@ -290,6 +294,7 @@ def get_board():
             move_color = get_opp_color(move_up_color)
         else:
             # !!!!!!!!!!!!!
+            board_image.show()
             raise Exception('Can not determine move color')
 
     return {

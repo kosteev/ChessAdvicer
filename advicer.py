@@ -35,18 +35,17 @@ if __name__ == '__main__':
 
             print_board(board)
             move_up_color = board['move_up_color']
-            init_eval = get_pieces_eval(board, move_up_color)
+            init_eval = get_pieces_eval(board)
             print
 
             print '{} goes up'.format(move_up_color.upper())
             print 'Evaluation: {}'.format(init_eval)
             print
 
-            if play:
-                move_color = board['move_color']
-                if move_color != move_up_color:
-                    print 'Waiting for opponent move'
-                    continue
+            move_color = board['move_color']
+            if move_color != move_up_color:
+                print 'Waiting for opponent move'
+                continue
 
             print 'Calculating lines...'
 
@@ -54,18 +53,20 @@ if __name__ == '__main__':
                 'nodes': 0
             }
             # TODO: (kosteev) write in the process of dfs working
-            result = dfs(
+            start_time = time.time()
+            evaluation, moves = dfs(
                 board, move_up_color, data, max_deep, lines=5)
-            print 'Nodes = {}'.format(data['nodes'])
+            end_time = time.time()
 
-            for ind, line in enumerate(result):
-                print '{}. ({}) {}'.format(
-                    ind + 1, line[0],
-                    '; '.join(
-                        [format_move(move, move_up_color)
-                         for move in reversed(line[1])]))
+            print 'Time = {:.3}, nodes = {}'.format(end_time - start_time, data['nodes'])
+
+            print '{}. ({}) {}'.format(
+                1, evaluation,
+                '; '.join(
+                    [format_move(move, move_up_color)
+                     for move in reversed(moves)]))
+
             if play:
-                moves = result[0][1]
                 if moves:
                     move = moves[-1]
                     make_move(board, move['position'], move['new_position'])

@@ -14,31 +14,37 @@ PIECES = {
     'rook': {
         'count': [2022, 4196],
         'value': 5,
+        'priority': 5,
         'title': 'R',
     },
     'knight': {
         'count': [1515, 5312],
         'value': 3,
+        'priority': 3,
         'title': 'N',
     },
     'bishop': {
         'count': [1789, 3571],
         'value': 3,
+        'priority': 3,
         'title': 'B',
     },
     'queen': {
         'count': [2942, 4593],
         'value': 9,
+        'priority': 9,
         'title': 'Q',
     },
     'king': {
         'count': [1854, 3590],
         'value': 100,
+        'priority': 0,
         'title': 'K',
     },
     'pawn': {
         'count': [912, 3867],
         'value': 1,
+        'priority': 1,
         'title': 'P',
     }
 }
