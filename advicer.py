@@ -42,8 +42,8 @@ if __name__ == '__main__':
             print
 
             print_board(board)
-            move_up_color = board['move_up_color']
-            move_color = board['move_color']
+            move_up_color = board.move_up_color
+            move_color = board.move_color
             init_eval = get_pieces_eval(board)
             print
 

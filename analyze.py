@@ -1,5 +1,5 @@
-from pieces import WHITE, BLACK, PIECES, get_piece_moves, get_opp_color
-from utils import get_pieces_eval, color_sign, on_board
+from pieces import WHITE, BLACK, get_opp_color
+from utils import get_pieces_eval, color_sign
 
 
 # - implement true check and mate
@@ -30,7 +30,7 @@ class Analyzer(object):
 
         opp_move_color = get_opp_color(move_color)
 
-        gen = self.generate_next_board(board, move_color)
+        gen = board.generate_next_board(move_color)
         result = []
         lines = self.lines if deep == 0 else 1
         for move in gen:
@@ -59,7 +59,7 @@ class Analyzer(object):
 
         sign = color_sign(move_color)
         if not result:
-            if self.is_check(board, opp_move_color):
+            if board.is_check(opp_move_color):
                 # Checkmate
                 result = [{
                     'evaluation': -sign * (self.MAX_EVALUATION - deep),
@@ -73,79 +73,3 @@ class Analyzer(object):
                 }]
 
         return result
-
-    @staticmethod
-    def is_check(board, move_color):
-        '''
-        Determines if check is by move_color to opposite color
-        '''
-        check = False
-        for _ in Analyzer.generate_next_board(board, move_color, check=True):
-            check = True
-            # Allow to end this loop to release generator
-
-        return check
-
-    @staticmethod
-    def generate_next_board(
-            board, move_color, check=False):
-        '''
-        pieces = {(1, 2): ('rook', 'white)}
-        '''
-        opp_move_color = get_opp_color(move_color)
-        pieces = board['pieces']
-
-        pieces_list = []
-        for position, (piece, color) in pieces.items():
-            if color != move_color:
-                continue
-            pieces_list.append((position, (piece, color)))
-        pieces_list.sort(key=lambda x: PIECES[x[1][0]]['priority'], reverse=True)
-
-        for position, (piece, color) in pieces_list:
-            for variant in get_piece_moves(board, position):
-                for diff in variant:
-                    new_position = (position[0] + diff[0], position[1] + diff[1])
-
-                    if not on_board(new_position):
-                        break
-
-                    new_position_piece = pieces.get(new_position)
-                    last_diff = False
-                    if new_position_piece:
-                        if new_position_piece[1] == move_color:
-                            break
-                        else:
-                            last_diff = True
-
-                    if check:
-                        if new_position_piece == ('king', opp_move_color):
-                            yield
-                            return
-                    else:
-                        # Make move (consider, promotions)
-                        pieces[new_position] = (diff[2] or pieces[position][0], pieces[position][1])
-                        del pieces[position]
-
-                        finish = False
-                        if not Analyzer.is_check(board, opp_move_color):
-                            finish = yield {
-                                'position': position,
-                                'new_position': new_position,
-                                'piece': piece,
-                                'new_piece': pieces[new_position][0],
-                                'is_take': True if new_position_piece else False
-                            }
-
-                        # Recover
-                        pieces[position] = (piece, color)
-                        if new_position_piece:
-                            pieces[new_position] = new_position_piece
-                        else:
-                            del pieces[new_position]
-
-                        if finish:
-                            return
-
-                    if last_diff:
-                        break

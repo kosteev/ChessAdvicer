@@ -14,7 +14,7 @@ def get_pieces_eval(board):
     pieces = {(1, 2): ('rook', 'white)}
     '''
     total = 0
-    for (piece, color) in board['pieces'].values():
+    for (piece, color) in board.pieces.values():
         if color == WHITE:
             total += PIECES[piece]['value']
         else:
@@ -63,7 +63,7 @@ def get_pieces_hash(board):
     if board is None:
         return -1337
 
-    return hash(json.dumps(sorted(board['pieces'].items())))
+    return hash(json.dumps(sorted(board.pieces.items())))
 
 
 def print_board(board):
@@ -75,7 +75,7 @@ def print_board(board):
     for y in xrange(8):
         line = ''
         for x in xrange(8):
-            p = board['pieces'].get((x, y))
+            p = board.pieces.get((x, y))
             if p is None:
                 line += '.'
             else:
