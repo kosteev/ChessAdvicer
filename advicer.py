@@ -3,8 +3,13 @@ import sys
 import time
 
 from analyze import Analyzer
-from utils import get_pieces_eval, get_pieces_hash, format_move, make_move, get_board, \
-    print_board
+from board_detection import get_board
+from gui import make_move
+from utils import get_pieces_eval, get_pieces_hash, format_move, print_board
+
+
+# 2minutes - deep=3
+# 3minutes - deep=4
 
 
 if __name__ == '__main__':
@@ -32,19 +37,21 @@ if __name__ == '__main__':
             os.system('clear')
             print 'Iteration: {}'.format(iteration)
             print 'Max deep: {}'.format(max_deep)
+            print 'Lines: {}'.format(lines)
             print 'Play: {}'.format(play)
             print
 
             print_board(board)
             move_up_color = board['move_up_color']
+            move_color = board['move_color']
             init_eval = get_pieces_eval(board)
             print
 
             print '{} goes up'.format(move_up_color.upper())
+            print '{} to move'.format(move_color.upper())
             print 'Evaluation: {}'.format(init_eval)
             print
 
-            move_color = board['move_color']
             if move_color != move_up_color:
                 print 'Waiting for opponent move'
                 continue

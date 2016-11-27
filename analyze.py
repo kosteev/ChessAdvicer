@@ -1,23 +1,17 @@
-from pieces import WHITE, BLACK, PIECES
-from profile import line_profile
-from utils import get_opp_color, get_pieces_eval, get_piece_moves, color_sign
+from pieces import WHITE, BLACK, PIECES, get_piece_moves, get_opp_color
+from utils import get_pieces_eval, color_sign, on_board
 
 
 # - implement true check and mate
 # - evaluation with brute force with good takes
-# - auto up color
-
-MAX_EVALUATION = 1000
 
 
 class Analyzer(object):
+    MAX_EVALUATION = 1000
+
     def __init__(self, max_deep, lines=1):
         self.max_deep = max_deep
         self.lines = lines
-
-    @staticmethod
-    def on_board((c, r)):
-        return 0 <= c < 8 and 0 <= r < 8
 
     def dfs(self, board, move_color, data, alpha=None, deep=0):
         '''
@@ -36,7 +30,7 @@ class Analyzer(object):
 
         opp_move_color = get_opp_color(move_color)
 
-        gen = self.generate_next_pieces(board, move_color)
+        gen = self.generate_next_board(board, move_color)
         result = []
         lines = self.lines if deep == 0 else 1
         for move in gen:
@@ -68,7 +62,7 @@ class Analyzer(object):
             if self.is_check(board, opp_move_color):
                 # Checkmate
                 result = [{
-                    'evaluation': -sign * (MAX_EVALUATION - deep),
+                    'evaluation': -sign * (self.MAX_EVALUATION - deep),
                     'moves': []
                 }]
             else:
@@ -86,14 +80,14 @@ class Analyzer(object):
         Determines if check is by move_color to opposite color
         '''
         check = False
-        for _ in Analyzer.generate_next_pieces(board, move_color, check=True):
+        for _ in Analyzer.generate_next_board(board, move_color, check=True):
             check = True
             # Allow to end this loop to release generator
 
         return check
 
     @staticmethod
-    def generate_next_pieces(
+    def generate_next_board(
             board, move_color, check=False):
         '''
         pieces = {(1, 2): ('rook', 'white)}
@@ -113,7 +107,7 @@ class Analyzer(object):
                 for diff in variant:
                     new_position = (position[0] + diff[0], position[1] + diff[1])
 
-                    if not Analyzer.on_board(new_position):
+                    if not on_board(new_position):
                         break
 
                     new_position_piece = pieces.get(new_position)
