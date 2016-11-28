@@ -63,6 +63,7 @@ def get_board_data():
         # E - 59
         move_up_color = BLACK
     else:
+        im.show()
         raise Exception('Can not determine move up color')
 
     board_image = im.crop(list(xy_min) + list(xy_max))
