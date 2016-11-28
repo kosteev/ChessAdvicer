@@ -1,5 +1,5 @@
 from pieces import WHITE, BLACK, get_opp_color
-from utils import get_pieces_eval, color_sign, print_board
+from utils import get_pieces_eval, color_sign
 
 
 # - implement true check and mate
@@ -14,7 +14,58 @@ class Analyzer(object):
         self.lines = lines
 
 
+class SimpleAnalyzer(Analyzer):
+    name = 'SimpleAnalyzer'
+
+    def dfs(self, board, move_color, data, deep=0):
+        '''
+        max_deep - 2*n for checkmate in `n` moves
+
+        TODO: (kosteev) write tests
+        '''
+        data['nodes'] += 1
+        if deep == self.max_deep:
+            return [{
+                'evaluation': get_pieces_eval(board),
+                'moves': []
+            }]
+
+        opp_move_color = get_opp_color(move_color)
+
+        gen = board.generate_next_board(move_color)
+        result = []
+        lines = self.lines if deep == 0 else 1
+        for move in gen:
+            cand = self.dfs(
+                board, opp_move_color, data, deep=deep + 1)
+
+            result.append(cand[0])
+            result[-1]['moves'].append(move)
+            result.sort(
+                key=lambda x: x['evaluation'], reverse=(move_color==WHITE))
+            result = result[:lines]
+
+        sign = color_sign(move_color)
+        if not result:
+            if board.is_check(opp_move_color):
+                # Checkmate
+                result = [{
+                    'evaluation': -sign * (self.MAX_EVALUATION - deep),
+                    'moves': []
+                }]
+            else:
+                # Draw
+                result = [{
+                    'evaluation': 0,
+                    'moves': []
+                }]
+
+        return result
+
+
 class AlphaAnalyzer(Analyzer):
+    name = 'AlphaAnalyzer'
+
     def dfs(self, board, move_color, data, alpha=None, deep=0):
         '''
         alpha - to reduce brute force
@@ -78,6 +129,8 @@ class AlphaAnalyzer(Analyzer):
 
 
 class AlphaBetaAnalyzer(Analyzer):
+    name = 'AlphaBetaAnalyzer'
+
     def dfs(self, board, move_color, data,
             alpha=-Analyzer.MAX_EVALUATION - 1, beta=Analyzer.MAX_EVALUATION + 1, deep=0):
         '''
@@ -85,7 +138,7 @@ class AlphaBetaAnalyzer(Analyzer):
         otherwise if less returns less or equal alpha
                   if more returns more or equal beta
 
-        Alpha–beta pruning
+        Alpha-beta pruning
             if alpha and beta not passed dfs will return always true evaluation
         max_deep - 2*n for checkmate in `n` moves
 
@@ -122,9 +175,9 @@ class AlphaBetaAnalyzer(Analyzer):
 
             if len(result) == lines:
                 if move_color == WHITE:
-                    alpha = max(alpha, result[0]['evaluation'])
+                    alpha = max(alpha, result[-1]['evaluation'])
                 else:
-                    beta = min(beta, result[0]['evaluation'])
+                    beta = min(beta, result[-1]['evaluation'])
 
             # >= ? >
             # Try both and see how many nodes

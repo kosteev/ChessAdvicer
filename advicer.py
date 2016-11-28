@@ -2,7 +2,7 @@ import os
 import sys
 import time
 
-from analyze import AlphaAnalyzer, AlphaBetaAnalyzer
+from analyze import SimpleAnalyzer, AlphaAnalyzer, AlphaBetaAnalyzer
 from board_detection import get_board
 from gui import make_move
 from utils import get_pieces_eval, get_pieces_hash, format_move, print_board
@@ -12,11 +12,34 @@ from utils import get_pieces_eval, get_pieces_hash, format_move, print_board
 # 3minutes - deep=4
 
 
+def run_analyzer(analyzer, board, move_color):
+    data = {
+        'nodes': 0
+    }
+    # TODO: (kosteev) write in the process of dfs working
+    start_time = time.time()
+    result = analyzer.dfs(
+        board, move_color, data)
+    end_time = time.time()
+
+    print analyzer.name
+    print 'Time = {:.3}, nodes = {}'.format(end_time - start_time, data['nodes'])
+    for ind, line in enumerate(result):
+        print '{}. ({}) {}'.format(
+            ind + 1, line['evaluation'],
+            '; '.join(
+                [format_move(move, move_up_color)
+                 for move in reversed(line['moves'])]))
+
+    return result
+
+
 if __name__ == '__main__':
     # ...
     max_deep = int(sys.argv[1])
     lines = int(sys.argv[2])
     play = len(sys.argv) > 3 and (sys.argv[3] == '1')
+    simple_analyzer = SimpleAnalyzer(max_deep=max_deep, lines=lines)
     alpha_analyzer = AlphaAnalyzer(max_deep=max_deep, lines=lines)
     alpha_beta_analyzer = AlphaBetaAnalyzer(max_deep=max_deep, lines=lines)
 
@@ -59,41 +82,9 @@ if __name__ == '__main__':
 
             print 'Calculating lines...'
 
-            data = {
-                'nodes': 0
-            }
-            # TODO: (kosteev) write in the process of dfs working
-            start_time = time.time()
-            result = alpha_analyzer.dfs(
-                board, move_color, data)
-            end_time = time.time()
-
-            print 'Time = {:.3}, nodes = {}'.format(end_time - start_time, data['nodes'])
-
-            for ind, line in enumerate(result):
-                print '{}. ({}) {}'.format(
-                    ind + 1, line['evaluation'],
-                    '; '.join(
-                        [format_move(move, move_up_color)
-                         for move in reversed(line['moves'])]))
-
-            data = {
-                'nodes': 0
-            }
-            # TODO: (kosteev) write in the process of dfs working
-            start_time = time.time()
-            result = alpha_beta_analyzer.dfs(
-                board, move_color, data)
-            end_time = time.time()
-
-            print 'Time = {:.3}, nodes = {}'.format(end_time - start_time, data['nodes'])
-
-            for ind, line in enumerate(result):
-                print '{}. ({}) {}'.format(
-                    ind + 1, line['evaluation'],
-                    '; '.join(
-                        [format_move(move, move_up_color)
-                         for move in reversed(line['moves'])]))
+            # run_analyzer(simple_analyzer, board, move_color)
+            # run_analyzer(alpha_analyzer, board, move_color)
+            result = run_analyzer(alpha_beta_analyzer, board, move_color)
 
             if play:
                 moves = result[0]['moves']
