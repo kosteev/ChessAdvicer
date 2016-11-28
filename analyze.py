@@ -81,11 +81,16 @@ class AlphaBetaAnalyzer(Analyzer):
     def dfs(self, board, move_color, data,
             alpha=-Analyzer.MAX_EVALUATION - 1, beta=Analyzer.MAX_EVALUATION + 1, deep=0):
         '''
-        alpha - to reduce brute force
-            if alpha and beta not passed dfs will return always list not 0-length
+        If evaluation between (alpha, beta) returns it,
+        otherwise if less returns less or equal alpha
+                  if more returns more or equal beta
+
+        Alpha–beta pruning
+            if alpha and beta not passed dfs will return always true evaluation
         max_deep - 2*n for checkmate in `n` moves
 
         TODO: (kosteev) write tests
+        TODO: (kosteev) compare with simple analyzer
         '''
         data['nodes'] += 1
         if deep == self.max_deep:
@@ -103,25 +108,23 @@ class AlphaBetaAnalyzer(Analyzer):
         for move in gen:
             is_any_move = True
 
-            # !!!!! Here is bug related to lines
             cand = self.dfs(
                 board, opp_move_color, data,
                 alpha=alpha, beta=beta, deep=deep + 1)
-            if not cand:
-                # Not found better move
-                continue
 
             result.append(cand[0])
             result[-1]['moves'].append(move)
+            # XXX: sorting is stable, it will never get newer variant
+            # (which can be with wrong evaluation).
             result.sort(
                 key=lambda x: x['evaluation'], reverse=(move_color==WHITE))
             result = result[:lines]
 
-            # !!!!! Here is bug related to lines
-            if move_color == WHITE:
-                alpha = max(alpha, result[0]['evaluation'])
-            else:
-                beta = min(beta, result[0]['evaluation'])
+            if len(result) == lines:
+                if move_color == WHITE:
+                    alpha = max(alpha, result[0]['evaluation'])
+                else:
+                    beta = min(beta, result[0]['evaluation'])
 
             # >= ? >
             # Try both and see how many nodes
@@ -130,10 +133,10 @@ class AlphaBetaAnalyzer(Analyzer):
                     gen.send(True)
                 except StopIteration:
                     pass
-                return []
+                break
 
-        sign = color_sign(move_color)
         if not is_any_move:
+            sign = color_sign(move_color)
             if board.is_check(opp_move_color):
                 # Checkmate
                 result = [{

@@ -25,7 +25,9 @@ class Board(object):
             if color != move_color:
                 continue
             pieces_list.append((position, (piece, color)))
-        pieces_list.sort(key=lambda x: PIECES[x[1][0]]['priority'], reverse=True)
+        # XXX: should we sort by position?
+        pieces_list.sort(
+            key=lambda x: (PIECES[x[1][0]]['priority'], x[0]), reverse=True)
 
         for position, (piece, color) in pieces_list:
             for variant in self.get_piece_moves(position):
