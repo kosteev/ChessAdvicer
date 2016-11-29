@@ -5,7 +5,7 @@ import time
 from analyze import SimpleAnalyzer, AlphaAnalyzer, AlphaBetaAnalyzer
 from board_detection import get_board
 from gui import make_move
-from utils import get_pieces_eval, get_pieces_hash, format_move, print_board
+from utils import get_pieces_hash, format_move, print_board
 
 
 # 2minutes - deep=3
@@ -71,7 +71,7 @@ if __name__ == '__main__':
             print_board(board)
             move_up_color = board.move_up_color
             move_color = board.move_color
-            init_eval = get_pieces_eval(board)
+            init_eval = board.get_pieces_eval()
             print
 
             print '{} goes up'.format(move_up_color.upper())

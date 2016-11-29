@@ -9,20 +9,6 @@ def color_sign(color):
     return 1 if color == WHITE else -1
 
 
-def get_pieces_eval(board):
-    '''
-    pieces = {(1, 2): ('rook', 'white)}
-    '''
-    total = 0
-    for (piece, color) in board.pieces.values():
-        if color == WHITE:
-            total += PIECES[piece]['value']
-        else:
-            total -= PIECES[piece]['value']
-
-    return total
-
-
 def h_name(cell, move_up_color):
     if move_up_color == WHITE:
         return 8 - cell[1]

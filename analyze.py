@@ -1,5 +1,5 @@
 from pieces import WHITE, BLACK, get_opp_color
-from utils import get_pieces_eval, color_sign
+from utils import color_sign
 
 
 # - implement true check and mate
@@ -26,7 +26,7 @@ class SimpleAnalyzer(Analyzer):
         data['nodes'] += 1
         if deep == self.max_deep:
             return [{
-                'evaluation': get_pieces_eval(board),
+                'evaluation': board.get_pieces_eval(),
                 'moves': []
             }]
 
@@ -77,7 +77,7 @@ class AlphaAnalyzer(Analyzer):
         data['nodes'] += 1
         if deep == self.max_deep:
             return [{
-                'evaluation': get_pieces_eval(board),
+                'evaluation': board.get_pieces_eval(),
                 'moves': []
             }]
 
@@ -148,7 +148,7 @@ class AlphaBetaAnalyzer(Analyzer):
         data['nodes'] += 1
         if deep == self.max_deep:
             return [{
-                'evaluation': get_pieces_eval(board),
+                'evaluation': board.get_pieces_eval(),
                 'moves': []
             }]
 

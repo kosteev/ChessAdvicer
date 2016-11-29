@@ -1,6 +1,6 @@
 import random
 
-from pieces import get_opp_color, PIECES, MOVES
+from pieces import get_opp_color, PIECES, MOVES, WHITE
 from utils import on_board
 
 
@@ -17,6 +17,19 @@ class Board(object):
         self.move_up_color = move_up_color
         self.move_color = move_color
         self.xy = xy
+
+    def get_pieces_eval(self):
+        '''
+        pieces = {(1, 2): ('rook', 'white)}
+        '''
+        total = 0
+        for (piece, color) in self.pieces.values():
+            if color == WHITE:
+                total += PIECES[piece]['value']
+            else:
+                total -= PIECES[piece]['value']
+
+        return total
 
     def generate_next_board(
             self, move_color, check=False, sort_key=None):
