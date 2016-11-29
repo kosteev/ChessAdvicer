@@ -43,7 +43,7 @@ if __name__ == '__main__':
     alpha_analyzer = AlphaAnalyzer(max_deep=max_deep, lines=lines)
     alpha_beta_analyzer = AlphaBetaAnalyzer(max_deep=max_deep, lines=lines)
     alpha_beta_analyzer_evaluation = AlphaBetaAnalyzer(
-        max_deep=10, lines=10, evaluation=True)
+        max_deep=10, lines=10)
 
     iteration = 0
     prev_hash = None
