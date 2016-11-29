@@ -9,9 +9,10 @@ from utils import color_sign
 class Analyzer(object):
     MAX_EVALUATION = 1000
 
-    def __init__(self, max_deep, lines=1):
+    def __init__(self, max_deep, lines=1, evaluation=False):
         self.max_deep = max_deep
         self.lines = lines
+        self.evaluation = evaluation
 
 
 class SimpleAnalyzer(Analyzer):
@@ -138,9 +139,14 @@ class AlphaBetaAnalyzer(Analyzer):
         otherwise if less returns less or equal alpha
                   if more returns more or equal beta
 
+        !!!! It always returns result of non-zero length
+
         Alpha-beta pruning
             if alpha and beta not passed dfs will return always true evaluation
         max_deep - 2*n for checkmate in `n` moves
+
+        `evaluation` == True
+            if players are allowed to make only takes
 
         TODO: (kosteev) write tests
         TODO: (kosteev) compare with simple analyzer
@@ -157,9 +163,23 @@ class AlphaBetaAnalyzer(Analyzer):
         lines = self.lines if deep == 0 else 1
         result = []
         is_any_move = False
-        gen = board.generate_next_board(move_color)
+        sort_key = None
+        if self.evaluation:
+            # First takes
+            sort_key = lambda x: (-1 if x['new_position_old_piece'] else 1)
+        gen = board.generate_next_board(move_color, sort_key=sort_key)
+
         for move in gen:
             is_any_move = True
+
+            if (self.evaluation and
+                    not move['new_position_old_piece']):
+                # Because it is sorted by takes, no more takes in gen
+                try:
+                    gen.send(True)
+                except StopIteration:
+                    pass
+                break
 
             cand = self.dfs(
                 board, opp_move_color, data,
@@ -200,6 +220,14 @@ class AlphaBetaAnalyzer(Analyzer):
                 # Draw
                 result = [{
                     'evaluation': 0,
+                    'moves': []
+                }]
+
+        if self.evaluation:
+            if not result:
+                # is_any_move == True, but no takes occured
+                return [{
+                    'evaluation': board.get_pieces_eval(),
                     'moves': []
                 }]
 

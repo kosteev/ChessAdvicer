@@ -12,14 +12,14 @@ from utils import get_pieces_hash, format_move, print_board
 # 3minutes - deep=4
 
 
-def run_analyzer(analyzer, board, move_color):
+def run_analyzer(analyzer, *args, **kwargs):
     data = {
         'nodes': 0
     }
     # TODO: (kosteev) write in the process of dfs working
     start_time = time.time()
     result = analyzer.dfs(
-        board, move_color, data)
+        *args, data=data, **kwargs)
     end_time = time.time()
 
     print analyzer.name
@@ -42,6 +42,8 @@ if __name__ == '__main__':
     simple_analyzer = SimpleAnalyzer(max_deep=max_deep, lines=lines)
     alpha_analyzer = AlphaAnalyzer(max_deep=max_deep, lines=lines)
     alpha_beta_analyzer = AlphaBetaAnalyzer(max_deep=max_deep, lines=lines)
+    alpha_beta_analyzer_evaluation = AlphaBetaAnalyzer(
+        max_deep=10, lines=10, evaluation=True)
 
     iteration = 0
     prev_hash = None
@@ -88,6 +90,7 @@ if __name__ == '__main__':
             # run_analyzer(simple_analyzer, board, move_color)
             # run_analyzer(alpha_analyzer, board, move_color)
             result = run_analyzer(alpha_beta_analyzer, board, move_color)
+            # run_analyzer(alpha_beta_analyzer_evaluation, board, move_color)
 
             if play:
                 moves = result[0]['moves']
