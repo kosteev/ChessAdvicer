@@ -100,6 +100,7 @@ def get_board():
     for c in xrange(8):
         for r in xrange(8):
             cell_info = stats[(c, r)]
+
             for piece_name, info in PIECES.items():
                 if equal_count(get_color_count(cell_info, BLACK_COLOR), info['count'][0]):
                     pieces[(c, r)] = (piece_name, WHITE)

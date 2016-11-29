@@ -1,3 +1,5 @@
+import random
+
 from pieces import get_opp_color, PIECES, MOVES
 from utils import on_board
 
@@ -17,19 +19,14 @@ class Board(object):
         self.xy = xy
 
     def generate_next_board(
-            self, move_color, check=False):
+            self, move_color, check=False, sort_key=None):
         opp_move_color = get_opp_color(move_color)
 
-        pieces_list = []
+        moves = []
         for position, (piece, color) in self.pieces.items():
             if color != move_color:
                 continue
-            pieces_list.append((position, (piece, color)))
-        # XXX: should we sort by position?
-        pieces_list.sort(
-            key=lambda x: (PIECES[x[1][0]]['priority'], x[0]), reverse=True)
 
-        for position, (piece, color) in pieces_list:
             for variant in self.get_piece_moves(position):
                 for diff in variant:
                     new_position = (position[0] + diff[0], position[1] + diff[1])
@@ -37,45 +34,54 @@ class Board(object):
                     if not on_board(new_position):
                         break
 
-                    new_position_piece = self.pieces.get(new_position)
+                    new_position_old_piece = self.pieces.get(new_position)
                     last_diff = False
-                    if new_position_piece:
-                        if new_position_piece[1] == move_color:
+                    if new_position_old_piece:
+                        if new_position_old_piece[1] == move_color:
                             break
                         else:
                             last_diff = True
 
                     if check:
-                        if new_position_piece == ('king', opp_move_color):
+                        if new_position_old_piece == ('king', opp_move_color):
                             yield
                             return
                     else:
-                        # Make move (consider, promotions)
-                        self.pieces[new_position] = (diff[2] or self.pieces[position][0], self.pieces[position][1])
-                        del self.pieces[position]
-
-                        finish = False
-                        if not self.is_check(opp_move_color):
-                            finish = yield {
-                                'position': position,
-                                'new_position': new_position,
-                                'piece': piece,
-                                'new_piece': self.pieces[new_position][0],
-                                'is_take': True if new_position_piece else False
-                            }
-
-                        # Recover
-                        self.pieces[position] = (piece, color)
-                        if new_position_piece:
-                            self.pieces[new_position] = new_position_piece
-                        else:
-                            del self.pieces[new_position]
-
-                        if finish:
-                            return
+                        moves.append({
+                            'position': position,
+                            'new_position': new_position,
+                            'piece': piece,
+                            'new_piece': diff[2] or piece,
+                            'new_position_old_piece': new_position_old_piece
+                        })
 
                     if last_diff:
                         break
+
+        random.shuffle(moves)
+        if sort_key is None:
+            # sort_key = lambda x: (-1 if x['new_position_old_piece'] else 1, -PIECES[x['piece']]['priority'], x['position'])
+            sort_key = lambda x: (-1 if x['new_position_old_piece'] else 1)
+        moves.sort(key=sort_key)
+
+        for move in moves:
+            # Make move
+            self.pieces[move['new_position']] = (move['new_piece'], move_color)
+            del self.pieces[move['position']]
+
+            finish = False
+            if not self.is_check(opp_move_color):
+                finish = yield move
+
+            # Recover
+            self.pieces[move['position']] = (move['piece'], move_color)
+            if move['new_position_old_piece']:
+                self.pieces[move['new_position']] = move['new_position_old_piece']
+            else:
+                del self.pieces[move['new_position']]
+
+            if finish:
+                return
 
     def get_piece_moves(self, position):
         '''

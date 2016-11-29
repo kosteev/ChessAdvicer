@@ -23,7 +23,7 @@ def run_analyzer(analyzer, board, move_color):
     end_time = time.time()
 
     print analyzer.name
-    print 'Time = {:.3}, nodes = {}'.format(end_time - start_time, data['nodes'])
+    print 'Time = {:.3f}, nodes = {}'.format(end_time - start_time, data['nodes'])
     for ind, line in enumerate(result):
         print '{}. ({}) {}'.format(
             ind + 1, line['evaluation'],
@@ -50,7 +50,9 @@ if __name__ == '__main__':
         time.sleep(0.1)
         iteration += 1
 
+        s = time.time()
         board = get_board()
+        e = time.time()
 
         new_hash = get_pieces_hash(board)
         if prev_hash == new_hash:
@@ -59,6 +61,7 @@ if __name__ == '__main__':
 
         if board:
             os.system('clear')
+            print 'Time: {:.3f}'.format(e - s)
             print 'Iteration: {}'.format(iteration)
             print 'Max deep: {}'.format(max_deep)
             print 'Lines: {}'.format(lines)
