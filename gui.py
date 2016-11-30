@@ -19,11 +19,6 @@ def click_cell(board, position):
 
 
 def make_move(board, position, new_position):
-    original_position = pyautogui.position()
-
     focus_board(board)
     click_cell(board, position)
     click_cell(board, new_position)
-
-    pyautogui.moveTo(original_position)
-    

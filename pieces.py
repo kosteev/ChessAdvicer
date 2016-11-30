@@ -12,36 +12,42 @@ def get_opp_color(color):
 
 PIECES = {
     'rook': {
+        'pixels': [[(30, 38, 'black')], [(33, 29, 'black')]],
         'count': [2022, 4196],
         'value': 5,
         'priority': 5,
         'title': 'R',
     },
     'knight': {
+        'pixels': [[(23, 72, 'black')], [(19, 75, 'black')]],
         'count': [1515, 5312],
         'value': 3,
         'priority': 3,
         'title': 'N',
     },
     'bishop': {
+        'pixels': [[(21, 107, 'white')], [(20, 107, 'black')]],
         'count': [1789, 3571],
         'value': 3,
         'priority': 3,
         'title': 'B',
     },
     'queen': {
+        'pixels': [[(11, 29, 'black')], [(13, 32, 'black')]],
         'count': [2942, 4593],
         'value': 9,
         'priority': 9,
         'title': 'Q',
     },
     'king': {
+        'pixels': [[(16, 58, 'black')], [(91, 51, 'black')]],
         'count': [1854, 3590],
         'value': 100,
         'priority': 0,
         'title': 'K',
     },
     'pawn': {
+        'pixels': [[(33, 108, 'white')], [(63, 55, 'black'), (95, 113, 'black')]],
         'count': [912, 3867],
         'value': 1,
         'priority': 9,
