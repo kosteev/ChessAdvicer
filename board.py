@@ -1,13 +1,13 @@
 import random
 
-from pieces import get_opp_color, PIECES, MOVES, WHITE
-from utils import on_board
+from pieces import get_opp_color, PIECES, MOVES
+from utils import on_board, color_sign
 
 
 class Board(object):
-    SORT_BY_TAKE_VALUE = lambda x: (
+    SORT_BY_TAKE_VALUE = staticmethod(lambda x: (
         -1 if x['new_position_old_piece'] else 1,
-        -PIECES[x['new_position_old_piece'][0]]['value'] if x['new_position_old_piece'] else 0)
+        -PIECES[x['new_position_old_piece'][0]]['value'] if x['new_position_old_piece'] else 0))
 
     def __init__(self, pieces, move_up_color, move_color, xy):
         '''
@@ -28,10 +28,7 @@ class Board(object):
         '''
         total = 0
         for (piece, color) in self.pieces.values():
-            if color == WHITE:
-                total += PIECES[piece]['value']
-            else:
-                total -= PIECES[piece]['value']
+            total += color_sign(color) * PIECES[piece]['value']
 
         return total
 
