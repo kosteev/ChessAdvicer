@@ -5,6 +5,10 @@ from utils import on_board
 
 
 class Board(object):
+    sort_by_take_value = lambda x: (
+        -1 if x['new_position_old_piece'] else 1,
+        -PIECES[x['new_position_old_piece'][0]]['value'] if x['new_position_old_piece'] else 0)
+
     def __init__(self, pieces, move_up_color, move_color, xy):
         '''
             `pieces` - dict with pieces
@@ -73,8 +77,7 @@ class Board(object):
 
         random.shuffle(moves)
         if sort_key is None:
-            # sort_key = lambda x: (-1 if x['new_position_old_piece'] else 1, -PIECES[x['piece']]['priority'], x['position'])
-            sort_key = lambda x: (-1 if x['new_position_old_piece'] else 1)
+            sort_key = Board.sort_by_take_value
         moves.sort(key=sort_key)
 
         for move in moves:

@@ -18,6 +18,16 @@ COLORS = {
 }
 
 
+def similiar_pixel(p1, colors):
+    for color in colors:
+        if (abs(p1[0] - color[0]) < 2 and
+            abs(p1[1] - color[1]) < 2 and
+                abs(p1[2] - color[2]) < 2):
+            return True
+
+    return False
+
+
 def get_board_data():
     im = ImageGrab.grab()
     im.load()
@@ -26,26 +36,31 @@ def get_board_data():
     xy_min = None
     for x in xrange(im.width):
         for y in xrange(im.height):
-            r, g, b, _ = im.im.getpixel((x, y))
-            for color in [COLORS['white_board'], COLORS['yellow_white_board']]:
-                if (abs(color[0] - r) < 2 and
-                    abs(color[1] - g) < 2 and
-                        abs(color[2] - b) < 2):
-                    xy_min = (x, y)
-                    break
+            lt_pixel = im.im.getpixel((x, y))
+            if similiar_pixel(
+                    lt_pixel, [COLORS['white_board'], COLORS['yellow_white_board']]):
+                # left-top corner pixel is not our, should move 2 points up
+                xy_min = (x, y - 2)
+                xy_max = (xy_min[0] + 8 * CELL_SIZE, xy_min[1] + 8 * CELL_SIZE)
 
-            if xy_min:
+                # Check right bottom pixel
+                # right-bottom corner pixel is not our, should move 2 points up
+                try:
+                    rb_pixel = im.im.getpixel((xy_max[0] - 1, xy_max[1] - 3))
+                except IndexError:
+                    return None
+                if not similiar_pixel(
+                        rb_pixel, [COLORS['white_board'], COLORS['yellow_white_board']]):
+                    # Not a board
+                    return None
+
                 break
+
         if xy_min:
                 break
 
     if not xy_min:
         return None
-
-    # left-top corner pixel is not our
-    xy_min = xy_min[0], xy_min[1] - 2
-    xy_max = (xy_min[0] + 8 * CELL_SIZE, xy_min[1] + 8 * CELL_SIZE)
-    # TODO: (kosteev) check if board found correctly (valid)
 
     # Determine orientation
     or_xy_min = (xy_min[0] + 3 * CELL_SIZE + CELL_SIZE / 2 - 10, xy_max[1] + 5)
@@ -133,19 +148,3 @@ def get_board():
         move_color=move_color,
         xy=board_data['xy']
     )
-
-
-def get_deviation_color(color):
-    deviation = 1
-    for x in xrange(-deviation, deviation + 1):
-        for y in xrange(-deviation, deviation + 1):
-            for z in xrange(-deviation, deviation + 1):
-                yield color[0] + x, color[1] + y, color[2] + z
-
-
-def get_color_count(stats, color):
-    result = 0
-    for deviation_color in get_deviation_color(color):
-        result += stats[deviation_color]
-
-    return result

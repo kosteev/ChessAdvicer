@@ -6,6 +6,7 @@ from analyze import SimpleAnalyzer, AlphaAnalyzer, AlphaBetaAnalyzer
 from board_detection import get_board
 from gui import make_move
 from utils import get_pieces_hash, format_move, print_board
+from mocks import get_mock
 
 
 # 2minutes - deep=3
@@ -54,6 +55,7 @@ if __name__ == '__main__':
 
         s = time.time()
         board = get_board()
+        # board = get_mock(0)
         e = time.time()
 
         new_hash = get_pieces_hash(board)
