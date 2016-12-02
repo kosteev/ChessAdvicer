@@ -70,7 +70,7 @@ def run_advicer():
     prev_hash = None
     while True:
         # Should be in the beginning (continue issue)
-        time.sleep(0.1)
+        time.sleep(0.001)
         iteration += 1
 
         s = time.time()
