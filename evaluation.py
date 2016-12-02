@@ -26,12 +26,9 @@ def simple_evaluation(board, move_color, data):
             # Consider only takes
             break
 
+        data['longest_moves'] = [move] + data['longest_moves']
         cand = simple_evaluation(
             board, opp_move_color, data)
-        try:
-            gen.send(True)
-        except StopIteration:
-            pass
 
         # TODO: (kosteev) consider no moves
         if move_color == WHITE:
@@ -43,6 +40,10 @@ def simple_evaluation(board, move_color, data):
                 evaluation = cand['evaluation']
                 evaluation_moves = cand['moves'] + [move]
         break
+    try:
+        gen.send(True)
+    except StopIteration:
+        pass
 
     if not is_any_move:
         if board.is_check(opp_move_color):

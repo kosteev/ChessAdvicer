@@ -20,14 +20,14 @@ def moves_stringify(moves, move_up_color):
          for move in reversed(moves)])
 
 
-def run_analyzer(analyzer, move_up_color, *args, **kwargs):
+def run_analyzer(analyzer, board, move_color):
     data = {
         'nodes': 0
     }
     # TODO: (kosteev) write in the process of dfs working
     start_time = time.time()
     result = analyzer.dfs(
-        *args, data=data, **kwargs)
+        board, move_color, data=data)
     end_time = time.time()
 
     print analyzer.name
@@ -35,20 +35,23 @@ def run_analyzer(analyzer, move_up_color, *args, **kwargs):
     for ind, line in enumerate(result):
         print '{}. ({}) {}'.format(
             ind + 1, line['evaluation'],
-            moves_stringify(line['moves'], move_up_color))
+            moves_stringify(line['moves'], board.move_up_color))
 
     return result
 
 
 def print_simple_eval(board):
     data = {
-        'nodes': 0
+        'nodes': 0,
+        'longest_moves': []
     }
     s = time.time()
     simple_eval = simple_evaluation(board, board.move_color, data)
     e = time.time()
     print
     print 'Time = {:.3f}, nodes = {}'.format(e - s, data['nodes'])
+    print 'Longest seq = {}'.format(
+        moves_stringify(data['longest_moves'], board.move_up_color))
     print 'Simple evaluation: {} ({})'.format(
         simple_eval['evaluation'], moves_stringify(simple_eval['moves'], board.move_up_color))
 
@@ -98,7 +101,7 @@ def run_advicer():
             print '{} goes up'.format(move_up_color.upper())
             print '{} to move'.format(move_color.upper())
             print 'Evaluation: {}'.format(init_eval)
-            print_simple_eval()
+            print_simple_eval(board)
             print
 
             if move_color != move_up_color:
