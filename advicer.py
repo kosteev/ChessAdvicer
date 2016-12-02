@@ -4,16 +4,23 @@ import time
 
 from analyze import SimpleAnalyzer, AlphaAnalyzer, AlphaBetaAnalyzer
 from board_detection import get_board
+from evaluation import simple_evaluation
 from gui import make_move
-from utils import get_pieces_hash, format_move, print_board
 from mocks import get_mock
+from utils import get_pieces_hash, format_move, print_board
 
 
 # 2minutes - deep=3
 # 3minutes - deep=4
 
 
-def run_analyzer(analyzer, *args, **kwargs):
+def moves_stringify(moves, move_up_color):
+    return '; '.join(
+        [format_move(move, move_up_color)
+         for move in reversed(moves)])
+
+
+def run_analyzer(analyzer, move_up_color, *args, **kwargs):
     data = {
         'nodes': 0
     }
@@ -28,15 +35,25 @@ def run_analyzer(analyzer, *args, **kwargs):
     for ind, line in enumerate(result):
         print '{}. ({}) {}'.format(
             ind + 1, line['evaluation'],
-            '; '.join(
-                [format_move(move, move_up_color)
-                 for move in reversed(line['moves'])]))
+            moves_stringify(line['moves'], move_up_color))
 
     return result
 
 
-if __name__ == '__main__':
-    # ...
+def print_simple_eval(board):
+    data = {
+        'nodes': 0
+    }
+    s = time.time()
+    simple_eval = simple_evaluation(board, board.move_color, data)
+    e = time.time()
+    print
+    print 'Time = {:.3f}, nodes = {}'.format(e - s, data['nodes'])
+    print 'Simple evaluation: {} ({})'.format(
+        simple_eval['evaluation'], moves_stringify(simple_eval['moves'], board.move_up_color))
+
+
+def run_advicer():
     max_deep = int(sys.argv[1])
     lines = int(sys.argv[2])
     play = len(sys.argv) > 3 and (sys.argv[3] == '1')
@@ -81,6 +98,7 @@ if __name__ == '__main__':
             print '{} goes up'.format(move_up_color.upper())
             print '{} to move'.format(move_color.upper())
             print 'Evaluation: {}'.format(init_eval)
+            print_simple_eval()
             print
 
             if move_color != move_up_color:
@@ -105,3 +123,7 @@ if __name__ == '__main__':
             print 'No board found'
         print
         print
+
+
+if __name__ == '__main__':
+    run_advicer()

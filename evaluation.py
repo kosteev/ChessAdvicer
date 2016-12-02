@@ -3,7 +3,7 @@ from pieces import get_opp_color, WHITE
 from utils import color_sign
 
 
-def simple_eval(self, board, move_color, data):
+def simple_evaluation(board, move_color, data):
     '''
     Evaluates position.
 
@@ -26,7 +26,7 @@ def simple_eval(self, board, move_color, data):
             # Consider only takes
             break
 
-        cand = simple_eval(
+        cand = simple_evaluation(
             board, opp_move_color, data)
         try:
             gen.send(True)
