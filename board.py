@@ -5,6 +5,9 @@ from utils import on_board, color_sign
 
 
 class Board(object):
+    MAX_EVALUATION = 1000
+    # 999 - checkmate in one move, 998 - ...
+
     SORT_BY_TAKE_VALUE = staticmethod(lambda x: (
         -1 if x['new_position_old_piece'] else 1,
         -PIECES[x['new_position_old_piece'][0]]['value'] if x['new_position_old_piece'] else 0))
