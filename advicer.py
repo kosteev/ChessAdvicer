@@ -75,7 +75,7 @@ def run_advicer():
 
         s = time.time()
         board = get_board()
-        # board = get_mock(0)
+        # board = get_mock(2)
         e = time.time()
 
         new_hash = get_pieces_hash(board)

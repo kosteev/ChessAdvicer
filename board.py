@@ -1,7 +1,7 @@
 import random
 
-from pieces import get_opp_color, PIECES, MOVES
-from utils import on_board, color_sign
+from pieces import get_opp_color, PIECES, PROBABLE_MOVES
+from utils import color_sign
 
 
 class Board(object):
@@ -44,12 +44,9 @@ class Board(object):
             if color != move_color:
                 continue
 
-            for variant in self.get_piece_moves(position):
-                for diff in variant:
-                    new_position = (position[0] + diff[0], position[1] + diff[1])
-
-                    if not on_board(new_position):
-                        break
+            for variant in self.get_piece_probable_moves(position):
+                for move in variant:
+                    new_position = move[:-1]
 
                     new_position_old_piece = self.pieces.get(new_position)
                     last_diff = False
@@ -68,7 +65,7 @@ class Board(object):
                             'position': position,
                             'new_position': new_position,
                             'piece': piece,
-                            'new_piece': diff[2] or piece,
+                            'new_piece': move[2] or piece,
                             'new_position_old_piece': new_position_old_piece
                         })
 
@@ -99,7 +96,7 @@ class Board(object):
             if finish:
                 return
 
-    def get_piece_moves(self, position):
+    def get_piece_probable_moves(self, position):
         '''
             1. By rules ( + on board)
             2. Do not pass someone on the way, except finish with opposite color
@@ -111,9 +108,9 @@ class Board(object):
         '''
         piece, move_color = self.pieces[position]
 
-        moves = []
+        probable_moves = []
         if piece != 'pawn':
-            moves = MOVES[piece]
+            probable_moves = PROBABLE_MOVES[piece][position]
         else:
             opp_move_color = get_opp_color(move_color)
 
@@ -134,23 +131,25 @@ class Board(object):
             for promote_piece in promote_pieces:
                 # First on side
                 for x in [-1, 1]:
-                    new_position = (position[0] + x, position[1] + sign)
-                    if (new_position in self.pieces and
-                            self.pieces[new_position][1] == opp_move_color):
-                        moves.append([(x, sign, promote_piece)])
+                    probable_move = (position[0] + x, position[1] + sign, promote_piece)
+                    if (probable_move[:-1] in self.pieces and
+                            self.pieces[probable_move[:-1]][1] == opp_move_color):
+                        probable_moves.append([probable_move])
 
                 # Second move forward
                 # Check if position is empty, to avoid treating as take
-                if (position[0], position[1] + sign) not in self.pieces:
-                    forward_moves = [(0, sign, promote_piece)]
-                    if ((position[0], position[1] + 2 * sign) not in self.pieces and
+                probable_move = (position[0], position[1] + sign, promote_piece)
+                if probable_move[:-1] not in self.pieces:
+                    forward_moves = [probable_move]
+                    probable_move = (position[0], position[1] + 2 * sign, promote_piece)
+                    if (probable_move[:-1] not in self.pieces and
                             position[1] - sign in [0, 7]):
                         # Move on two steps
-                        forward_moves.append((0, 2 * sign, promote_piece))
+                        forward_moves.append(probable_move)
 
-                    moves.append(forward_moves)
+                    probable_moves.append(forward_moves)
 
-        return moves
+        return probable_moves
 
     def is_check(self, move_color):
         '''

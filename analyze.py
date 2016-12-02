@@ -1,4 +1,5 @@
 from board import Board
+from evaluation import simple_evaluation
 from pieces import WHITE, BLACK, get_opp_color
 from utils import color_sign
 
@@ -148,9 +149,18 @@ class AlphaBetaAnalyzer(Analyzer):
         '''
         data['nodes'] += 1
         if deep == self.max_deep:
+            d = {
+                'nodes': 0,
+                'longest_moves': []
+            }
+#             return [{
+#                 'evaluation': board.get_pieces_eval(),
+#                 'moves': []
+#             }]
+            simple_eval = simple_evaluation(board, move_color, d)
             return [{
-                'evaluation': board.get_pieces_eval(),
-                'moves': []
+                'evaluation': simple_eval['evaluation'],
+                'moves': simple_eval['moves']
             }]
 
         opp_move_color = get_opp_color(move_color)

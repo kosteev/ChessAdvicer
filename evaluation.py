@@ -50,7 +50,7 @@ def simple_evaluation(board, move_color, data):
             # Checkmate
             # ???? self.MAX_EVALUATION / 2
             return {
-                'evaluation': -sign * self.MAX_EVALUATION / 2,
+                'evaluation': -sign * Board.MAX_EVALUATION / 2,
                 'moves': []
             }
         else:

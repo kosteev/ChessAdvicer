@@ -67,7 +67,3 @@ def print_board(board):
             else:
                 line += termcolor.colored(PIECES[p[0]]['title'], BOARD_COLORS[p[1]])
         print line
-
-
-def on_board((c, r)):
-    return 0 <= c < 8 and 0 <= r < 8
