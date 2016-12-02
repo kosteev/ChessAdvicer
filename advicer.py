@@ -101,7 +101,7 @@ def run_advicer():
             print '{} goes up'.format(move_up_color.upper())
             print '{} to move'.format(move_color.upper())
             print 'Evaluation: {}'.format(init_eval)
-            print_simple_eval(board)
+            # print_simple_eval(board)
             print
 
             if move_color != move_up_color:
