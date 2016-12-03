@@ -68,13 +68,14 @@ def run_advicer():
 
     iteration = 0
     prev_hash = None
+    board = None
     while True:
         # Should be in the beginning (continue issue)
         time.sleep(0.005)
         iteration += 1
 
         s = time.time()
-        board = get_board()
+        board = get_board(board)
         # board = get_mock(2)
         e = time.time()
 

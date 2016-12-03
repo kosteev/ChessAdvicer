@@ -12,7 +12,7 @@ class Board(object):
         -1 if x['new_position_old_piece'] else 1,
         -PIECES[x['new_position_old_piece'][0]]['value'] if x['new_position_old_piece'] else 0))
 
-    def __init__(self, pieces, move_up_color, move_color, board_lt):
+    def __init__(self, pieces, move_up_color, move_color, lt_screen):
         '''
             `pieces` - dict with pieces
                 pieces = {(1, 2): ('rook', 'white)}
@@ -23,7 +23,7 @@ class Board(object):
         self.pieces = pieces
         self.move_up_color = move_up_color
         self.move_color = move_color
-        self.board_lt = board_lt
+        self.lt_screen = lt_screen
 
     def get_pieces_eval(self):
         '''

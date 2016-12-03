@@ -39,7 +39,7 @@ COLORS = {
 }
 
 
-DEVIATION = 2 / 255.0
+DEVIATION = 1 / 255.0
 
 
 def similiar_pixel(p1, colors):
@@ -67,11 +67,17 @@ def get_pixel(bitmap, x, y):
     return c.redComponent(), c.greenComponent(), c.blueComponent()
 
 
-def get_board_data():
-    bitmap = get_screen_bitmap((0, 0), (-1, -1))
+def get_board_data(prev_board):
+    delta_screen = (0, 0)
+    if prev_board is None:
+        bitmap = get_screen_bitmap((0, 0), (-1, -1))
+    else:
+        # Trying to get board regarding to previous board, to improve next x y loop
+        delta_screen = prev_board.lt_screen
+        bitmap = get_screen_bitmap(prev_board.lt_screen, (CELL_SIZE * 8 / 2, (CELL_SIZE * 8 + 30) / 2))
 
     # Determine top-left corner of board
-    xy_min = None
+    bitmap_board_xy = None
     bitmap_size = bitmap.size()
     for x in xrange(int(bitmap_size.width + 0.5)):
         for y in xrange(int(bitmap_size.height + 0.5)):
@@ -79,14 +85,14 @@ def get_board_data():
             if similiar_pixel(
                     lt_pixel, [COLORS['white_board'], COLORS['yellow_white_board']]):
                 # left-top corner pixel is not our, should move 2 points up
-                xy_min = (x, y - 2)
-                xy_max = (xy_min[0] + 8 * CELL_SIZE, xy_min[1] + 8 * CELL_SIZE)
+                bitmap_board_xy = (x, y - 2)
+                bitmap_board_xy_rb = (bitmap_board_xy[0] + 8 * CELL_SIZE, bitmap_board_xy[1] + 8 * CELL_SIZE)
 
                 # Check right bottom pixel
                 # right-bottom corner pixel is not our, should move 2 points up
                 try:
                     # !!!! except error on outbound
-                    rb_pixel = get_pixel(bitmap, xy_max[0] - 1, xy_max[1] - 3)
+                    rb_pixel = get_pixel(bitmap, bitmap_board_xy_rb[0] - 1, bitmap_board_xy_rb[1] - 3)
                 except:
                     return None
                 if not similiar_pixel(
@@ -96,19 +102,19 @@ def get_board_data():
 
                 break
 
-        if xy_min:
+        if bitmap_board_xy:
                 break
 
-    if not xy_min:
+    if not bitmap_board_xy:
         return None
 
     # Determine orientation
-    or_xy_min = (xy_min[0] + 3 * CELL_SIZE + CELL_SIZE / 2 - 10, xy_max[1] + 5)
-    or_xy_max = (or_xy_min[0] + 20, or_xy_min[1] + 22)
+    or_xy = (bitmap_board_xy[0] + 3 * CELL_SIZE + CELL_SIZE / 2 - 10, bitmap_board_xy_rb[1] + 5)
+    or_xy_rb = (or_xy[0] + 20, or_xy[1] + 22)
 
     grey_count = 0
-    for x in xrange(or_xy_min[0], or_xy_max[0]):
-        for y in xrange(or_xy_min[1], or_xy_max[1]):
+    for x in xrange(or_xy[0], or_xy_rb[0]):
+        for y in xrange(or_xy[1], or_xy_rb[1]):
             pixel = get_pixel(bitmap, x, y)
             if pixel == COLORS['grey']:
                 grey_count += 1
@@ -124,20 +130,23 @@ def get_board_data():
         print 'Can not determine move up color'
         return None
 
+    lt_screen = delta_screen[0] + bitmap_board_xy[0] / 2, delta_screen[1] + bitmap_board_xy[1] / 2
+
     return {
         'bitmap': bitmap,
-        'board_lt': xy_min,
-        'move_up_color': move_up_color
+        'bitmap_board_xy': bitmap_board_xy,
+        'move_up_color': move_up_color,
+        'lt_screen': lt_screen
     }
 
 
-def get_board():
-    board_data = get_board_data()
+def get_board(prev_board):
+    board_data = get_board_data(prev_board)
     if not board_data:
         return None
 
     bitmap = board_data['bitmap']
-    board_lt = board_data['board_lt']
+    bitmap_board_xy = board_data['bitmap_board_xy']
 
     pieces = {}
     move_color = None
@@ -152,14 +161,14 @@ def get_board():
                     for pixel_info in info['pixels'][ind]:
                         px = pixel_info[0]
                         py = pixel_info[1]
-                        pixel = get_pixel(bitmap, board_lt[0] + x + px, board_lt[1] + y + py)
+                        pixel = get_pixel(bitmap, bitmap_board_xy[0] + x + px, bitmap_board_xy[1] + y + py)
                         if pixel != COLORS[pixel_info[-1]]:
                             break
                     else:
                         pieces[(c, r)] = (piece, color)
 
             # Determine whose move
-            pixel = get_pixel(bitmap, board_lt[0] + x + 5, board_lt[1] + y + 5)
+            pixel = get_pixel(bitmap, bitmap_board_xy[0] + x + 5, bitmap_board_xy[1] + y + 5)
             if pixel in [COLORS['yellow_white_board'], COLORS['yellow_black_board']]:
                 yellow_cells.append((c, r))
                 if (c, r) in pieces:
@@ -184,5 +193,5 @@ def get_board():
         pieces=pieces,
         move_up_color=move_up_color,
         move_color=move_color,
-        board_lt=board_lt
+        lt_screen=board_data['lt_screen']
     )
