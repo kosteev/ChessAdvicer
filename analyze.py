@@ -1,4 +1,5 @@
 from board import Board
+from endgame import get_best_move
 from evaluation import simple_evaluation
 from pieces import WHITE, BLACK, get_opp_color
 from utils import color_sign
@@ -135,7 +136,16 @@ class AlphaBetaAnalyzer(Analyzer):
         data = {
             'nodes': 0
         }
-        result = self.dfs(board, move_color, data)
+
+        endgame_best_move = get_best_move(board, board.move_color)
+        if endgame_best_move is None:
+            result = self.dfs(board, move_color, data)
+        else:
+            result = [{
+                'evaluation': endgame_best_move['evaluation'],
+                'moves': endgame_best_move['moves']
+            }]
+
         return {
             'result': result,
             'data': data

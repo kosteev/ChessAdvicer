@@ -118,7 +118,7 @@ def run_advicer():
             result = run_analyzer(alpha_beta_analyzer, board)
 
             if play:
-                moves = result[0]['moves']
+                moves = result['result'][0]['moves']
                 if moves:
                     move = moves[-1]
                     make_move(board, move['position'], move['new_position'])

@@ -44,6 +44,12 @@ COLORS = {
 DEVIATION = 1 / 255.0
 
 
+def show_image(lt, rb):
+    im = ImageGrab.grab(bbox=list(lt) + list(rb))
+    im.load()
+    im.show()
+
+
 def similiar_pixel(p1, colors):
     for color in colors:
         if (abs(p1[0] - color[0]) < DEVIATION and

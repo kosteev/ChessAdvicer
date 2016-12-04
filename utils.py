@@ -23,6 +23,14 @@ def v_name(cell, move_up_color):
         return chr(ord('h') - cell[0])
 
 
+def name_to_cell(cell_name, move_up_color):
+    result = (ord(cell_name[0]) - ord('a'), 8 - int(cell_name[1]))
+    if move_up_color == BLACK:
+        result = 7 - result[0], 7 - result[1]
+
+    return result
+
+
 def cell_name(cell, move_up_color):
     return '{}{}'.format(v_name(cell, move_up_color), h_name(cell, move_up_color))
 
