@@ -25,6 +25,8 @@ class Board(object):
         self.move_color = move_color
         self.lt_screen = lt_screen
 
+        self.evaluation = self.get_pieces_eval()
+
     def get_pieces_eval(self):
         '''
         pieces = {(1, 2): ('rook', 'white)}
@@ -38,6 +40,7 @@ class Board(object):
     def generate_next_board(
             self, move_color, check=False, sort_key=None):
         opp_move_color = get_opp_color(move_color)
+        sign = color_sign(move_color)
 
         moves = []
         for position, (piece, color) in self.pieces.items():
@@ -81,6 +84,12 @@ class Board(object):
             # Make move
             self.pieces[move['new_position']] = (move['new_piece'], move_color)
             del self.pieces[move['position']]
+            # Recalculate evaluation
+            delta = PIECES[move['new_piece']]['value'] - PIECES[move['new_piece']]['value']
+            if move['new_position_old_piece']:
+                delta += PIECES[move['new_position_old_piece'][0]]['value']
+            delta *= sign
+            self.evaluation += delta
 
             finish = False
             if not self.is_check(opp_move_color):
@@ -92,6 +101,8 @@ class Board(object):
                 self.pieces[move['new_position']] = move['new_position_old_piece']
             else:
                 del self.pieces[move['new_position']]
+            # Retrun evaluation
+            self.evaluation -= delta
 
             if finish:
                 return

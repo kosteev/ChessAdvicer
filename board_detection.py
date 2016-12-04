@@ -113,6 +113,7 @@ def get_board_data(prev_board):
         print 'Not full board is visible on the screen'
         return None
 
+    # TODO: better check if board found valid
     # Check right bottom pixel
     # right-bottom corner pixel is not our, should move 2 points up
     rb_pixel = get_pixel(bitmap, 8 * CELL_SIZE - 1, 8 * CELL_SIZE - 3)

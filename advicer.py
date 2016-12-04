@@ -2,16 +2,11 @@ import os
 import sys
 import time
 
-from analyze import SimpleAnalyzer, AlphaAnalyzer, AlphaBetaAnalyzer
+from analyze import AlphaBetaAnalyzer
 from board_detection import get_board
-from evaluation import simple_evaluation
+from evaluation import simple_evaluation, take_if_better
 from gui import make_move
-from mocks import get_mock
 from utils import get_pieces_hash, format_move, print_board
-
-
-# 2minutes - deep=3
-# 3minutes - deep=4
 
 
 def moves_stringify(moves, move_up_color):
@@ -20,22 +15,19 @@ def moves_stringify(moves, move_up_color):
          for move in reversed(moves)])
 
 
-def run_analyzer(analyzer, board, move_color):
-    data = {
-        'nodes': 0
-    }
+def run_analyzer(analyzer, board):
     # TODO: (kosteev) write in the process of dfs working
     start_time = time.time()
-    result = analyzer.dfs(
-        board, move_color, data=data)
+    result = analyzer.guess_move(board)
     end_time = time.time()
 
     print analyzer.name
-    print 'Time = {:.3f}, nodes = {}'.format(end_time - start_time, data['nodes'])
-    for ind, line in enumerate(result):
+    print 'Time = {:.6f}, nodes = {}'.format(end_time - start_time, result['data']['nodes'])
+    for ind, line in enumerate(result['result']):
         print '{}. ({}) {}'.format(
             ind + 1, line['evaluation'],
             moves_stringify(line['moves'], board.move_up_color))
+        print moves_stringify(line.get('eval_data', {}).get('longest_moves', []), board.move_up_color)
 
     return result
 
@@ -49,29 +41,41 @@ def print_simple_eval(board):
     simple_eval = simple_evaluation(board, board.move_color, data)
     e = time.time()
     print
-    print 'Time = {:.3f}, nodes = {}'.format(e - s, data['nodes'])
+    print 'Time = {:.6f}, nodes = {}'.format(e - s, data['nodes'])
     print 'Longest seq = {}'.format(
         moves_stringify(data['longest_moves'], board.move_up_color))
     print 'Simple evaluation: {} ({})'.format(
         simple_eval['evaluation'], moves_stringify(simple_eval['moves'], board.move_up_color))
 
 
+def print_take_if_better(board):
+    data = {
+        'nodes': 0,
+        'longest_moves': []
+    }
+    s = time.time()
+    take_if_better_eval = take_if_better(board, board.move_color, data)
+    e = time.time()
+    print
+    print 'Time = {:.3f}, nodes = {}'.format(e - s, data['nodes'])
+    print 'Longest seq = {}'.format(
+        moves_stringify(data['longest_moves'], board.move_up_color))
+    print 'Take if better evaluation: {} ({})'.format(
+        take_if_better_eval['evaluation'], moves_stringify(take_if_better_eval['moves'], board.move_up_color))
+
+
 def run_advicer():
     max_deep = int(sys.argv[1])
     lines = int(sys.argv[2])
     play = len(sys.argv) > 3 and (sys.argv[3] == '1')
-    simple_analyzer = SimpleAnalyzer(max_deep=max_deep, lines=lines)
-    alpha_analyzer = AlphaAnalyzer(max_deep=max_deep, lines=lines)
     alpha_beta_analyzer = AlphaBetaAnalyzer(max_deep=max_deep, lines=lines)
-    alpha_beta_analyzer_evaluation = AlphaBetaAnalyzer(
-        max_deep=10, lines=10)
 
     iteration = 0
     prev_hash = None
     board = None
     while True:
         # Should be in the beginning (continue issue)
-        time.sleep(0.005)
+        time.sleep(0.010)
         iteration += 1
 
         s = time.time()
@@ -96,13 +100,13 @@ def run_advicer():
             print_board(board)
             move_up_color = board.move_up_color
             move_color = board.move_color
-            init_eval = board.get_pieces_eval()
             print
 
             print '{} goes up'.format(move_up_color.upper())
             print '{} to move'.format(move_color.upper())
-            print 'Evaluation: {}'.format(init_eval)
+            print 'Evaluation: {}'.format(board.evaluation)
             # print_simple_eval(board)
+            # print_take_if_better(board)
             print
 
             if move_color != move_up_color:
@@ -111,10 +115,7 @@ def run_advicer():
 
             print 'Calculating lines...'
 
-            # run_analyzer(simple_analyzer, board, move_color)
-            # run_analyzer(alpha_analyzer, board, move_color)
-            result = run_analyzer(alpha_beta_analyzer, board, move_color)
-            # run_analyzer(alpha_beta_analyzer_evaluation, board, move_color)
+            result = run_analyzer(alpha_beta_analyzer, board)
 
             if play:
                 moves = result[0]['moves']

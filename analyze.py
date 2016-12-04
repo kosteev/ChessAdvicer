@@ -26,7 +26,7 @@ class SimpleAnalyzer(Analyzer):
         data['nodes'] += 1
         if deep == self.max_deep:
             return [{
-                'evaluation': board.get_pieces_eval(),
+                'evaluation': board.evaluation,
                 'moves': []
             }]
 
@@ -77,7 +77,7 @@ class AlphaAnalyzer(Analyzer):
         data['nodes'] += 1
         if deep == self.max_deep:
             return [{
-                'evaluation': board.get_pieces_eval(),
+                'evaluation': board.evaluation,
                 'moves': []
             }]
 
@@ -131,6 +131,16 @@ class AlphaAnalyzer(Analyzer):
 class AlphaBetaAnalyzer(Analyzer):
     name = 'AlphaBetaAnalyzer'
 
+    def guess_move(self, board):
+        data = {
+            'nodes': 0
+        }
+        result = self.dfs(board, board.move_color, data)
+        return {
+            'result': result,
+            'data': data
+        }
+
     def dfs(self, board, move_color, data,
             alpha=-Board.MAX_EVALUATION - 1, beta=Board.MAX_EVALUATION + 1, deep=0):
         '''
@@ -149,18 +159,11 @@ class AlphaBetaAnalyzer(Analyzer):
         '''
         data['nodes'] += 1
         if deep == self.max_deep:
-            d = {
-                'nodes': 0,
-                'longest_moves': []
-            }
-#             return [{
-#                 'evaluation': board.get_pieces_eval(),
-#                 'moves': []
-#             }]
-            simple_eval = simple_evaluation(board, move_color, d)
+            simple_eval = simple_evaluation(board)
             return [{
-                'evaluation': simple_eval['evaluation'],
-                'moves': simple_eval['moves']
+                'evaluation': simple_eval['result']['evaluation'],
+                'moves': simple_eval['result']['moves'],
+                'eval_data': simple_eval['data']
             }]
 
         opp_move_color = get_opp_color(move_color)
