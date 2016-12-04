@@ -18,7 +18,7 @@ def moves_stringify(moves, move_up_color):
 def run_analyzer(analyzer, board):
     # TODO: (kosteev) write in the process of dfs working
     start_time = time.time()
-    result = analyzer.guess_move(board)
+    result = analyzer.guess_move(board, board.move_color)
     end_time = time.time()
 
     print analyzer.name

@@ -131,11 +131,11 @@ class AlphaAnalyzer(Analyzer):
 class AlphaBetaAnalyzer(Analyzer):
     name = 'AlphaBetaAnalyzer'
 
-    def guess_move(self, board):
+    def guess_move(self, board, move_color):
         data = {
             'nodes': 0
         }
-        result = self.dfs(board, board.move_color, data)
+        result = self.dfs(board, move_color, data)
         return {
             'result': result,
             'data': data
@@ -159,7 +159,7 @@ class AlphaBetaAnalyzer(Analyzer):
         '''
         data['nodes'] += 1
         if deep == self.max_deep:
-            simple_eval = simple_evaluation(board)
+            simple_eval = simple_evaluation(board, move_color)
             return [{
                 'evaluation': simple_eval['result']['evaluation'],
                 'moves': simple_eval['result']['moves'],

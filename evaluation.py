@@ -3,12 +3,12 @@ from pieces import get_opp_color, WHITE, PIECES
 from utils import color_sign
 
 
-def simple_evaluation(board):
+def simple_evaluation(board, move_color):
     data = {
         'nodes': 0,
         'longest_moves': []
     }
-    result = simple_evaluation_dfs(board, board.move_color, data)
+    result = simple_evaluation_dfs(board, move_color, data)
     return {
         'result': result,
         'data': data
