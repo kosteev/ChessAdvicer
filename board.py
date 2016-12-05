@@ -12,18 +12,17 @@ class Board(object):
         -1 if x['new_position_old_piece'] else 1,
         -PIECES[x['new_position_old_piece'][0]]['value'] if x['new_position_old_piece'] else 0))
 
-    def __init__(self, pieces, move_up_color, move_color, lt_screen):
+    def __init__(self, pieces, move_up_color, lt_screen, init_move_color):
         '''
             `pieces` - dict with pieces
                 pieces = {(1, 2): ('rook', 'white)}
-            `move_up_color` - color of side whose goes up
-            `move_color` - color of side to move
-            `xy` - coordinates of board position on screen
+            `move_up_color` - color of side who goes up
+            `lt_screen` - coordinates of board left-top position on the screen
         '''
         self.pieces = pieces
         self.move_up_color = move_up_color
-        self.move_color = move_color
         self.lt_screen = lt_screen
+        self.init_move_color = init_move_color
 
         self.evaluation = self.get_pieces_eval()
 
@@ -39,6 +38,9 @@ class Board(object):
 
     def generate_next_board(
             self, move_color, check=False, sort_key=None):
+        '''
+        Method to generate next valid board position
+        '''
         opp_move_color = get_opp_color(move_color)
         sign = color_sign(move_color)
 
@@ -109,13 +111,14 @@ class Board(object):
 
     def get_piece_probable_moves(self, position):
         '''
-            1. By rules ( + on board)
-            2. Do not pass someone on the way, except finish with opposite color
-            3. Do not make own king under check
+        Returns probable piece moves
+        1. By rules ( + on board) - PROBABLE_MOVES
+        2. Do not pass someone on the way, except finish with opposite color
+        3. Do not make own king under check
 
-            ???
-            1. on passan
-            2. 0-0 | 0-0-0
+        ???
+        1. on passan
+        2. 0-0 | 0-0-0
         '''
         piece, move_color = self.pieces[position]
 

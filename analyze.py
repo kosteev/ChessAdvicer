@@ -1,5 +1,5 @@
 from board import Board
-from endgame import get_best_move
+from endgame import get_syzygy_best_move
 from evaluation import simple_evaluation
 from pieces import WHITE, BLACK, get_opp_color
 from utils import color_sign
@@ -18,13 +18,13 @@ class Analyzer(object):
 class SimpleAnalyzer(Analyzer):
     name = 'SimpleAnalyzer'
 
-    def dfs(self, board, move_color, data, deep=0):
+    def dfs(self, board, move_color, stats, deep=0):
         '''
         max_deep - 2*n for checkmate in `n` moves
 
         TODO: (kosteev) write tests
         '''
-        data['nodes'] += 1
+        stats['nodes'] += 1
         if deep == self.max_deep:
             return [{
                 'evaluation': board.evaluation,
@@ -38,7 +38,7 @@ class SimpleAnalyzer(Analyzer):
         lines = self.lines if deep == 0 else 1
         for move in gen:
             cand = self.dfs(
-                board, opp_move_color, data, deep=deep + 1)
+                board, opp_move_color, stats, deep=deep + 1)
 
             result.append(cand[0])
             result[-1]['moves'].append(move)
@@ -67,7 +67,7 @@ class SimpleAnalyzer(Analyzer):
 class AlphaAnalyzer(Analyzer):
     name = 'AlphaAnalyzer'
 
-    def dfs(self, board, move_color, data, alpha=None, deep=0):
+    def dfs(self, board, move_color, stats, alpha=None, deep=0):
         '''
         alpha - to reduce brute force
             if alpha is None dfs will return always list not 0-length
@@ -75,7 +75,7 @@ class AlphaAnalyzer(Analyzer):
 
         TODO: (kosteev) write tests
         '''
-        data['nodes'] += 1
+        stats['nodes'] += 1
         if deep == self.max_deep:
             return [{
                 'evaluation': board.evaluation,
@@ -89,7 +89,7 @@ class AlphaAnalyzer(Analyzer):
         lines = self.lines if deep == 0 else 1
         for move in gen:
             cand = self.dfs(
-                board, opp_move_color, data,
+                board, opp_move_color, stats,
                 alpha=result[-1]['evaluation'] if len(result) == lines else None, deep=deep + 1)
             if cand is None:
                 # Not found better move
@@ -132,26 +132,26 @@ class AlphaAnalyzer(Analyzer):
 class AlphaBetaAnalyzer(Analyzer):
     name = 'AlphaBetaAnalyzer'
 
-    def guess_move(self, board, move_color):
-        data = {
+    def analyze(self, board, move_color):
+        stats = {
             'nodes': 0
         }
 
-        endgame_best_move = get_best_move(board, board.move_color)
-        if endgame_best_move is None:
-            result = self.dfs(board, move_color, data)
+        syzygy_best_move = get_syzygy_best_move(board, move_color)
+        if syzygy_best_move is None:
+            result = self.dfs(board, move_color, stats)
         else:
             result = [{
-                'evaluation': endgame_best_move['evaluation'],
-                'moves': endgame_best_move['moves']
+                'evaluation': syzygy_best_move['evaluation'],
+                'moves': syzygy_best_move['moves']
             }]
 
         return {
             'result': result,
-            'data': data
+            'stats': stats
         }
 
-    def dfs(self, board, move_color, data,
+    def dfs(self, board, move_color, stats,
             alpha=-Board.MAX_EVALUATION - 1, beta=Board.MAX_EVALUATION + 1, deep=0):
         '''
         If evaluation between (alpha, beta) returns it,
@@ -167,13 +167,14 @@ class AlphaBetaAnalyzer(Analyzer):
         TODO: (kosteev) write tests
         TODO: (kosteev) compare with simple analyzer
         '''
-        data['nodes'] += 1
+        stats['nodes'] += 1
         if deep == self.max_deep:
             simple_eval = simple_evaluation(board, move_color)
             return [{
                 'evaluation': simple_eval['result']['evaluation'],
-                'moves': simple_eval['result']['moves'],
-                'eval_data': simple_eval['data']
+                'moves': [],
+                'evaluation_moves': simple_eval['result']['moves'],
+                'evaluation_stats': simple_eval['stats']
             }]
 
         opp_move_color = get_opp_color(move_color)
@@ -187,7 +188,7 @@ class AlphaBetaAnalyzer(Analyzer):
             is_any_move = True
 
             cand = self.dfs(
-                board, opp_move_color, data,
+                board, opp_move_color, stats,
                 alpha=alpha, beta=beta, deep=deep + 1)
 
             result.append(cand[0])

@@ -4,64 +4,37 @@ import time
 
 from analyze import AlphaBetaAnalyzer
 from board_detection import get_board
-from evaluation import simple_evaluation, take_if_better
+from evaluation import simple_evaluation
 from gui import make_move
-from utils import get_pieces_hash, format_move, print_board
+from utils import get_pieces_hash, print_board, moves_stringify
 
 
-def moves_stringify(moves, move_up_color):
-    return '; '.join(
-        [format_move(move, move_up_color)
-         for move in reversed(moves)])
-
-
-def run_analyzer(analyzer, board):
-    # TODO: (kosteev) write in the process of dfs working
+def run_analyzer(analyzer, board, move_color):
     start_time = time.time()
-    result = analyzer.guess_move(board, board.move_color)
+    analysis = analyzer.analyze(board, move_color)
     end_time = time.time()
 
     print analyzer.name
-    print 'Time = {:.6f}, nodes = {}'.format(end_time - start_time, result['data']['nodes'])
-    for ind, line in enumerate(result['result']):
-        print '{}. ({}) {}'.format(
-            ind + 1, line['evaluation'],
-            moves_stringify(line['moves'], board.move_up_color))
-        print moves_stringify(line.get('eval_data', {}).get('longest_moves', []), board.move_up_color)
+    print 'Time = {:.6f}, nodes = {}'.format(end_time - start_time, analysis['stats']['nodes'])
+    for line in analysis['result']:
+        print '({}) {} ({})'.format(
+            line['evaluation'],
+            moves_stringify(line['moves'], board.move_up_color),
+            moves_stringify(line.get('evaluation_moves', []), board.move_up_color))
 
-    return result
+    return analysis
 
 
 def print_simple_eval(board):
-    data = {
-        'nodes': 0,
-        'longest_moves': []
-    }
     s = time.time()
-    simple_eval = simple_evaluation(board, board.move_color, data)
+    simple_eval = simple_evaluation(board, board.move_color)
     e = time.time()
     print
-    print 'Time = {:.6f}, nodes = {}'.format(e - s, data['nodes'])
+    print 'Time = {:.6f}, nodes = {}'.format(e - s, simple_eval['stats']['nodes'])
     print 'Longest seq = {}'.format(
-        moves_stringify(data['longest_moves'], board.move_up_color))
+        moves_stringify(simple_eval['stats']['longest_moves'], board.move_up_color))
     print 'Simple evaluation: {} ({})'.format(
-        simple_eval['evaluation'], moves_stringify(simple_eval['moves'], board.move_up_color))
-
-
-def print_take_if_better(board):
-    data = {
-        'nodes': 0,
-        'longest_moves': []
-    }
-    s = time.time()
-    take_if_better_eval = take_if_better(board, board.move_color, data)
-    e = time.time()
-    print
-    print 'Time = {:.3f}, nodes = {}'.format(e - s, data['nodes'])
-    print 'Longest seq = {}'.format(
-        moves_stringify(data['longest_moves'], board.move_up_color))
-    print 'Take if better evaluation: {} ({})'.format(
-        take_if_better_eval['evaluation'], moves_stringify(take_if_better_eval['moves'], board.move_up_color))
+        simple_eval['result']['evaluation'], moves_stringify(simple_eval['result']['moves'], board.move_up_color))
 
 
 def run_advicer():
@@ -99,23 +72,23 @@ def run_advicer():
 
             print_board(board)
             move_up_color = board.move_up_color
-            move_color = board.move_color
+            init_move_color = board.init_move_color
             print
 
             print '{} goes up'.format(move_up_color.upper())
-            print '{} to move'.format(move_color.upper())
+            print '{} to move'.format(init_move_color.upper())
             print 'Evaluation: {}'.format(board.evaluation)
             # print_simple_eval(board)
             # print_take_if_better(board)
             print
 
-            if move_color != move_up_color:
+            if init_move_color != move_up_color:
                 print 'Waiting for opponent move'
                 continue
 
             print 'Calculating lines...'
 
-            result = run_analyzer(alpha_beta_analyzer, board)
+            result = run_analyzer(alpha_beta_analyzer, board, init_move_color)
 
             if play:
                 moves = result['result'][0]['moves']

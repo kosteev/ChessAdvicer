@@ -6,7 +6,7 @@ from board_detection import CELL_SIZE
 
 def focus_board(board):
     x = board.lt_screen[0]
-    y = board.lt_screen[1] - 5
+    y = board.lt_screen[1]
 
     pyautogui.click(x, y)
 

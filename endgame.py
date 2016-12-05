@@ -7,7 +7,7 @@ from pieces import WHITE, PIECES
 from utils import name_to_cell, color_sign
 
 
-def get_best_move(board, move_color):
+def get_syzygy_best_move(board, move_color):
     '''
     WDL - 6 pieces
     DTM - 5 pieces
@@ -16,7 +16,6 @@ def get_best_move(board, move_color):
         return None
 
     fen = generate_fen(board, move_color)
-    print 'FEN: {}'.format(fen)
     try:
         response = urllib2.urlopen(
             "https://syzygy-tables.info/api/v2?fen={}".format(urllib.quote(fen))).read()
@@ -47,9 +46,9 @@ def get_best_move(board, move_color):
         evaluation = 0
     else:
         if parsed_move['dtm'] is None:
-            evaluation = 200
+            evaluation = Board.MAX_EVALUATION
         else:
-            evaluation = 400 - abs(parsed_move['dtm']) - 1
+            evaluation = Board.MAX_EVALUATION - abs(parsed_move['dtm']) - 1
         if parsed_move['wdl'] > 0:
             evaluation *= -1
         evaluation *= sign

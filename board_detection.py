@@ -1,3 +1,6 @@
+'''
+Board detection works only for lichess.org
+'''
 import objc
 from AppKit import NSBitmapImageRep
 from Quartz.CoreGraphics import CGMainDisplayID
@@ -175,7 +178,7 @@ def get_board(prev_board):
 
             for piece, info in PIECES.items():
                 for ind, color in enumerate([WHITE, BLACK]):
-                    for pixel_info in info['pixels'][ind]:
+                    for pixel_info in info['lichess_pixels'][ind]:
                         px = pixel_info[0]
                         py = pixel_info[1]
                         pixel = get_pixel(bitmap, x + px, y + py)
@@ -209,6 +212,6 @@ def get_board(prev_board):
     return Board(
         pieces=pieces,
         move_up_color=move_up_color,
-        move_color=move_color,
-        lt_screen=board_data['lt_screen']
+        lt_screen=board_data['lt_screen'],
+        init_move_color=move_color
     )

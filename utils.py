@@ -6,29 +6,38 @@ from pieces import PIECES, WHITE, BLACK
 
 
 def color_sign(color):
+    '''
+    Returns 1 for white and -1 for black.
+    Used in many functions, e.g.: get_pieces_eval
+    '''
     return 1 if color == WHITE else -1
 
 
+def normalize_cell(cell, move_up_color):
+    '''
+    Normalizes cell relative to a8 square.
+    '''
+    if move_up_color == BLACK:
+        cell = (7 - cell[0], 7 - cell[1])
+
+    return cell
+
+
 def h_name(cell, move_up_color):
-    if move_up_color == WHITE:
-        return 8 - cell[1]
-    else:
-        return cell[1] + 1
+    cell = normalize_cell(cell, move_up_color)
+    return 8 - cell[1]
 
 
 def v_name(cell, move_up_color):
-    if move_up_color == WHITE:
-        return chr(ord('a') + cell[0])
-    else:
-        return chr(ord('h') - cell[0])
+    cell = normalize_cell(cell, move_up_color)
+    return chr(ord('a') + cell[0])
 
 
-def name_to_cell(cell_name, move_up_color):
-    result = (ord(cell_name[0]) - ord('a'), 8 - int(cell_name[1]))
-    if move_up_color == BLACK:
-        result = 7 - result[0], 7 - result[1]
+def name_to_cell(name, move_up_color):
+    cell = (ord(name[0]) - ord('a'), 8 - int(name[1]))
+    cell = normalize_cell(cell, move_up_color)
 
-    return result
+    return cell
 
 
 def cell_name(cell, move_up_color):
@@ -53,7 +62,15 @@ def format_move(move, move_up_color):
     )
 
 
+def moves_stringify(moves, move_up_color):
+    # TODO: 1.Bf5 f4 2.Kf6 ...
+    return '; '.join(
+        [format_move(move, move_up_color)
+         for move in reversed(moves)])
+
+
 def get_pieces_hash(board):
+    # TODO: consider all board params
     if board is None:
         return -1337
 

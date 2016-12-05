@@ -13,44 +13,39 @@ def on_board((c, r)):
 
 PIECES = {
     'rook': {
-        'pixels': [[(30, 38, 'black')], [(33, 29, 'black')]],
+        'lichess_pixels': [[(30, 38, 'black')], [(33, 29, 'black')]],
         'value': 5,
-        'priority': 5,
         'title': 'R',
     },
     'knight': {
-        'pixels': [[(23, 72, 'black')], [(19, 75, 'black')]],
+        'lichess_pixels': [[(23, 72, 'black')], [(19, 75, 'black')]],
         'value': 3,
-        'priority': 3,
         'title': 'N',
     },
     'bishop': {
-        'pixels': [[(21, 107, 'white')], [(20, 107, 'black')]],
+        'lichess_pixels': [[(21, 107, 'white')], [(20, 107, 'black')]],
         'value': 3,
-        'priority': 3,
         'title': 'B',
     },
     'queen': {
-        'pixels': [[(11, 29, 'black')], [(13, 32, 'black')]],
+        'lichess_pixels': [[(11, 29, 'black')], [(13, 32, 'black')]],
         'value': 9,
-        'priority': 9,
         'title': 'Q',
     },
     'king': {
-        'pixels': [[(16, 58, 'black')], [(91, 51, 'black')]],
+        'lichess_pixels': [[(16, 58, 'black')], [(91, 51, 'black')]],
         'value': 100,
-        'priority': 0,
         'title': 'K',
     },
     'pawn': {
-        'pixels': [[(33, 108, 'white')], [(63, 55, 'black'), (95, 113, 'black')]],
+        'lichess_pixels': [[(33, 108, 'white')], [(63, 55, 'black'), (95, 113, 'black')]],
         'value': 1,
-        'priority': 9,
         'title': 'P',
     }
 }
 
 
+# Valid piece moves by rules
 DIFFS = {}
 DIFFS['rook'] = [
     [(0, x, None) for x in xrange(1, 8)],
@@ -79,6 +74,7 @@ DIFFS['knight'] = [
 ]
 
 
+# Valid piece moves by rules + on board
 PROBABLE_MOVES = {}
 for piece in DIFFS:
     PROBABLE_MOVES[piece] = {}
