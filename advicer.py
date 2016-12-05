@@ -75,7 +75,7 @@ def run_advicer():
     board = None
     while True:
         # Should be in the beginning (continue issue)
-        time.sleep(0.010)
+        time.sleep(0.005)
         iteration += 1
 
         s = time.time()
