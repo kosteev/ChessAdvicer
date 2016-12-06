@@ -3,7 +3,7 @@ import time
 from board import Board
 from endgame import get_syzygy_best_move
 from evaluation import simple_evaluation
-from pieces import WHITE, BLACK, get_opp_color
+from pieces import WHITE, BLACK
 from utils import color_sign
 
 
@@ -21,7 +21,7 @@ class Analyzer(object):
 class SimpleAnalyzer(Analyzer):
     name = 'SimpleAnalyzer'
 
-    def dfs(self, board, move_color, stats, deep=0):
+    def dfs(self, board, stats, deep=0):
         '''
         max_deep - 2*n for checkmate in `n` moves
 
@@ -34,14 +34,14 @@ class SimpleAnalyzer(Analyzer):
                 'moves': []
             }]
 
-        opp_move_color = get_opp_color(move_color)
+        move_color = board.move_color
 
-        gen = board.generate_next_board(move_color)
+        gen = board.generate_next_board()
         result = []
         lines = self.lines if deep == 0 else 1
         for move in gen:
             cand = self.dfs(
-                board, opp_move_color, stats, deep=deep + 1)
+                board, stats, deep=deep + 1)
 
             result.append(cand[0])
             result[-1]['moves'].append(move)
@@ -51,7 +51,7 @@ class SimpleAnalyzer(Analyzer):
 
         sign = color_sign(move_color)
         if not result:
-            if board.is_check(opp_move_color):
+            if board.is_check(opposite=True):
                 # Checkmate
                 result = [{
                     'evaluation': -sign * (Board.MAX_EVALUATION - deep),
@@ -70,7 +70,7 @@ class SimpleAnalyzer(Analyzer):
 class AlphaAnalyzer(Analyzer):
     name = 'AlphaAnalyzer'
 
-    def dfs(self, board, move_color, stats, alpha=None, deep=0):
+    def dfs(self, board, stats, alpha=None, deep=0):
         '''
         alpha - to reduce brute force
             if alpha is None dfs will return always list not 0-length
@@ -85,14 +85,14 @@ class AlphaAnalyzer(Analyzer):
                 'moves': []
             }]
 
-        opp_move_color = get_opp_color(move_color)
+        move_color = board.move_color
 
-        gen = board.generate_next_board(move_color)
+        gen = board.generate_next_board()
         result = []
         lines = self.lines if deep == 0 else 1
         for move in gen:
             cand = self.dfs(
-                board, opp_move_color, stats,
+                board, stats,
                 alpha=result[-1]['evaluation'] if len(result) == lines else None, deep=deep + 1)
             if cand is None:
                 # Not found better move
@@ -116,7 +116,7 @@ class AlphaAnalyzer(Analyzer):
 
         sign = color_sign(move_color)
         if not result:
-            if board.is_check(opp_move_color):
+            if board.is_check(opposite=True):
                 # Checkmate
                 result = [{
                     'evaluation': -sign * (Board.MAX_EVALUATION - deep),
@@ -135,15 +135,15 @@ class AlphaAnalyzer(Analyzer):
 class AlphaBetaAnalyzer(Analyzer):
     name = 'AlphaBetaAnalyzer'
 
-    def analyze(self, board, move_color):
+    def analyze(self, board):
         stats = {
             'nodes': 0
         }
 
-        syzygy_best_move = get_syzygy_best_move(board, move_color)
+        syzygy_best_move = get_syzygy_best_move(board)
         if syzygy_best_move is None:
             self.dfs_start_time = time.time()
-            result = self.dfs(board, move_color, stats)
+            result = self.dfs(board, stats)
         else:
             result = [{
                 'evaluation': syzygy_best_move['evaluation'],
@@ -155,7 +155,7 @@ class AlphaBetaAnalyzer(Analyzer):
             'stats': stats
         }
 
-    def dfs(self, board, move_color, stats,
+    def dfs(self, board, stats,
             alpha=-Board.MAX_EVALUATION - 1, beta=Board.MAX_EVALUATION + 1, deep=0):
         '''
         If evaluation between (alpha, beta) returns it,
@@ -179,7 +179,7 @@ class AlphaBetaAnalyzer(Analyzer):
 #             }]
 
         if deep == self.max_deep:
-            simple_eval = simple_evaluation(board, move_color)
+            simple_eval = simple_evaluation(board)
             return [{
                 'evaluation': simple_eval['result']['evaluation'],
                 'moves': [],
@@ -187,7 +187,7 @@ class AlphaBetaAnalyzer(Analyzer):
                 'evaluation_stats': simple_eval['stats']
             }]
 
-        opp_move_color = get_opp_color(move_color)
+        move_color = board.move_color
 
         lines = self.lines if deep == 0 else 1
         result = []
@@ -198,7 +198,7 @@ class AlphaBetaAnalyzer(Analyzer):
             is_any_move = True
 
             cand = self.dfs(
-                board, opp_move_color, stats,
+                board, stats,
                 alpha=alpha, beta=beta, deep=deep + 1)
 
             result.append(cand[0])
@@ -226,7 +226,7 @@ class AlphaBetaAnalyzer(Analyzer):
 
         if not is_any_move:
             sign = color_sign(move_color)
-            if board.is_check(opp_move_color):
+            if board.is_check(opposite=True):
                 # Checkmate
                 result = [{
                     'evaluation': -sign * (Board.MAX_EVALUATION - deep),

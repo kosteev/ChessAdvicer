@@ -12,7 +12,7 @@ class Board(object):
         -1 if x['new_position_old_piece'] else 1,
         -PIECES[x['new_position_old_piece'][0]]['value'] if x['new_position_old_piece'] else 0))
 
-    def __init__(self, pieces, move_up_color, lt_screen, init_move_color):
+    def __init__(self, pieces, move_up_color, move_color, lt_screen):
         '''
             `pieces` - dict with pieces
                 pieces = {(1, 2): ('rook', 'white)}
@@ -21,8 +21,8 @@ class Board(object):
         '''
         self.pieces = pieces
         self.move_up_color = move_up_color
+        self.move_color = move_color
         self.lt_screen = lt_screen
-        self.init_move_color = init_move_color
 
         self.evaluation = self.get_pieces_eval()
 
@@ -37,10 +37,11 @@ class Board(object):
         return total
 
     def generate_next_board(
-            self, move_color, check=False, sort_key=None):
+            self, check=False, sort_key=None):
         '''
         Method to generate next valid board position
         '''
+        move_color = self.move_color
         opp_move_color = get_opp_color(move_color)
         sign = color_sign(move_color)
 
@@ -92,9 +93,11 @@ class Board(object):
                 delta += PIECES[move['new_position_old_piece'][0]]['value']
             delta *= sign
             self.evaluation += delta
+            # Move color
+            self.move_color = opp_move_color
 
             finish = False
-            if not self.is_check(opp_move_color):
+            if not self.is_check():
                 finish = yield move
 
             # Recover
@@ -105,6 +108,8 @@ class Board(object):
                 del self.pieces[move['new_position']]
             # Retrun evaluation
             self.evaluation -= delta
+            # Move color
+            self.move_color = move_color
 
             if finish:
                 return
@@ -165,13 +170,20 @@ class Board(object):
 
         return probable_moves
 
-    def is_check(self, move_color):
+    def is_check(self, opposite=False):
         '''
-        Determines if check is by move_color to opposite color
+        Determines if check is by self.move_color to opposite color
+            `opposite` == True, check for the opposites side
         '''
         check = False
-        for _ in self.generate_next_board(move_color, check=True):
+        if opposite:
+            self.move_color = get_opp_color(self.move_color)
+
+        for _ in self.generate_next_board(check=True):
             check = True
             # Allow to end this loop to release generator
+
+        if opposite:
+            self.move_color = get_opp_color(self.move_color)
 
         return check

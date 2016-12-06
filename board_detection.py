@@ -213,5 +213,5 @@ def get_board(prev_board):
         pieces=pieces,
         move_up_color=move_up_color,
         lt_screen=board_data['lt_screen'],
-        init_move_color=move_color
+        move_color=move_color
     )

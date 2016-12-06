@@ -7,7 +7,7 @@ from pieces import WHITE, PIECES
 from utils import name_to_cell, color_sign
 
 
-def get_syzygy_best_move(board, move_color):
+def get_syzygy_best_move(board):
     '''
     WDL - 6 pieces
     DTM - 5 pieces
@@ -15,7 +15,7 @@ def get_syzygy_best_move(board, move_color):
     if len(board.pieces) > 6:
         return None
 
-    fen = generate_fen(board, move_color)
+    fen = generate_fen(board)
     try:
         response = urllib2.urlopen(
             "https://syzygy-tables.info/api/v2?fen={}".format(urllib.quote(fen))).read()
@@ -41,7 +41,7 @@ def get_syzygy_best_move(board, move_color):
     parsed_move = parsed_moves[0]
 
     # TODO: promotions
-    sign = color_sign(move_color)
+    sign = color_sign(board.move_color)
     if parsed_move['wdl'] == 0:
         evaluation = 0
     else:
@@ -72,7 +72,7 @@ def get_syzygy_best_move(board, move_color):
     }
 
 
-def generate_fen(board, move_color):
+def generate_fen(board):
     fen_1 = []
     for r in xrange(8):
         row = ""
@@ -105,5 +105,5 @@ def generate_fen(board, move_color):
 
     # TODO: provide k/q castles
     # TODO: provide on passan
-    fen = "{} {} - - 0 1".format("/".join(fen_1), "w" if move_color == WHITE else "b")
+    fen = "{} {} - - 0 1".format("/".join(fen_1), "w" if board.move_color == WHITE else "b")
     return fen

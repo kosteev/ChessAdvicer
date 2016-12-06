@@ -10,7 +10,7 @@ from gui import make_move
 from utils import get_pieces_hash, print_board, moves_stringify
 
 
-def run_analyzer(board, max_deep, lines, move_color):
+def run_analyzer(board, max_deep, lines):
     min_time = 0.8
     max_time = 1.2
     move_time = min_time + (max_time - min_time) * random.random()
@@ -22,7 +22,7 @@ def run_analyzer(board, max_deep, lines, move_color):
     )
 
     start_time = time.time()
-    analysis = analyzer.analyze(board, move_color)
+    analysis = analyzer.analyze(board)
     # Sleep if analyzer was too fast
     to_sleep = max(move_time - (time.time() - start_time), 0)
     time.sleep(to_sleep)
@@ -41,7 +41,7 @@ def run_analyzer(board, max_deep, lines, move_color):
 
 def print_simple_eval(board):
     s = time.time()
-    simple_eval = simple_evaluation(board, board.move_color)
+    simple_eval = simple_evaluation(board)
     e = time.time()
     print
     print 'Time = {:.6f}, nodes = {}'.format(e - s, simple_eval['stats']['nodes'])
@@ -81,23 +81,23 @@ def run_advicer(max_deep, lines, play):
 
             print_board(board)
             move_up_color = board.move_up_color
-            init_move_color = board.init_move_color
+            move_color = board.move_color
             print
 
             print '{} goes up'.format(move_up_color.upper())
-            print '{} to move'.format(init_move_color.upper())
+            print '{} to move'.format(move_color.upper())
             print 'Evaluation: {}'.format(board.evaluation)
             # print_simple_eval(board)
             # print_take_if_better(board)
             print
 
-            if init_move_color != move_up_color:
+            if move_color != move_up_color:
                 print 'Waiting for opponent move'
                 continue
 
             print 'Calculating lines...'
 
-            result = run_analyzer(board, init_move_color)
+            result = run_analyzer(board)
 
             if play:
                 moves = result['result'][0]['moves']
