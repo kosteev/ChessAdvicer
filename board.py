@@ -1,3 +1,4 @@
+import json
 import random
 
 from pieces import get_opp_color, PIECES, PROBABLE_MOVES
@@ -12,7 +13,7 @@ class Board(object):
         -1 if x['new_position_old_piece'] else 1,
         -PIECES[x['new_position_old_piece'][0]]['value'] if x['new_position_old_piece'] else 0))
 
-    def __init__(self, pieces, move_up_color, move_color, lt_screen):
+    def __init__(self, pieces, move_up_color, move_color, lt_screen=None):
         '''
             `pieces` - dict with pieces
                 pieces = {(1, 2): ('rook', 'white)}
@@ -25,6 +26,9 @@ class Board(object):
         self.lt_screen = lt_screen
 
         self.evaluation = self.get_pieces_eval()
+
+    def hash(self):
+        return hash(json.dumps(sorted(self.pieces.items()) + [self.move_color, self.move_up_color]))
 
     def get_pieces_eval(self):
         '''

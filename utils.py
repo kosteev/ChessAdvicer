@@ -1,5 +1,3 @@
-import json
-
 import termcolor
 
 from pieces import PIECES, WHITE, BLACK
@@ -62,19 +60,34 @@ def format_move(move, move_up_color):
     )
 
 
-def moves_stringify(moves, move_up_color):
-    # TODO: 1.Bf5 f4 2.Kf6 ...
+def moves_stringify(moves, move_color, move_up_color):
+    if len(moves) == 0:
+        return ''
+
+    result = ''
+    ind = 1
+    if move_color == BLACK:
+        result = format_move(moves[-1], move_up_color)
+        ind = 2
+        moves = moves[:-1]
+
+    while moves:
+        move = moves.pop()
+        if result:
+            result += ' '
+        result += '{}.{}'.format(ind, format_move(move, move_up_color))
+
+        if moves:
+            move = moves.pop()
+            result += ' {}'.format(format_move(move, move_up_color))
+
+        ind += 1
+
+    return result
+
     return '; '.join(
         [format_move(move, move_up_color)
          for move in reversed(moves)])
-
-
-def get_pieces_hash(board):
-    # TODO: consider all board params
-    if board is None:
-        return -1337
-
-    return hash(json.dumps(sorted(board.pieces.items())))
 
 
 def print_board(board):

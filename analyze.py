@@ -2,7 +2,6 @@ import time
 
 from board import Board
 from endgame import get_syzygy_best_move
-from evaluation import simple_evaluation
 from pieces import WHITE, BLACK
 from utils import color_sign
 
@@ -12,10 +11,30 @@ from utils import color_sign
 
 
 class Analyzer(object):
-    def __init__(self, max_deep, lines=1, max_time=999999):
+    def __init__(self, max_deep, evaluation_func, lines=1):
         self.max_deep = max_deep
         self.lines = lines
-        self.max_time = max_time
+        self.evaluation_func = evaluation_func
+
+    def analyze(self, board):
+        stats = {
+            'nodes': 0
+        }
+        result = self.dfs(board, stats)
+
+        return {
+            'result': result,
+            'stats': stats
+        }
+
+    def board_evaluation(self, board):
+        evaluation = self.evaluation_func(board)
+        return [{
+            'evaluation': evaluation['result']['evaluation'],
+            'moves': [],
+            'evaluation_moves': evaluation['result']['moves'],
+            'evaluation_stats': evaluation['stats']
+        }]
 
 
 class SimpleAnalyzer(Analyzer):
@@ -29,10 +48,7 @@ class SimpleAnalyzer(Analyzer):
         '''
         stats['nodes'] += 1
         if deep == self.max_deep:
-            return [{
-                'evaluation': board.evaluation,
-                'moves': []
-            }]
+            return self.board_evaluation(board)
 
         move_color = board.move_color
 
@@ -80,10 +96,7 @@ class AlphaAnalyzer(Analyzer):
         '''
         stats['nodes'] += 1
         if deep == self.max_deep:
-            return [{
-                'evaluation': board.evaluation,
-                'moves': []
-            }]
+            return self.board_evaluation(board)
 
         move_color = board.move_color
 
@@ -135,6 +148,12 @@ class AlphaAnalyzer(Analyzer):
 class AlphaBetaAnalyzer(Analyzer):
     name = 'AlphaBetaAnalyzer'
 
+    def __init__(self, *args, **kwargs):
+        max_time = kwargs.pop('max_time', None)
+        self.max_time = max_time
+
+        super(AlphaBetaAnalyzer, self).__init__(*args, **kwargs)
+
     def analyze(self, board):
         stats = {
             'nodes': 0
@@ -179,20 +198,14 @@ class AlphaBetaAnalyzer(Analyzer):
 #             }]
 
         if deep == self.max_deep:
-            simple_eval = simple_evaluation(board)
-            return [{
-                'evaluation': simple_eval['result']['evaluation'],
-                'moves': [],
-                'evaluation_moves': simple_eval['result']['moves'],
-                'evaluation_stats': simple_eval['stats']
-            }]
+            return self.board_evaluation(board)
 
         move_color = board.move_color
 
         lines = self.lines if deep == 0 else 1
         result = []
         is_any_move = False
-        gen = board.generate_next_board(move_color)
+        gen = board.generate_next_board()
 
         for move in gen:
             is_any_move = True

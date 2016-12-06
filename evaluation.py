@@ -1,21 +1,34 @@
 from board import Board
-from pieces import get_opp_color, WHITE, PIECES
+from pieces import WHITE
 from utils import color_sign
 
 
 def simple_evaluation(board):
-    stats = {
-        'nodes': 0,
-        'longest_moves': []
+    stats = {}
+    result = {
+        'evaluation': board.evaluation,
+        'moves': []
     }
-    result = simple_evaluation_dfs(board, stats)
+
     return {
         'result': result,
         'stats': stats
     }
 
 
-def simple_evaluation_dfs(board, stats):
+def take_evaluation(board):
+    stats = {
+        'nodes': 0,
+        'longest_moves': []
+    }
+    result = take_evaluation_dfs(board, stats)
+    return {
+        'result': result,
+        'stats': stats
+    }
+
+
+def take_evaluation_dfs(board, stats):
     '''
     Evaluates position.
 
@@ -40,7 +53,7 @@ def simple_evaluation_dfs(board, stats):
             break
 
         stats['longest_moves'] = [move] + stats['longest_moves']
-        cand = simple_evaluation_dfs(
+        cand = take_evaluation_dfs(
             board, stats)
 
         # TODO: (kosteev) consider no moves

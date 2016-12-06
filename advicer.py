@@ -3,52 +3,65 @@ import random
 import sys
 import time
 
-from analyze import AlphaBetaAnalyzer
+from analyze import SimpleAnalyzer, AlphaAnalyzer, AlphaBetaAnalyzer
 from board_detection import get_board
-from evaluation import simple_evaluation
+from evaluation import simple_evaluation, take_evaluation
 from gui import make_move
-from utils import get_pieces_hash, print_board, moves_stringify
+from mocks import get_mock
+from pieces import get_opp_color
+from utils import print_board, moves_stringify
 
 
-def run_analyzer(board, max_deep, lines):
-    min_time = 0.8
-    max_time = 1.2
-    move_time = min_time + (max_time - min_time) * random.random()
-    print move_time
+def run_analyzer(analyzer_class, board, max_deep, lines, play):
+    kwargs = {
+        'max_deep': max_deep,
+        'lines': lines,
+        'evaluation_func': take_evaluation
+    }
+    move_time = None
+    if play:
+        min_time = 0.8
+        max_time = 1.2
+        move_time = min_time + (max_time - min_time) * random.random()
+        move_time = 0
+        kwargs['max_time'] = move_time
 
     # TODO: fix bug with time
-    analyzer = AlphaBetaAnalyzer(
-        max_deep=max_deep, lines=lines, max_time=move_time
-    )
+    analyzer = analyzer_class(**kwargs)
 
     start_time = time.time()
     analysis = analyzer.analyze(board)
     # Sleep if analyzer was too fast
-    to_sleep = max(move_time - (time.time() - start_time), 0)
-    time.sleep(to_sleep)
+    if play:
+        to_sleep = max(move_time - (time.time() - start_time), 0)
+        print 'Move time: {:.6f} (sleep: {:.6f})'.format(move_time, to_sleep)
+        time.sleep(to_sleep)
     end_time = time.time()
 
     print analyzer.name
     print 'Time = {:.6f}, nodes = {}'.format(end_time - start_time, analysis['stats']['nodes'])
     for line in analysis['result']:
+        eval_move_color = board.move_color if len(line['moves']) % 2 == 0 else get_opp_color(board.move_color)
         print '({}) {} ({})'.format(
             line['evaluation'],
-            moves_stringify(line['moves'], board.move_up_color),
-            moves_stringify(line.get('evaluation_moves', []), board.move_up_color))
+            moves_stringify(line['moves'], board.move_color, board.move_up_color),
+            moves_stringify(
+                line.get('evaluation_moves', []), eval_move_color, board.move_up_color))
 
     return analysis
 
 
-def print_simple_eval(board):
+def print_take_evaluation(board):
     s = time.time()
-    simple_eval = simple_evaluation(board)
+    take_eval = take_evaluation(board)
     e = time.time()
     print
-    print 'Time = {:.6f}, nodes = {}'.format(e - s, simple_eval['stats']['nodes'])
+    print 'Time = {:.6f}, nodes = {}'.format(e - s, take_eval['stats']['nodes'])
     print 'Longest seq = {}'.format(
-        moves_stringify(simple_eval['stats']['longest_moves'], board.move_up_color))
-    print 'Simple evaluation: {} ({})'.format(
-        simple_eval['result']['evaluation'], moves_stringify(simple_eval['result']['moves'], board.move_up_color))
+        moves_stringify(take_eval['stats']['longest_moves'], board.move_color, board.move_up_color))
+    print 'Take evaluation: {} ({})'.format(
+        take_eval['result']['evaluation'], moves_stringify(
+            take_eval['result']['moves'], board.move_color, board.move_up_color))
 
 
 def run_advicer(max_deep, lines, play):
@@ -61,11 +74,13 @@ def run_advicer(max_deep, lines, play):
         iteration += 1
 
         s = time.time()
-        board = get_board(board)
-        # board = get_mock(2)
+        # board = get_board(board)
+        board = get_mock(2)
         e = time.time()
 
-        new_hash = get_pieces_hash(board)
+        new_hash = -1337
+        if board:
+            new_hash = board.hash()
         if prev_hash == new_hash:
             continue
         prev_hash = new_hash
@@ -87,8 +102,7 @@ def run_advicer(max_deep, lines, play):
             print '{} goes up'.format(move_up_color.upper())
             print '{} to move'.format(move_color.upper())
             print 'Evaluation: {}'.format(board.evaluation)
-            # print_simple_eval(board)
-            # print_take_if_better(board)
+            print_take_evaluation(board)
             print
 
             if move_color != move_up_color:
@@ -97,7 +111,9 @@ def run_advicer(max_deep, lines, play):
 
             print 'Calculating lines...'
 
-            result = run_analyzer(board)
+            # result = run_analyzer(SimpleAnalyzer, board, max_deep, lines, play)
+            # result = run_analyzer(AlphaAnalyzer, board, max_deep, lines, play)
+            result = run_analyzer(AlphaBetaAnalyzer, board, max_deep, lines, play)
 
             if play:
                 moves = result['result'][0]['moves']
