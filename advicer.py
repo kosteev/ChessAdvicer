@@ -8,7 +8,7 @@ from board_detection import get_board
 from evaluation import simple_evaluation, take_evaluation
 from gui import make_move
 from mocks import get_mock
-from pieces import get_opp_color
+from pieces import get_opp_color, BLACK
 from utils import print_board, moves_stringify
 
 
@@ -42,11 +42,11 @@ def run_analyzer(analyzer_class, board, max_deep, lines, play):
     print 'Time = {:.6f}, nodes = {}'.format(end_time - start_time, analysis['stats']['nodes'])
     for line in analysis['result']:
         eval_move_color = board.move_color if len(line['moves']) % 2 == 0 else get_opp_color(board.move_color)
+        eval_ind = (len(line['moves']) + (1 if board.move_color == BLACK else 0)) / 2 + 1
         print '({}) {} ({})'.format(
             line['evaluation'],
-            moves_stringify(line['moves'], board.move_color, board.move_up_color),
-            moves_stringify(
-                line.get('evaluation_moves', []), eval_move_color, board.move_up_color))
+            moves_stringify(line['moves'], board.move_color),
+            moves_stringify(line.get('evaluation_moves', []), eval_move_color, ind=eval_ind))
 
     return analysis
 
@@ -58,10 +58,10 @@ def print_take_evaluation(board):
     print
     print 'Time = {:.6f}, nodes = {}'.format(e - s, take_eval['stats']['nodes'])
     print 'Longest seq = {}'.format(
-        moves_stringify(take_eval['stats']['longest_moves'], board.move_color, board.move_up_color))
+        moves_stringify(take_eval['stats']['longest_moves'], board.move_color))
     print 'Take evaluation: {} ({})'.format(
         take_eval['result']['evaluation'], moves_stringify(
-            take_eval['result']['moves'], board.move_color, board.move_up_color))
+            take_eval['result']['moves'], board.move_color))
 
 
 def run_advicer(max_deep, lines, play):
@@ -74,8 +74,8 @@ def run_advicer(max_deep, lines, play):
         iteration += 1
 
         s = time.time()
-        # board = get_board(board)
-        board = get_mock(2)
+        board = get_board(board)
+        # board = get_mock(2)
         e = time.time()
 
         new_hash = -1337

@@ -9,6 +9,7 @@ from PIL import ImageGrab
 
 from board import Board
 from pieces import WHITE, BLACK, PIECES, get_opp_color
+from utils import normalize_cell
 
 
 # Big big thanks to https://bitbucket.org/ronaldoussoren/pyobjc/ for updated .bridgesupport files
@@ -167,6 +168,7 @@ def get_board(prev_board):
         return None
 
     bitmap = board_data['bitmap']
+    move_up_color = board_data['move_up_color']
 
     pieces = {}
     move_color = None
@@ -174,8 +176,8 @@ def get_board(prev_board):
     for c in xrange(8):
         for r in xrange(8):
             x = c * CELL_SIZE
-            y = r * CELL_SIZE
-
+            y = (7 - r) * CELL_SIZE
+            cell = normalize_cell((c, r), move_up_color)
             for piece, info in PIECES.items():
                 for ind, color in enumerate([WHITE, BLACK]):
                     for pixel_info in info['lichess_pixels'][ind]:
@@ -185,26 +187,25 @@ def get_board(prev_board):
                         if pixel != COLORS[pixel_info[-1]]:
                             break
                     else:
-                        pieces[(c, r)] = (piece, color)
+                        pieces[cell] = (piece, color)
 
             # Determine whose move
             pixel = get_pixel(bitmap, x + 5, y + 5)
             if pixel in [COLORS['yellow_white_board'], COLORS['yellow_black_board']]:
-                yellow_cells.append((c, r))
-                if (c, r) in pieces:
-                    move_color = get_opp_color(pieces[(c, r)][1])
+                yellow_cells.append(cell)
+                if cell in pieces:
+                    move_color = get_opp_color(pieces[cell][1])
 
-    move_up_color = board_data['move_up_color']
     if move_color is None:
         if not yellow_cells:
             # Initial position
             move_color = WHITE
         elif (len(yellow_cells) == 2 and
                 yellow_cells[0][1] == 0 and yellow_cells[1][1] == 0):
-            move_color = move_up_color
+            move_color = BLACK
         elif (len(yellow_cells) == 2 and
                 yellow_cells[0][1] == 7 and yellow_cells[1][1] == 7):
-            move_color = get_opp_color(move_up_color)
+            move_color = WHITE
         else:
             print 'Can not determine move color'
             return None

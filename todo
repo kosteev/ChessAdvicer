@@ -6,3 +6,4 @@
 - optparse
 - make Play class
 - board from fen
+- move_up_color not in board

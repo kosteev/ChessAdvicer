@@ -1,7 +1,7 @@
 import json
 import random
 
-from pieces import get_opp_color, PIECES, PROBABLE_MOVES
+from pieces import get_opp_color, PIECES, PROBABLE_MOVES, WHITE
 from utils import color_sign
 
 
@@ -9,26 +9,22 @@ class Board(object):
     MAX_EVALUATION = 1000
     # 999 - checkmate in one move, 998 - ...
 
-    SORT_BY_TAKE_VALUE = staticmethod(lambda x: (
-        -1 if x['new_position_old_piece'] else 1,
-        -PIECES[x['new_position_old_piece'][0]]['value'] if x['new_position_old_piece'] else 0))
-
-    def __init__(self, pieces, move_up_color, move_color, lt_screen=None):
+    def __init__(self, pieces, move_color, move_up_color=WHITE, lt_screen=None):
         '''
             `pieces` - dict with pieces
                 pieces = {(1, 2): ('rook', 'white)}
-            `move_up_color` - color of side who goes up
-            `lt_screen` - coordinates of board left-top position on the screen
+            `move_up_color` - color of side who goes up, just for display purpose
+            `lt_screen` - coordinates of board left-top position on the screen, for gui library
         '''
         self.pieces = pieces
-        self.move_up_color = move_up_color
         self.move_color = move_color
+        self.move_up_color = move_up_color
         self.lt_screen = lt_screen
 
         self.evaluation = self.get_pieces_eval()
 
     def hash(self):
-        return hash(json.dumps(sorted(self.pieces.items()) + [self.move_color, self.move_up_color]))
+        return hash(json.dumps(sorted(self.pieces.items()) + [self.move_color]))
 
     def get_pieces_eval(self):
         '''
@@ -84,7 +80,7 @@ class Board(object):
 
         random.shuffle(moves)
         if sort_key is None:
-            sort_key = self.SORT_BY_TAKE_VALUE
+            sort_key = self.sort_by_take_value
         moves.sort(key=sort_key)
 
         for move in moves:
@@ -136,11 +132,7 @@ class Board(object):
             probable_moves = PROBABLE_MOVES[piece][position]
         else:
             opp_move_color = get_opp_color(move_color)
-
-            if move_color == self.move_up_color:
-                sign = -1
-            else:
-                sign = 1
+            sign = color_sign(move_color)
 
             promote_pieces = []
             if position[1] + sign in [0, 7]:
@@ -191,3 +183,14 @@ class Board(object):
             self.move_color = get_opp_color(self.move_color)
 
         return check
+
+    @staticmethod
+    def sort_by_take_value(move):
+        '''
+        Take+the most valueable+by the most cheap
+        '''
+        new_position_old_piece = move.get('new_position_old_piece')
+        if new_position_old_piece:
+            return [
+                -1, -PIECES[new_position_old_piece[0]]['value'], PIECES[move['piece']]['value']]
+        return [1]

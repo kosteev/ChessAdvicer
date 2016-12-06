@@ -42,7 +42,7 @@ def take_evaluation_dfs(board, stats):
     move_color = board.move_color
     sign = color_sign(move_color)
     is_any_move = False
-    gen = board.generate_next_board(sort_key=Board.SORT_BY_TAKE_VALUE)
+    gen = board.generate_next_board(sort_key=Board.sort_by_take_value)
 
     evaluation = board.evaluation
     evaluation_moves = []

@@ -21,31 +21,28 @@ def normalize_cell(cell, move_up_color):
     return cell
 
 
-def h_name(cell, move_up_color):
-    cell = normalize_cell(cell, move_up_color)
-    return 8 - cell[1]
+def h_name(cell):
+    return cell[1] + 1
 
 
-def v_name(cell, move_up_color):
-    cell = normalize_cell(cell, move_up_color)
+def v_name(cell):
     return chr(ord('a') + cell[0])
 
 
-def name_to_cell(name, move_up_color):
-    cell = (ord(name[0]) - ord('a'), 8 - int(name[1]))
-    cell = normalize_cell(cell, move_up_color)
+def name_to_cell(name):
+    cell = (ord(name[0]) - ord('a'), int(name[1]) - 1)
 
     return cell
 
 
-def cell_name(cell, move_up_color):
-    return '{}{}'.format(v_name(cell, move_up_color), h_name(cell, move_up_color))
+def cell_name(cell):
+    return '{}{}'.format(v_name(cell), h_name(cell))
 
 
-def format_move(move, move_up_color):
+def format_move(move):
     if move['piece'] == 'pawn':
         if move['new_position_old_piece']:
-            piece_title = v_name(move['position'], move_up_color)
+            piece_title = v_name(move['position'])
         else:
             piece_title = ''
     else:
@@ -54,39 +51,38 @@ def format_move(move, move_up_color):
     return '{piece_title}{is_take}{new_position}{new_piece_title}{check_mate}'.format(
         piece_title=piece_title,
         is_take='x' if move['new_position_old_piece'] else '',
-        new_position=cell_name(move['new_position'], move_up_color),
+        new_position=cell_name(move['new_position']),
         new_piece_title=('=' + PIECES[move['new_piece']]['title']) if move['piece'] != move['new_piece'] else '',
         check_mate=''
     )
 
 
-def moves_stringify(moves, move_color, move_up_color):
+def moves_stringify(moves, move_color, ind=1):
     if len(moves) == 0:
         return ''
 
     result = ''
-    ind = 1
     if move_color == BLACK:
-        result = format_move(moves[-1], move_up_color)
-        ind = 2
+        result = format_move(moves[-1])
+        ind += 1
         moves = moves[:-1]
 
     while moves:
         move = moves.pop()
         if result:
             result += ' '
-        result += '{}.{}'.format(ind, format_move(move, move_up_color))
+        result += '{}.{}'.format(ind, format_move(move))
 
         if moves:
             move = moves.pop()
-            result += ' {}'.format(format_move(move, move_up_color))
+            result += ' {}'.format(format_move(move))
 
         ind += 1
 
     return result
 
     return '; '.join(
-        [format_move(move, move_up_color)
+        [format_move(move)
          for move in reversed(moves)])
 
 
@@ -96,10 +92,12 @@ def print_board(board):
         BLACK: 'grey'
     }
 
-    for y in xrange(8):
+    for r in xrange(7, -1, -1):
         line = ''
-        for x in xrange(8):
-            p = board.pieces.get((x, y))
+        for c in xrange(8):
+            cell = (c, r)
+            cell = normalize_cell(cell, board.move_up_color)
+            p = board.pieces.get(cell)
             if p is None:
                 line += '.'
             else:

@@ -53,8 +53,8 @@ def get_syzygy_best_move(board):
             evaluation *= -1
         evaluation *= sign
 
-    position = name_to_cell(parsed_move['key'][:2], board.move_up_color)
-    new_position = name_to_cell(parsed_move['key'][2:4], board.move_up_color)
+    position = name_to_cell(parsed_move['key'][:2])
+    new_position = name_to_cell(parsed_move['key'][2:4])
     piece = board.pieces[position][0]
     new_position_old_piece = board.pieces.get(new_position)
 
@@ -74,14 +74,11 @@ def get_syzygy_best_move(board):
 
 def generate_fen(board):
     fen_1 = []
-    for r in xrange(8):
+    for r in xrange(7, -1, -1):
         row = ""
         empty = 0
         for c in xrange(8):
-            if board.move_up_color == WHITE:
-                cell = (c, r)
-            else:
-                cell = (7 - c, 7 - r)
+            cell = (c, r)
             
             if cell in board.pieces:
                 if empty:

@@ -17,11 +17,9 @@ class Test(unittest.TestCase):
 
         pieces = {
             (0, 0): ('king', WHITE),
-            (7, 7): ('king', BLACK)
+            (7, 6): ('king', BLACK)
         }
-        b1 = Board(pieces, move_up_color=WHITE, move_color=WHITE)
-        b2 = Board(pieces, move_up_color=WHITE, move_color=BLACK)
-        b3 = Board(pieces, move_up_color=BLACK, move_color=WHITE)
-        b4 = Board(pieces, move_up_color=BLACK, move_color=BLACK)
+        b1 = Board(pieces, move_color=WHITE)
+        b2 = Board(pieces, move_color=BLACK)
 
-        assert_equal(len({b1.hash(), b2.hash(), b3.hash(), b4.hash()}), 4)
+        assert_equal(len({b1.hash(), b2.hash()}), 2)

@@ -20,7 +20,6 @@ def get_mock(mock_id):
         
         return Board(
             pieces=pieces,
-            move_up_color=BLACK,
             move_color=BLACK
         )
 
@@ -28,10 +27,10 @@ def get_mock(mock_id):
         # Initial position
         pieces = {}
         for c in xrange(8):
-            pieces[(c, 1)] = ('pawn', BLACK)
-            pieces[(c, 6)] = ('pawn', WHITE)
+            pieces[(c, 1)] = ('pawn', WHITE)
+            pieces[(c, 6)] = ('pawn', BLACK)
         for r in [0, 7]:
-            color = BLACK if r == 0 else WHITE
+            color = WHITE if r == 0 else BLACK
             pieces[(0, r)] = ('rook', color)
             pieces[(7, r)] = ('rook', color)
             pieces[(1, r)] = ('knight', color)
@@ -43,23 +42,21 @@ def get_mock(mock_id):
 
         return Board(
             pieces=pieces,
-            move_up_color=WHITE,
             move_color=WHITE
         )
 
     if mock_id == 2:
         # Initial position
         pieces = {}
-        pieces[(7, 0)] = ('king', BLACK)
-        pieces[(5, 0)] = ('rook', BLACK)
-        pieces[(7, 1)] = ('pawn', BLACK)
-        pieces[(6, 1)] = ('pawn', BLACK)
-        pieces[(7, 2)] = ('knight', WHITE)
-        pieces[(3, 3)] = ('queen', WHITE)
-        pieces[(7, 7)] = ('king', WHITE)
+        pieces[(7, 7)] = ('king', BLACK)
+        pieces[(5, 7)] = ('rook', BLACK)
+        pieces[(7, 6)] = ('pawn', BLACK)
+        pieces[(6, 6)] = ('pawn', BLACK)
+        pieces[(7, 5)] = ('knight', WHITE)
+        pieces[(3, 4)] = ('queen', WHITE)
+        pieces[(7, 0)] = ('king', WHITE)
 
         return Board(
             pieces=pieces,
-            move_up_color=WHITE,
             move_color=WHITE
         )
