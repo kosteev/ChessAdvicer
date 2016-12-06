@@ -1,4 +1,5 @@
 import os
+import random
 import sys
 import time
 
@@ -9,9 +10,22 @@ from gui import make_move
 from utils import get_pieces_hash, print_board, moves_stringify
 
 
-def run_analyzer(analyzer, board, move_color):
+def run_analyzer(board, max_deep, lines, move_color):
+    min_time = 0.8
+    max_time = 1.2
+    move_time = min_time + (max_time - min_time) * random.random()
+    print move_time
+
+    # TODO: fix bug with time
+    analyzer = AlphaBetaAnalyzer(
+        max_deep=max_deep, lines=lines, max_time=move_time
+    )
+
     start_time = time.time()
     analysis = analyzer.analyze(board, move_color)
+    # Sleep if analyzer was too fast
+    to_sleep = max(move_time - (time.time() - start_time), 0)
+    time.sleep(to_sleep)
     end_time = time.time()
 
     print analyzer.name
@@ -37,12 +51,7 @@ def print_simple_eval(board):
         simple_eval['result']['evaluation'], moves_stringify(simple_eval['result']['moves'], board.move_up_color))
 
 
-def run_advicer():
-    max_deep = int(sys.argv[1])
-    lines = int(sys.argv[2])
-    play = len(sys.argv) > 3 and (sys.argv[3] == '1')
-    alpha_beta_analyzer = AlphaBetaAnalyzer(max_deep=max_deep, lines=lines)
-
+def run_advicer(max_deep, lines, play):
     iteration = 0
     prev_hash = None
     board = None
@@ -88,7 +97,7 @@ def run_advicer():
 
             print 'Calculating lines...'
 
-            result = run_analyzer(alpha_beta_analyzer, board, init_move_color)
+            result = run_analyzer(board, init_move_color)
 
             if play:
                 moves = result['result'][0]['moves']
@@ -104,4 +113,12 @@ def run_advicer():
 
 
 if __name__ == '__main__':
-    run_advicer()
+    max_deep = int(sys.argv[1])
+    lines = int(sys.argv[2])
+    play = len(sys.argv) > 3 and (sys.argv[3] == '1')
+
+    run_advicer(
+        max_deep=max_deep,
+        lines=lines,
+        play=play
+    )

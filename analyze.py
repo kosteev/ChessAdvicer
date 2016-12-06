@@ -1,3 +1,5 @@
+import time
+
 from board import Board
 from endgame import get_syzygy_best_move
 from evaluation import simple_evaluation
@@ -10,9 +12,10 @@ from utils import color_sign
 
 
 class Analyzer(object):
-    def __init__(self, max_deep, lines=1):
+    def __init__(self, max_deep, lines=1, max_time=999999):
         self.max_deep = max_deep
         self.lines = lines
+        self.max_time = max_time
 
 
 class SimpleAnalyzer(Analyzer):
@@ -139,6 +142,7 @@ class AlphaBetaAnalyzer(Analyzer):
 
         syzygy_best_move = get_syzygy_best_move(board, move_color)
         if syzygy_best_move is None:
+            self.dfs_start_time = time.time()
             result = self.dfs(board, move_color, stats)
         else:
             result = [{
@@ -168,6 +172,12 @@ class AlphaBetaAnalyzer(Analyzer):
         TODO: (kosteev) compare with simple analyzer
         '''
         stats['nodes'] += 1
+#         if time.time() - self.dfs_start_time > self.max_time:
+#             return [{
+#                 'evaluation': -1 * color_sign(move_color) * (Board.MAX_EVALUATION + 1),
+#                 'moves': []
+#             }]
+
         if deep == self.max_deep:
             simple_eval = simple_evaluation(board, move_color)
             return [{
