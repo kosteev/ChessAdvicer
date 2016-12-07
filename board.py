@@ -9,17 +9,19 @@ class Board(object):
     MAX_EVALUATION = 1000
     # 999 - checkmate in one move, 998 - ...
 
-    def __init__(self, pieces, move_color, move_up_color=WHITE, lt_screen=None):
+    def __init__(self, pieces, move_color, move_up_color=WHITE, lt_screen=None, cell_size=None):
         '''
             `pieces` - dict with pieces
                 pieces = {(1, 2): ('rook', 'white)}
             `move_up_color` - color of side who goes up, just for display purpose
             `lt_screen` - coordinates of board left-top position on the screen, for gui library
+            `cell_size` - size of cell, for gui library
         '''
         self.pieces = pieces
         self.move_color = move_color
         self.move_up_color = move_up_color
         self.lt_screen = lt_screen
+        self.cell_size = cell_size
 
         self.evaluation = self.get_pieces_eval()
 

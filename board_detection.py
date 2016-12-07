@@ -32,17 +32,31 @@ objc.parseBridgeSupport( """<?xml version='1.0'?>
 """, globals(), '/System/Library/Frameworks/ApplicationServices.framework/Frameworks/CoreGraphics.framework')
 
 
-CELL_SIZE = 128
+MODE_LICHESS = 0
+MODE_CHESSCOM = 1
+MODE = MODE_LICHESS
 
 
-COLORS = {
-    'white': (1, 1, 1),
-    'black': (0, 0, 0),
-    'white_board': (239 / 255.0, 216 / 255.0, 183 / 255.0),
-    'yellow_white_board': (206 / 255.0, 209 / 255.0, 113 / 255.0),
-    'yellow_black_board': (170 / 255.0, 161 / 255.0, 67 / 255.0),
-    'grey': (137 / 255.0, 137 / 255.0, 137 / 255.0)
-}
+if MODE == MODE_LICHESS:
+    BOARD_RADIUS_PIXELS = 1
+    COLORS = {
+        'white': (1, 1, 1),
+        'black': (0, 0, 0),
+        'white_board': (239 / 255.0, 216 / 255.0, 183 / 255.0),
+        'yellow_white_board': (206 / 255.0, 209 / 255.0, 113 / 255.0),
+        'yellow_black_board': (170 / 255.0, 161 / 255.0, 67 / 255.0),
+        'grey': (137 / 255.0, 137 / 255.0, 137 / 255.0)
+    }
+else:
+    BOARD_RADIUS_PIXELS = 4
+    COLORS = {
+        'white': (1, 1, 1),
+        'black': (0, 0, 0),
+        'white_board': (239 / 255.0, 216 / 255.0, 183 / 255.0),
+        'yellow_white_board': (206 / 255.0, 209 / 255.0, 113 / 255.0),
+        'yellow_black_board': (170 / 255.0, 161 / 255.0, 67 / 255.0),
+        'grey': (137 / 255.0, 137 / 255.0, 137 / 255.0)
+    }
 
 
 DEVIATION = 1 / 255.0
@@ -79,9 +93,9 @@ def get_pixel(bitmap, x, y):
     return c.redComponent(), c.greenComponent(), c.blueComponent()
 
 
-def get_lt_screen(prev_board):
+def get_lt_screen_cell_size(prev_board):
     '''
-    Try to guess left-top of screen.
+    Try to guess left-top of screen and cell size.
     '''
     lt_screen = None
 
@@ -97,36 +111,48 @@ def get_lt_screen(prev_board):
                 if similiar_pixel(pixel, [COLORS['white_board'], COLORS['yellow_white_board']]):
                     # left-top corner pixel is not our, should move 1 point up
                     # real coordinates are twice less
-                    lt_screen = (x / 2, y / 2 - 1)
+                    lt_screen = (x / 2, y / 2 - BOARD_RADIUS_PIXELS)
+                    # determine cell size
+                    while similiar_pixel(pixel, [COLORS['white_board'], COLORS['yellow_white_board']]):
+                        y += 1
+                        # ??? if out of the image
+                        pixel = im.im.getpixel((x, y))
+                        pixel = [c / 255.0 for c in pixel[:-1]]
+                    cell_size = y / 2 - lt_screen[1]
+#                     xi = lt_screen[0] * 2
+#                     yi = lt_screen[1] * 2
+#                     show_image((xi, yi), (xi + CELL_SIZE * 8, yi + CELL_SIZE *8))
+#                     raise
                     break
 
             if lt_screen:
                 break
     else:
         lt_screen = prev_board.lt_screen
+        cell_size = prev_board.cell_size
 
-    return lt_screen
+    return lt_screen, cell_size
 
 
 def get_board_data(prev_board):
-    lt_screen = get_lt_screen(prev_board)
+    lt_screen, cell_size = get_lt_screen_cell_size(prev_board)
     if not lt_screen:
         print 'Not found left top corner'
         return None
 
     # + 30, be careful, extra pixels for letters below the board
-    bitmap_width = CELL_SIZE * 8
-    bitmap_height = CELL_SIZE * 8 + 30
-    bitmap = get_screen_bitmap(lt_screen, (bitmap_width / 2, bitmap_height / 2))
-    if (bitmap.size().width < bitmap_width or
-            bitmap.size().height < bitmap_height):
+    bitmap_width = cell_size * 8
+    bitmap_height = cell_size * 8 + 15
+    bitmap = get_screen_bitmap(lt_screen, (bitmap_width, bitmap_height))
+    if (bitmap.size().width / 2 < bitmap_width or
+            bitmap.size().height / 2 < bitmap_height):
         print 'Not full board is visible on the screen'
         return None
 
     # TODO: better check if board found valid
     # Check right bottom pixel
     # right-bottom corner pixel is not our, should move 2 points up
-    rb_pixel = get_pixel(bitmap, 8 * CELL_SIZE - 1, 8 * CELL_SIZE - 3)
+    rb_pixel = get_pixel(bitmap, 8 * cell_size * 2 - 1, 8 * cell_size * 2 - 1 - BOARD_RADIUS_PIXELS * 2)
     if not similiar_pixel(
             rb_pixel, [COLORS['white_board'], COLORS['yellow_white_board']]):
         # Not a board
@@ -134,7 +160,7 @@ def get_board_data(prev_board):
         return None
 
     # Determine orientation
-    or_xy = (3 * CELL_SIZE + CELL_SIZE / 2 - 10, 8 * CELL_SIZE + 5)
+    or_xy = (3 * cell_size * 2 + cell_size * 2 / 2 - 10, 8 * cell_size * 2 + 5)
     or_xy_rb = (or_xy[0] + 20, or_xy[1] + 22)
 
     grey_count = 0
@@ -158,7 +184,8 @@ def get_board_data(prev_board):
     return {
         'bitmap': bitmap,
         'move_up_color': move_up_color,
-        'lt_screen': lt_screen
+        'lt_screen': lt_screen,
+        'cell_size': cell_size
     }
 
 
@@ -169,14 +196,15 @@ def get_board(prev_board):
 
     bitmap = board_data['bitmap']
     move_up_color = board_data['move_up_color']
+    cell_size = board_data['cell_size']
 
     pieces = {}
     move_color = None
     yellow_cells = []
     for c in xrange(8):
         for r in xrange(8):
-            x = c * CELL_SIZE
-            y = (7 - r) * CELL_SIZE
+            x = c * cell_size * 2
+            y = (7 - r) * cell_size * 2
             cell = normalize_cell((c, r), move_up_color)
             for piece, info in PIECES.items():
                 for ind, color in enumerate([WHITE, BLACK]):
@@ -187,6 +215,9 @@ def get_board(prev_board):
                         if pixel != COLORS[pixel_info[-1]]:
                             break
                     else:
+#                         if cell in pieces:
+#                             raise ValueError('Two pieces for cell {}: {}, {}'.format(
+#                                 cell, pieces[cell], (piece, color)))
                         pieces[cell] = (piece, color)
 
             # Determine whose move
@@ -213,6 +244,7 @@ def get_board(prev_board):
     return Board(
         pieces=pieces,
         move_up_color=move_up_color,
+        cell_size=cell_size,
         lt_screen=board_data['lt_screen'],
         move_color=move_color
     )

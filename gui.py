@@ -1,7 +1,6 @@
 import pyautogui
 
 
-from board_detection import CELL_SIZE
 from utils import normalize_cell
 
 
@@ -14,8 +13,8 @@ def focus_board(board):
 
 def click_cell(board, position):
     position = normalize_cell(position, board.move_up_color)
-    x = board.lt_screen[0] + (position[0] + 0.5) * CELL_SIZE / 2
-    y = board.lt_screen[1] + (7 - position[1] + 0.5) * CELL_SIZE / 2
+    x = board.lt_screen[0] + (position[0] + 0.5) * board.cell_size
+    y = board.lt_screen[1] + (7 - position[1] + 0.5) * board.cell_size
 
     pyautogui.click(x, y)
 
