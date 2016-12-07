@@ -61,6 +61,9 @@ def moves_stringify(moves, move_color, ind=1):
     if len(moves) == 0:
         return ''
 
+    # !!!
+    moves = list(moves)
+
     result = ''
     if move_color == BLACK:
         result = format_move(moves[-1])
