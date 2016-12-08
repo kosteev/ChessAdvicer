@@ -70,8 +70,10 @@ DIFFS['knight'] = [
 
 # Valid piece moves by rules + on board
 PROBABLE_MOVES = {}
+COUNT_OF_PROBABLE_MOVES = {}
 for piece in DIFFS:
     PROBABLE_MOVES[piece] = {}
+    COUNT_OF_PROBABLE_MOVES[piece] = {}
     for c in xrange(8):
         for r in xrange(8):
             PROBABLE_MOVES[piece][(c, r)] = []
@@ -86,3 +88,6 @@ for piece in DIFFS:
 
                 if moves_variant:
                     PROBABLE_MOVES[piece][(c, r)].append(moves_variant)
+
+            COUNT_OF_PROBABLE_MOVES[piece][(c, r)] = sum(
+                len(v) for v in PROBABLE_MOVES[piece][(c, r)])

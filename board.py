@@ -42,6 +42,8 @@ class Board(object):
             self, check=False, sort_key=None):
         '''
         Method to generate next valid board position
+            if check == True, yield if check is occured
+            if check == False, first yield with moves info
         '''
         move_color = self.move_color
         opp_move_color = get_opp_color(move_color)
@@ -80,10 +82,17 @@ class Board(object):
                     if last_diff:
                         break
 
+        if check:
+            return
+
         random.shuffle(moves)
         if sort_key is None:
             sort_key = self.sort_by_take_value
         moves.sort(key=sort_key)
+
+        yield {
+            'len_moves': len(moves)
+        }
 
         for move in moves:
             # Make move

@@ -42,9 +42,11 @@ def take_evaluation_dfs(board, stats):
     move_color = board.move_color
     sign = color_sign(move_color)
     is_any_move = False
-    gen = board.generate_next_board(sort_key=Board.sort_by_take_value)
 
-    evaluation = board.evaluation
+    gen = board.generate_next_board(sort_key=Board.sort_by_take_value)
+    moves_info = gen.next()
+
+    evaluation = board.evaluation # + moves_info['len_moves'] / 1000.0
     evaluation_moves = []
     for move in gen:
         is_any_move = True
