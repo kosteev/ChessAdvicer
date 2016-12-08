@@ -34,7 +34,7 @@ objc.parseBridgeSupport( """<?xml version='1.0'?>
 
 MODE_LICHESS = 0
 MODE_CHESSCOM = 1
-MODE = MODE_LICHESS
+MODE = MODE_CHESSCOM
 
 
 if MODE == MODE_LICHESS:
@@ -74,17 +74,47 @@ if MODE == MODE_LICHESS:
             'black': [((101, 62), 'black_piece'), ((71, 44), ('black_piece'))],
         }
     }
+    WHITE_LETTER_COUNT = 84
+    BLACK_LETTER_COUNT = 59
 else:
     BOARD_RADIUS_PIXELS = 4
     COLORS = {
         'white_piece': (1, 1, 1),
         'black_piece': (0, 0, 0),
         'white_board_cell': (239 / 255.0, 216 / 255.0, 183 / 255.0),
-        'moved_white_board_cell': (206 / 255.0, 209 / 255.0, 113 / 255.0),
-        'moved_white_board_cell': (170 / 255.0, 161 / 255.0, 67 / 255.0),
-        'letter': (137 / 255.0, 137 / 255.0, 137 / 255.0)
+        'moved_white_board_cell': (246 / 255.0, 235 / 255.0, 124 / 255.0),
+        'moved_black_board_cell': (217 / 255.0, 194 / 255.0, 85 / 255.0),
+        'letter': (168 / 255.0, 167 / 255.0, 166 / 255.0)
     }
     CELL_SIZE = 64
+    PIXELS = {
+        'pawn': {
+            'white': [((43, 58), 'black_piece'), ((79, 91), ('white_piece'))],
+            'black': [((60, 73), 'black_piece'), ((88, 106), ('black_piece'))],
+        },
+        'rook': {
+            'white': [((91, 108), 'white_piece'), ((51, 83), ('black_piece'))],
+            'black': [((47, 33), 'black_piece'), ((56, 113), ('black_piece'))],
+        },
+        'knight': {
+            'white': [((30, 56), 'white_piece'), ((71, 94), ('white_piece'))],
+            'black': [((93, 57), 'white_piece'), ((85, 92), ('black_piece'))],
+        },
+        'bishop': {
+            'white': [((71, 80), 'white_piece'), ((83, 103), ('black_piece'))],
+            'black': [((18, 101), 'black_piece'), ((82, 65), ('black_piece'))],
+        },
+        'queen': {
+            'white': [((90, 81), 'white_piece'), ((94, 108), ('black_piece'))],
+            'black': [((85, 26), 'black_piece'), ((13, 32), ('black_piece'))],
+        },
+        'king': {
+            'white': [((51, 85), 'white_piece'), ((84, 69), ('white_piece'))],
+            'black': [((56, 79), 'white_piece'), ((110, 63), ('black_piece'))],
+        }
+    }
+    WHITE_LETTER_COUNT = 92
+    BLACK_LETTER_COUNT = 43
 
 
 DEVIATION = 1 / 255.0
@@ -194,26 +224,27 @@ def get_board_data(prev_board):
     # Determine orientation
     or_xy = (3 * cell_size * 2 + cell_size * 2 / 2 - 10, 8 * cell_size * 2 + 5)
     or_xy_rb = (or_xy[0] + 20, or_xy[1] + 22)
+#     show_image(
+#         (lt_screen[0] * 2 + or_xy[0], lt_screen[1] * 2 + or_xy[1]),
+#         (lt_screen[0] * 2 + or_xy_rb[0], lt_screen[1] * 2 + or_xy_rb[1]))
 
-    grey_count = 0
+    letter_count = 0
     for x in xrange(or_xy[0], or_xy_rb[0]):
         for y in xrange(or_xy[1], or_xy_rb[1]):
             pixel = get_pixel(bitmap, x, y)
             if pixel == COLORS['letter']:
-                grey_count += 1
+                letter_count += 1
 
     move_up_color = None
-    if abs(grey_count - 84) < 1:
-        # D - 84
+    if abs(letter_count - WHITE_LETTER_COUNT) < 1:
+        # d
         move_up_color = WHITE
-    elif abs(grey_count - 59) < 1:
-        # E - 59
+    elif abs(letter_count - BLACK_LETTER_COUNT) < 1:
+        # e
         move_up_color = BLACK
     else:
         print 'Can not determine move up color'
-        #return None
-        # TEMP!!!
-        move_up_color = WHITE
+        return None
 
     return {
         'bitmap': bitmap,
