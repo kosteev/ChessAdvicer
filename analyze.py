@@ -53,7 +53,6 @@ class SimpleAnalyzer(Analyzer):
         move_color = board.move_color
 
         gen = board.generate_next_board()
-        _ = gen.next()
 
         result = []
         lines = self.lines if deep == 0 else 1
@@ -103,7 +102,6 @@ class AlphaAnalyzer(Analyzer):
         move_color = board.move_color
 
         gen = board.generate_next_board()
-        _ = gen.next()
 
         result = []
         lines = self.lines if deep == 0 else 1
@@ -211,7 +209,6 @@ class AlphaBetaAnalyzer(Analyzer):
         is_any_move = False
 
         gen = board.generate_next_board()
-        _ = gen.next()
 
         for move in gen:
             is_any_move = True

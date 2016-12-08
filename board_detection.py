@@ -236,10 +236,10 @@ def get_board_data(prev_board):
                 letter_count += 1
 
     move_up_color = None
-    if abs(letter_count - WHITE_LETTER_COUNT) < 1:
+    if abs(letter_count - WHITE_LETTER_COUNT) < 3:
         # d
         move_up_color = WHITE
-    elif abs(letter_count - BLACK_LETTER_COUNT) < 1:
+    elif abs(letter_count - BLACK_LETTER_COUNT) < 3:
         # e
         move_up_color = BLACK
     else:

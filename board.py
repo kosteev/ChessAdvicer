@@ -90,10 +90,6 @@ class Board(object):
             sort_key = self.sort_by_take_value
         moves.sort(key=sort_key)
 
-        yield {
-            'len_moves': len(moves)
-        }
-
         for move in moves:
             # Make move
             self.pieces[move['new_position']] = (move['new_piece'], move_color)
