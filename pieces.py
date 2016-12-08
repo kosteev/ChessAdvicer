@@ -13,32 +13,26 @@ def on_board((c, r)):
 
 PIECES = {
     'rook': {
-        'lichess_pixels': [[(30, 38, 'black')], [(33, 29, 'black')]],
         'value': 5,
         'title': 'R',
     },
     'knight': {
-        'lichess_pixels': [[(23, 72, 'black')], [(19, 75, 'black')]],
         'value': 3,
         'title': 'N',
     },
     'bishop': {
-        'lichess_pixels': [[(21, 107, 'white')], [(20, 107, 'black')]],
         'value': 3,
         'title': 'B',
     },
     'queen': {
-        'lichess_pixels': [[(11, 29, 'black')], [(13, 32, 'black')]],
         'value': 9,
         'title': 'Q',
     },
     'king': {
-        'lichess_pixels': [[(16, 58, 'black')], [(91, 51, 'black')]],
         'value': 100,
         'title': 'K',
     },
     'pawn': {
-        'lichess_pixels': [[(33, 108, 'white')], [(63, 55, 'black'), (95, 113, 'black')]],
         'value': 1,
         'title': 'P',
     }

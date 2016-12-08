@@ -1,5 +1,5 @@
 '''
-Board detection works only for lichess.org
+Board detection works for lichess.org/chess.com
 '''
 import objc
 from AppKit import NSBitmapImageRep
@@ -40,23 +40,51 @@ MODE = MODE_LICHESS
 if MODE == MODE_LICHESS:
     BOARD_RADIUS_PIXELS = 1
     COLORS = {
-        'white': (1, 1, 1),
-        'black': (0, 0, 0),
-        'white_board': (239 / 255.0, 216 / 255.0, 183 / 255.0),
-        'yellow_white_board': (206 / 255.0, 209 / 255.0, 113 / 255.0),
-        'yellow_black_board': (170 / 255.0, 161 / 255.0, 67 / 255.0),
-        'grey': (137 / 255.0, 137 / 255.0, 137 / 255.0)
+        'white_piece': (1, 1, 1),
+        'black_piece': (0, 0, 0),
+        'white_board_cell': (239 / 255.0, 216 / 255.0, 183 / 255.0),
+        'moved_white_board_cell': (206 / 255.0, 209 / 255.0, 113 / 255.0),
+        'moved_black_board_cell': (170 / 255.0, 161 / 255.0, 67 / 255.0),
+        'letter': (137 / 255.0, 137 / 255.0, 137 / 255.0)
+    }
+    CELL_SIZE = 64
+    PIXELS = {
+        'pawn': {
+            'white': [((69, 32), 'white_piece'), ((83, 82), ('black_piece'))],
+            'black': [((54, 71), 'black_piece'), ((94, 113), ('black_piece'))],
+        },
+        'rook': {
+            'white': [((25, 111), 'black_piece'), ((76, 40), ('black_piece'))],
+            'black': [((79, 30), 'black_piece'), ((54, 104), ('black_piece'))],
+        },
+        'knight': {
+            'white': [((69, 59), 'white_piece'), ((93, 103), ('white_piece'))],
+            'black': [((32, 49), 'black_piece'), ((89, 100), ('black_piece'))],
+        },
+        'bishop': {
+            'white': [((70, 42), 'white_piece'), ((75, 94), ('black_piece'))],
+            'black': [((110, 107), 'black_piece'), ((52, 81), ('black_piece'))],
+        },
+        'queen': {
+            'white': [((41, 19), 'black_piece'), ((109, 36), ('white_piece'))],
+            'black': [((37, 86), 'black_piece'), ((14, 34), ('black_piece'))],
+        },
+        'king': {
+            'white': [((81, 105), 'white_piece'), ((74, 52), ('black_piece'))],
+            'black': [((101, 62), 'black_piece'), ((71, 44), ('black_piece'))],
+        }
     }
 else:
     BOARD_RADIUS_PIXELS = 4
     COLORS = {
-        'white': (1, 1, 1),
-        'black': (0, 0, 0),
-        'white_board': (239 / 255.0, 216 / 255.0, 183 / 255.0),
-        'yellow_white_board': (206 / 255.0, 209 / 255.0, 113 / 255.0),
-        'yellow_black_board': (170 / 255.0, 161 / 255.0, 67 / 255.0),
-        'grey': (137 / 255.0, 137 / 255.0, 137 / 255.0)
+        'white_piece': (1, 1, 1),
+        'black_piece': (0, 0, 0),
+        'white_board_cell': (239 / 255.0, 216 / 255.0, 183 / 255.0),
+        'moved_white_board_cell': (206 / 255.0, 209 / 255.0, 113 / 255.0),
+        'moved_white_board_cell': (170 / 255.0, 161 / 255.0, 67 / 255.0),
+        'letter': (137 / 255.0, 137 / 255.0, 137 / 255.0)
     }
+    CELL_SIZE = 64
 
 
 DEVIATION = 1 / 255.0
@@ -98,6 +126,7 @@ def get_lt_screen_cell_size(prev_board):
     Try to guess left-top of screen and cell size.
     '''
     lt_screen = None
+    cell_size = None
 
     if prev_board is None:
         im = ImageGrab.grab()
@@ -108,12 +137,12 @@ def get_lt_screen_cell_size(prev_board):
             for y in xrange(im.height):
                 pixel = im.im.getpixel((x, y))
                 pixel = [c / 255.0 for c in pixel[:-1]]
-                if similiar_pixel(pixel, [COLORS['white_board'], COLORS['yellow_white_board']]):
+                if similiar_pixel(pixel, [COLORS['white_board_cell'], COLORS['moved_white_board_cell']]):
                     # left-top corner pixel is not our, should move 1 point up
                     # real coordinates are twice less
                     lt_screen = (x / 2, y / 2 - BOARD_RADIUS_PIXELS)
                     # determine cell size
-                    while similiar_pixel(pixel, [COLORS['white_board'], COLORS['yellow_white_board']]):
+                    while similiar_pixel(pixel, [COLORS['white_board_cell'], COLORS['moved_white_board_cell']]):
                         y += 1
                         # ??? if out of the image
                         pixel = im.im.getpixel((x, y))
@@ -121,7 +150,7 @@ def get_lt_screen_cell_size(prev_board):
                     cell_size = y / 2 - lt_screen[1]
 #                     xi = lt_screen[0] * 2
 #                     yi = lt_screen[1] * 2
-#                     show_image((xi, yi), (xi + CELL_SIZE * 8, yi + CELL_SIZE *8))
+#                     show_image((xi, yi), (xi + cell_size * 8 * 2, yi + cell_size * 8 * 2))
 #                     raise
                     break
 
@@ -139,6 +168,9 @@ def get_board_data(prev_board):
     if not lt_screen:
         print 'Not found left top corner'
         return None
+    if cell_size != CELL_SIZE:
+        print 'Not a valid cell size, actual - {}, required - {}'.format(cell_size, CELL_SIZE)
+        return None
 
     # + 30, be careful, extra pixels for letters below the board
     bitmap_width = cell_size * 8
@@ -154,7 +186,7 @@ def get_board_data(prev_board):
     # right-bottom corner pixel is not our, should move 2 points up
     rb_pixel = get_pixel(bitmap, 8 * cell_size * 2 - 1, 8 * cell_size * 2 - 1 - BOARD_RADIUS_PIXELS * 2)
     if not similiar_pixel(
-            rb_pixel, [COLORS['white_board'], COLORS['yellow_white_board']]):
+            rb_pixel, [COLORS['white_board_cell'], COLORS['moved_white_board_cell']]):
         # Not a board
         print 'Right bottom pixel is incorrect'
         return None
@@ -167,7 +199,7 @@ def get_board_data(prev_board):
     for x in xrange(or_xy[0], or_xy_rb[0]):
         for y in xrange(or_xy[1], or_xy_rb[1]):
             pixel = get_pixel(bitmap, x, y)
-            if pixel == COLORS['grey']:
+            if pixel == COLORS['letter']:
                 grey_count += 1
 
     move_up_color = None
@@ -179,7 +211,9 @@ def get_board_data(prev_board):
         move_up_color = BLACK
     else:
         print 'Can not determine move up color'
-        return None
+        #return None
+        # TEMP!!!
+        move_up_color = WHITE
 
     return {
         'bitmap': bitmap,
@@ -206,23 +240,23 @@ def get_board(prev_board):
             x = c * cell_size * 2
             y = (7 - r) * cell_size * 2
             cell = normalize_cell((c, r), move_up_color)
-            for piece, info in PIECES.items():
-                for ind, color in enumerate([WHITE, BLACK]):
-                    for pixel_info in info['lichess_pixels'][ind]:
-                        px = pixel_info[0]
-                        py = pixel_info[1]
+            for piece, piece_info in PIXELS.items():
+                for color, piece_color_info in piece_info.items():
+                    for pixel_info in piece_color_info:
+                        px = pixel_info[0][0]
+                        py = pixel_info[0][1]
                         pixel = get_pixel(bitmap, x + px, y + py)
-                        if pixel != COLORS[pixel_info[-1]]:
+                        if pixel != COLORS[pixel_info[1]]:
                             break
                     else:
-#                         if cell in pieces:
-#                             raise ValueError('Two pieces for cell {}: {}, {}'.format(
-#                                 cell, pieces[cell], (piece, color)))
+                        if cell in pieces:
+                            raise ValueError('Two pieces for cell {}: {}, {}'.format(
+                                cell, pieces[cell], (piece, color)))
                         pieces[cell] = (piece, color)
 
             # Determine whose move
             pixel = get_pixel(bitmap, x + 5, y + 5)
-            if pixel in [COLORS['yellow_white_board'], COLORS['yellow_black_board']]:
+            if pixel in [COLORS['moved_white_board_cell'], COLORS['moved_black_board_cell']]:
                 yellow_cells.append(cell)
                 if cell in pieces:
                     move_color = get_opp_color(pieces[cell][1])
