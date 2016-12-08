@@ -5,8 +5,8 @@ from utils import normalize_cell
 
 
 def focus_board(board):
-    x = board.lt_screen[0]
-    y = board.lt_screen[1]
+    x = board.lt_screen[0] - 1
+    y = board.lt_screen[1] - 1
 
     pyautogui.click(x, y)
 

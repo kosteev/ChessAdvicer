@@ -84,7 +84,7 @@ else:
         'white_board_cell': (239 / 255.0, 216 / 255.0, 183 / 255.0),
         'moved_white_board_cell': (246 / 255.0, 235 / 255.0, 124 / 255.0),
         'moved_black_board_cell': (217 / 255.0, 194 / 255.0, 85 / 255.0),
-        'letter': (168 / 255.0, 167 / 255.0, 166 / 255.0)
+        'letter': (152 / 255.0, 150 / 255.0, 149 / 255.0)
     }
     CELL_SIZE = 64
     PIXELS = {
@@ -281,8 +281,9 @@ def get_board(prev_board):
                             break
                     else:
                         if cell in pieces:
-                            raise ValueError('Two pieces for cell {}: {}, {}'.format(
-                                cell, pieces[cell], (piece, color)))
+                            print 'Two pieces for cell {}: {}, {}'.format(
+                                cell, pieces[cell], (piece, color))
+                            return None
                         pieces[cell] = (piece, color)
 
             # Determine whose move

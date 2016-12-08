@@ -102,12 +102,12 @@ def run_advicer(max_deep, lines, play):
             print '{} goes up'.format(move_up_color.upper())
             print '{} to move'.format(move_color.upper())
             print 'Evaluation: {}'.format(board.evaluation)
-            print_take_evaluation(board)
+            # print_take_evaluation(board)
             print
 
-#             if move_color != move_up_color:
-#                 print 'Waiting for opponent move'
-#                 continue
+            if move_color != move_up_color:
+                print 'Waiting for opponent move'
+                continue
 
             print 'Calculating lines...'
 
