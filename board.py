@@ -1,7 +1,7 @@
 import json
 import random
 
-from pieces import get_opp_color, PIECES, PROBABLE_MOVES, WHITE
+from pieces import get_opp_color, PIECES, PROBABLE_MOVES, WHITE, COUNT_OF_PROBABLE_MOVES
 from utils import color_sign
 
 
@@ -35,6 +35,21 @@ class Board(object):
         total = 0
         for (piece, color) in self.pieces.values():
             total += color_sign(color) * PIECES[piece]['value']
+
+        return total
+
+    def get_probable_moves_count(self):
+        '''
+        Returns count of probable moves.
+        TODO: (kosteev) consider all chess rules
+        '''
+        total = 0
+        for position, (piece, color) in self.pieces.items():
+            if piece == 'pawn':
+                probable_moves = 1 if position[0] in [0, 7] else 2
+            else:
+                probable_moves = COUNT_OF_PROBABLE_MOVES[piece][position]
+            total += color_sign(color) * probable_moves
 
         return total
 

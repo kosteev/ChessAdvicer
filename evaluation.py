@@ -45,7 +45,8 @@ def take_evaluation_dfs(board, stats):
 
     gen = board.generate_next_board(sort_key=Board.sort_by_take_value)
 
-    evaluation = board.evaluation # + sign * moves_info['len_moves'] / 1000.0
+    # TODO: (kosteev) cache `get_probable_moves_count` function
+    evaluation = board.evaluation + board.get_probable_moves_count() / 1000.0
     evaluation_moves = []
     for move in gen:
         is_any_move = True
