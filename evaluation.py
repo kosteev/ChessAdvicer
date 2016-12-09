@@ -45,8 +45,7 @@ def take_evaluation_dfs(board, stats):
 
     gen = board.generate_next_board(sort_key=Board.sort_by_take_value)
 
-    # TODO: use cached func
-    evaluation = board.evaluation + board.get_probable_moves_count() / 1000.0
+    evaluation = board.evaluation + board.probable_moves_count / 1000.0
     evaluation_moves = []
     for move in gen:
         is_any_move = True

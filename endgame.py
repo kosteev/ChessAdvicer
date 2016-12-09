@@ -1,10 +1,10 @@
 import json
+import random
 import urllib
 import urllib2
 
 from board import Board
-from pieces import WHITE, PIECES
-from utils import name_to_cell, color_sign
+from utils import name_to_cell, color_sign, get_fen_from_board
 
 
 def get_syzygy_best_move(board):
@@ -15,7 +15,7 @@ def get_syzygy_best_move(board):
     if len(board.pieces) > 6:
         return None
 
-    fen = generate_fen(board)
+    fen = get_fen_from_board(board)
     try:
         response = urllib2.urlopen(
             "https://syzygy-tables.info/api/v2?fen={}".format(urllib.quote(fen))).read()
@@ -33,6 +33,7 @@ def get_syzygy_best_move(board):
         # Is it a draw?
         return None
 
+    random.shuffle(parsed_moves)
     if len(board.pieces) == 6:
         parsed_moves.sort(key=lambda x: x['wdl'])
     else:
@@ -70,37 +71,3 @@ def get_syzygy_best_move(board):
         'evaluation': evaluation,
         'moves': [move]
     }
-
-
-def generate_fen(board):
-    fen_1 = []
-    for r in xrange(7, -1, -1):
-        row = ""
-        empty = 0
-        for c in xrange(8):
-            cell = (c, r)
-            
-            if cell in board.pieces:
-                if empty:
-                    row += str(empty)
-
-                piece, color = board.pieces[cell]
-                title = PIECES[piece]['title']
-                if color == WHITE:
-                    title = title.upper()
-                else:
-                    title = title.lower()
-
-                row += title
-                empty = 0
-            else:
-                empty += 1
-        if empty:
-            row += str(empty)
-
-        fen_1.append(row)
-
-    # TODO: provide k/q castles
-    # TODO: provide on passan
-    fen = "{} {} - - 0 1".format("/".join(fen_1), "w" if board.move_color == WHITE else "b")
-    return fen

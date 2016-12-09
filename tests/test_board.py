@@ -22,4 +22,4 @@ class Test(unittest.TestCase):
         b1 = Board(pieces, move_color=WHITE)
         b2 = Board(pieces, move_color=BLACK)
 
-        assert_equal(len({b1.hash(), b2.hash()}), 2)
+        assert_equal(len({b1.hash, b2.hash}), 2)

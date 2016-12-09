@@ -80,7 +80,7 @@ def run_advicer(max_deep, lines, play):
 
         new_hash = -1337
         if board:
-            new_hash = board.hash()
+            new_hash = board.hash
         if prev_hash == new_hash:
             continue
         prev_hash = new_hash
@@ -103,7 +103,7 @@ def run_advicer(max_deep, lines, play):
             print '{} to move'.format(move_color.upper())
             print 'Evaluation: {}'.format(board.evaluation)
             print 'Probable moves: {}'.format(board.probable_moves_count)
-            # print_take_evaluation(board)
+            print_take_evaluation(board)
             print
 
             if move_color != move_up_color:

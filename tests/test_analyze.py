@@ -4,7 +4,6 @@ from nose.tools import assert_equal
 from analyze import SimpleAnalyzer, AlphaAnalyzer, AlphaBetaAnalyzer
 from evaluation import simple_evaluation
 from mocks import get_mock
-from utils import print_board
 
 
 analyzer_classes = [SimpleAnalyzer, AlphaAnalyzer, AlphaBetaAnalyzer]

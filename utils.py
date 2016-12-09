@@ -106,3 +106,65 @@ def print_board(board):
             else:
                 line += termcolor.colored(PIECES[p[0]]['title'], BOARD_COLORS[p[1]])
         print line
+
+
+def get_fen_from_board(board):
+    fen_1 = []
+    for r in xrange(7, -1, -1):
+        row = ""
+        empty = 0
+        for c in xrange(8):
+            cell = (c, r)
+
+            if cell in board.pieces:
+                if empty:
+                    row += str(empty)
+
+                piece, color = board.pieces[cell]
+                title = PIECES[piece]['title']
+                if color == WHITE:
+                    title = title.upper()
+                else:
+                    title = title.lower()
+
+                row += title
+                empty = 0
+            else:
+                empty += 1
+        if empty:
+            row += str(empty)
+
+        fen_1.append(row)
+
+    # TODO: provide k/q castles
+    # TODO: provide on passan
+    fen = "{} {} - - 0 1".format("/".join(fen_1), "w" if board.move_color == WHITE else "b")
+    return fen
+
+
+def get_board_from_fen(fen):
+    from board import Board
+
+    p1, p2, _, _, _, _ = fen.split(' ')
+
+    board_list = list(reversed(p1.split('/')))
+    pieces = {}
+    for r in xrange(7, -1, -1):
+        c = 0
+        for l in board_list[r]:
+            if l.isdigit():
+                c += int(l)
+            else:
+                for piece, piece_info in PIECES.items():
+                    if piece_info['title'].lower() == l.lower():
+                        color = BLACK if l == l.lower() else WHITE
+                        pieces[(c, r)] = (piece, color)
+                        break
+                c += 1
+
+    move_color = WHITE if p2 == 'w' else BLACK
+
+    return Board(
+        pieces=pieces,
+        move_color=move_color
+    )

@@ -161,7 +161,9 @@ class AlphaBetaAnalyzer(Analyzer):
             'nodes': 0
         }
 
-        syzygy_best_move = get_syzygy_best_move(board)
+        # syzygy_best_move = get_syzygy_best_move(board)
+        # Temporary commented
+        syzygy_best_move = None
         if syzygy_best_move is None:
             self.dfs_start_time = time.time()
             result = self.dfs(board, stats)

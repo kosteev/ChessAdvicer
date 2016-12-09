@@ -26,6 +26,7 @@ class Board(object):
         self.evaluation = self.get_pieces_eval()
         self.probable_moves_count = self.get_probable_moves_count()
 
+    @property
     def hash(self):
         return hash(json.dumps(sorted(self.pieces.items()) + [self.move_color]))
 
