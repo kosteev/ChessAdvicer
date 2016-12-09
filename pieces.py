@@ -91,3 +91,8 @@ for piece in DIFFS:
 
             COUNT_OF_PROBABLE_MOVES[piece][(c, r)] = sum(
                 len(v) for v in PROBABLE_MOVES[piece][(c, r)])
+
+COUNT_OF_PROBABLE_MOVES['pawn'] = {}
+for c in xrange(8):
+    for r in xrange(1, 7):
+        COUNT_OF_PROBABLE_MOVES['pawn'][(c, r)] = 1 if c in [0, 7] else 2

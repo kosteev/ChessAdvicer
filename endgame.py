@@ -46,9 +46,9 @@ def get_syzygy_best_move(board):
         evaluation = 0
     else:
         if parsed_move['dtm'] is None:
-            evaluation = Board.MAX_EVALUATION
+            evaluation = Board.MAX_EVALUATION / 2
         else:
-            evaluation = Board.MAX_EVALUATION - abs(parsed_move['dtm']) - 1
+            evaluation = Board.MAX_EVALUATION / 2 - abs(parsed_move['dtm']) - 1
         if parsed_move['wdl'] > 0:
             evaluation *= -1
         evaluation *= sign

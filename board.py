@@ -24,6 +24,7 @@ class Board(object):
         self.cell_size = cell_size
 
         self.evaluation = self.get_pieces_eval()
+        self.probable_moves_count = self.get_probable_moves_count()
 
     def hash(self):
         return hash(json.dumps(sorted(self.pieces.items()) + [self.move_color]))
@@ -45,11 +46,7 @@ class Board(object):
         '''
         total = 0
         for position, (piece, color) in self.pieces.items():
-            if piece == 'pawn':
-                probable_moves = 1 if position[0] in [0, 7] else 2
-            else:
-                probable_moves = COUNT_OF_PROBABLE_MOVES[piece][position]
-            total += color_sign(color) * probable_moves
+            total += color_sign(color) * COUNT_OF_PROBABLE_MOVES[piece][position]
 
         return total
 
@@ -110,11 +107,20 @@ class Board(object):
             self.pieces[move['new_position']] = (move['new_piece'], move_color)
             del self.pieces[move['position']]
             # Recalculate evaluation
-            delta = PIECES[move['new_piece']]['value'] - PIECES[move['new_piece']]['value']
+            delta_eval = PIECES[move['new_piece']]['value']
+            delta_eval -= PIECES[move['piece']]['value']
             if move['new_position_old_piece']:
-                delta += PIECES[move['new_position_old_piece'][0]]['value']
-            delta *= sign
-            self.evaluation += delta
+                delta_eval += PIECES[move['new_position_old_piece'][0]]['value']
+            delta_eval *= sign
+            self.evaluation += delta_eval
+            # Recalculate probable moves
+            delta_prob_moves = COUNT_OF_PROBABLE_MOVES[move['new_piece']][move['new_position']]
+            delta_prob_moves -= COUNT_OF_PROBABLE_MOVES[move['piece']][move['position']]
+            if move['new_position_old_piece']:
+                delta_prob_moves += \
+                    COUNT_OF_PROBABLE_MOVES[move['new_position_old_piece'][0]][move['new_position']]
+            delta_prob_moves *= sign
+            self.probable_moves_count += delta_prob_moves
             # Move color
             self.move_color = opp_move_color
 
@@ -129,7 +135,9 @@ class Board(object):
             else:
                 del self.pieces[move['new_position']]
             # Retrun evaluation
-            self.evaluation -= delta
+            self.evaluation -= delta_eval
+            # Return probable moves
+            self.probable_moves_count -= delta_prob_moves
             # Move color
             self.move_color = move_color
 

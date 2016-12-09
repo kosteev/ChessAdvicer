@@ -45,7 +45,7 @@ def take_evaluation_dfs(board, stats):
 
     gen = board.generate_next_board(sort_key=Board.sort_by_take_value)
 
-    # TODO: (kosteev) cache `get_probable_moves_count` function
+    # TODO: use cached func
     evaluation = board.evaluation + board.get_probable_moves_count() / 1000.0
     evaluation_moves = []
     for move in gen:
@@ -78,7 +78,7 @@ def take_evaluation_dfs(board, stats):
             # Checkmate
             # ???? self.MAX_EVALUATION / 2
             return {
-                'evaluation': -sign * Board.MAX_EVALUATION / 2,
+                'evaluation': -sign * Board.MAX_EVALUATION / 5,
                 'moves': []
             }
         else:
