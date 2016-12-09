@@ -34,10 +34,10 @@ objc.parseBridgeSupport( """<?xml version='1.0'?>
 
 MODE_LICHESS = 0
 MODE_CHESSCOM = 1
-MODE = MODE_CHESSCOM
+MODE = MODE_LICHESS
 
 
-if MODE == MODE_LICHESS:
+if MODE == MODE_CHESSCOM:
     BOARD_RADIUS_PIXELS = 1
     COLORS = {
         'white_piece': (1, 1, 1),
@@ -50,7 +50,7 @@ if MODE == MODE_LICHESS:
     CELL_SIZE = 64
     PIXELS = {
         'pawn': {
-            'white': [((69, 32), 'white_piece'), ((83, 82), ('black_piece'))],
+            'white': [((73, 89), 'white_piece'), ((78, 77), ('black_piece'))],
             'black': [((54, 71), 'black_piece'), ((94, 113), ('black_piece'))],
         },
         'rook': {
@@ -66,7 +66,7 @@ if MODE == MODE_LICHESS:
             'black': [((110, 107), 'black_piece'), ((52, 81), ('black_piece'))],
         },
         'queen': {
-            'white': [((41, 19), 'black_piece'), ((109, 36), ('white_piece'))],
+            'white': [((12, 37), 'black_piece'), ((34, 91), ('black_piece'))],
             'black': [((37, 86), 'black_piece'), ((14, 34), ('black_piece'))],
         },
         'king': {
