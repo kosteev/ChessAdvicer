@@ -16,7 +16,7 @@ class Test(unittest.TestCase):
             'new_position': (2, 5),
             'piece': 'king',
             'new_piece': 'king',
-            'new_position_old_piece': None
+            'captured_piece': None
         }, result['moves'][0])
 
     def test_promotion_rook(self):
@@ -28,5 +28,5 @@ class Test(unittest.TestCase):
             'new_position': (5, 7),
             'piece': 'pawn',
             'new_piece': 'rook',
-            'new_position_old_piece': None
+            'captured_piece': None
         }, result['moves'][0])

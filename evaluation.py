@@ -49,7 +49,7 @@ def take_evaluation_dfs(board, stats):
     evaluation_moves = []
     for move in gen:
         is_any_move = True
-        if not move['new_position_old_piece']:
+        if not move['captured_piece']:
             # Consider only takes
             break
 

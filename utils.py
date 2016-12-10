@@ -41,7 +41,7 @@ def cell_name(cell):
 
 def format_move(move):
     if move['piece'] == 'pawn':
-        if move['new_position_old_piece']:
+        if move['captured_piece']:
             piece_title = v_name(move['position'])
         else:
             piece_title = ''
@@ -50,7 +50,7 @@ def format_move(move):
 
     return '{piece_title}{is_take}{new_position}{new_piece_title}{check_mate}'.format(
         piece_title=piece_title,
-        is_take='x' if move['new_position_old_piece'] else '',
+        is_take='x' if move['captured_piece'] else '',
         new_position=cell_name(move['new_position']),
         new_piece_title=('=' + PIECES[move['new_piece']]['title']) if move['piece'] != move['new_piece'] else '',
         check_mate=''

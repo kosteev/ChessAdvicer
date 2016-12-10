@@ -61,14 +61,14 @@ def get_syzygy_best_move(board):
     new_piece = piece
     if len(parsed_move['key']) == 5:
         new_piece = get_piece_by_title(parsed_move['key'][4])
-    new_position_old_piece = board.pieces.get(new_position)
+    captured_piece, _ = board.pieces.get(new_position, (None, None))
 
     move = {
         'position': position,
         'new_position': new_position,
         'piece': piece,
         'new_piece': new_piece,
-        'new_position_old_piece': new_position_old_piece
+        'captured_piece': captured_piece
     }
     
     return {

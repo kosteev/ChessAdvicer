@@ -26,28 +26,28 @@ class Test(unittest.TestCase):
                 'new_position': (4, 3),
                 'piece': 'pawn',
                 'new_piece': 'pawn',
-                'new_position_old_piece': None
+                'captured_piece': None
             }, 'e4'),
             ({
                 'position': (4, 1),
                 'new_position': (3, 2),
                 'piece': 'pawn',
                 'new_piece': 'pawn',
-                'new_position_old_piece': ('rook', BLACK)
+                'captured_piece': 'rook'
             }, 'exd3'),
             ({
                 'position': (4, 6),
                 'new_position': (4, 7),
                 'piece': 'pawn',
                 'new_piece': 'knight',
-                'new_position_old_piece': None
+                'captured_piece': None
             }, 'e8=N'),
             ({
                 'position': (6, 2),
                 'new_position': (1, 7),
                 'piece': 'bishop',
                 'new_piece': 'bishop',
-                'new_position_old_piece': ('queen', WHITE)
+                'captured_piece': 'queen'
             }, 'Bxb8'),
         ]
         for move, text in inputs:
@@ -59,25 +59,25 @@ class Test(unittest.TestCase):
             'new_position': (4, 3),
             'piece': 'pawn',
             'new_piece': 'pawn',
-            'new_position_old_piece': None
+            'captured_piece': None
         }, {
             'position': (3, 4),
             'new_position': (4, 3),
             'piece': 'pawn',
             'new_piece': 'pawn',
-            'new_position_old_piece': ('pawn', WHITE)
+            'captured_piece': 'pawn'
         }, {
             'position': (0, 6),
             'new_position': (0, 1),
             'piece': 'rook',
             'new_piece': 'rook',
-            'new_position_old_piece': None
+            'captured_piece': None
         }, {
             'position': (2, 2),
             'new_position': (0, 1),
             'piece': 'knight',
             'new_piece': 'knight',
-            'new_position_old_piece': ('rook', WHITE)
+            'captured_piece': 'rook'
         }], WHITE, '1.e4 dxe4 2.Ra2 Nxa2')
 
         input_2 = ([{
@@ -85,13 +85,13 @@ class Test(unittest.TestCase):
             'new_position': (7, 5),
             'piece': 'pawn',
             'new_piece': 'pawn',
-            'new_position_old_piece': ('knight', WHITE)
+            'captured_piece': 'knight'
         }, {
             'position': (4, 3),
             'new_position': (7, 5),
             'piece': 'queen',
             'new_piece': 'queen',
-            'new_position_old_piece': ('pawn', BLACK)
+            'captured_piece': 'pawn'
         }], BLACK, 'gxh6 2.Qxh6')
 
         inputs = [input_1, input_2]

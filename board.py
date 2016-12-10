@@ -71,16 +71,16 @@ class Board(object):
                 for move in variant:
                     new_position = move[:-1]
 
-                    new_position_old_piece = self.pieces.get(new_position)
+                    captured_piece, captured_color = self.pieces.get(new_position, (None, None))
                     last_diff = False
-                    if new_position_old_piece:
-                        if new_position_old_piece[1] == move_color:
+                    if captured_piece:
+                        if captured_color == move_color:
                             break
                         else:
                             last_diff = True
 
                     if check:
-                        if new_position_old_piece == ('king', opp_move_color):
+                        if captured_piece == 'king':
                             yield
                             return
                     else:
@@ -89,7 +89,7 @@ class Board(object):
                             'new_position': new_position,
                             'piece': piece,
                             'new_piece': move[2] or piece,
-                            'new_position_old_piece': new_position_old_piece
+                            'captured_piece': captured_piece
                         })
 
                     if last_diff:
@@ -110,16 +110,16 @@ class Board(object):
             # Recalculate evaluation
             delta_eval = PIECES[move['new_piece']]['value']
             delta_eval -= PIECES[move['piece']]['value']
-            if move['new_position_old_piece']:
-                delta_eval += PIECES[move['new_position_old_piece'][0]]['value']
+            if move['captured_piece']:
+                delta_eval += PIECES[move['captured_piece']]['value']
             delta_eval *= sign
             self.evaluation += delta_eval
             # Recalculate probable moves
             delta_prob_moves = COUNT_OF_PROBABLE_MOVES[move['new_piece']][move['new_position']]
             delta_prob_moves -= COUNT_OF_PROBABLE_MOVES[move['piece']][move['position']]
-            if move['new_position_old_piece']:
+            if move['captured_piece']:
                 delta_prob_moves += \
-                    COUNT_OF_PROBABLE_MOVES[move['new_position_old_piece'][0]][move['new_position']]
+                    COUNT_OF_PROBABLE_MOVES[move['captured_piece']][move['new_position']]
             delta_prob_moves *= sign
             self.probable_moves_count += delta_prob_moves
             # Move color
@@ -131,8 +131,8 @@ class Board(object):
 
             # Recover
             self.pieces[move['position']] = (move['piece'], move_color)
-            if move['new_position_old_piece']:
-                self.pieces[move['new_position']] = move['new_position_old_piece']
+            if move['captured_piece']:
+                self.pieces[move['new_position']] = (move['captured_piece'], opp_move_color)
             else:
                 del self.pieces[move['new_position']]
             # Retrun evaluation
@@ -220,8 +220,8 @@ class Board(object):
         '''
         Take+the most valueable+by the most cheap
         '''
-        new_position_old_piece = move.get('new_position_old_piece')
-        if new_position_old_piece:
+        captured_piece = move.get('captured_piece')
+        if captured_piece:
             return [
-                -1, -PIECES[new_position_old_piece[0]]['value'], PIECES[move['piece']]['value']]
+                -1, -PIECES[captured_piece]['value'], PIECES[move['piece']]['value']]
         return [1]

@@ -32,7 +32,7 @@ class Test(unittest.TestCase):
                 'new_position': (2, 4),
                 'piece': 'queen',
                 'new_piece': 'queen',
-                'new_position_old_piece': ('rook', BLACK)
+                'captured_piece': 'rook'
             },
             'evaluation': 18,
             'probable_moves_count': 47
@@ -42,7 +42,7 @@ class Test(unittest.TestCase):
                 'new_position': (5, 6),
                 'piece': 'pawn',
                 'new_piece': 'pawn',
-                'new_position_old_piece': ('knight', BLACK)
+                'captured_piece': 'knight'
             },
             'evaluation': 16,
             'probable_moves_count': 41
@@ -52,7 +52,7 @@ class Test(unittest.TestCase):
                 'new_position': (5, 6),
                 'piece': 'knight',
                 'new_piece': 'knight',
-                'new_position_old_piece': ('knight', BLACK)
+                'captured_piece': 'knight'
             },
             'evaluation': 16,
             'probable_moves_count': 45
@@ -62,7 +62,7 @@ class Test(unittest.TestCase):
                 'new_position': (5, 6),
                 'piece': 'rook',
                 'new_piece': 'rook',
-                'new_position_old_piece': ('knight', BLACK)
+                'captured_piece': 'knight'
             },
             'evaluation': 16,
             'probable_moves_count': 41

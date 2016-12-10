@@ -13,7 +13,7 @@ class Test(unittest.TestCase):
         print_board(board)
 
         assert_equal(take_evaluation(board)['result'], {
-            'evaluation': -1.08,
+            'evaluation': -1.008,
             'moves': []
         })
 
@@ -31,7 +31,7 @@ class Test(unittest.TestCase):
         print_board(board)
 
         assert_equal(take_evaluation(board)['result'], {
-            'evaluation': 5.14,
+            'evaluation': 5.014,
             'moves': []
         })
 
@@ -40,18 +40,18 @@ class Test(unittest.TestCase):
         print_board(board)
 
         assert_equal(take_evaluation(board)['result'], {
-            'evaluation': 15.49,
+            'evaluation': 15.049,
             'moves': [{
                 'position': (5, 6),
                 'new_position': (7, 7),
                 'piece': 'knight',
                 'new_piece': 'knight',
-                'new_position_old_piece': ('knight', WHITE)
+                'captured_piece': 'knight'
             }, {
                 'position': (3, 4),
                 'new_position': (2, 4),
                 'piece': 'queen',
                 'new_piece': 'queen',
-                'new_position_old_piece': ('rook', BLACK)
+                'captured_piece': 'rook'
             }]
         })
