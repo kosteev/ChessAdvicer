@@ -64,7 +64,7 @@ def print_take_evaluation(board):
             take_eval['result']['moves'], board.move_color))
 
 
-def run_advicer(max_deep, lines, play):
+def run_advicer(mode, max_deep, lines, play):
     iteration = 0
     prev_hash = None
     board = None
@@ -74,7 +74,7 @@ def run_advicer(max_deep, lines, play):
         iteration += 1
 
         s = time.time()
-        board = get_board(board)
+        board = get_board(mode, board)
         # board = get_mock(2)
         e = time.time()
 
@@ -130,11 +130,13 @@ def run_advicer(max_deep, lines, play):
 
 
 if __name__ == '__main__':
-    max_deep = int(sys.argv[1])
-    lines = int(sys.argv[2])
-    play = len(sys.argv) > 3 and (sys.argv[3] == '1')
+    mode = sys.argv[1]
+    max_deep = int(sys.argv[2])
+    lines = int(sys.argv[3])
+    play = len(sys.argv) > 4 and (sys.argv[4] == '1')
 
     run_advicer(
+        mode=mode,
         max_deep=max_deep,
         lines=lines,
         play=play

@@ -4,6 +4,7 @@ import urllib
 import urllib2
 
 from board import Board
+from pieces import get_piece_by_title
 from utils import name_to_cell, color_sign, get_fen_from_board
 
 
@@ -57,13 +58,16 @@ def get_syzygy_best_move(board):
     position = name_to_cell(parsed_move['key'][:2])
     new_position = name_to_cell(parsed_move['key'][2:4])
     piece = board.pieces[position][0]
+    new_piece = piece
+    if len(parsed_move['key']) == 5:
+        new_piece = get_piece_by_title(parsed_move['key'][4])
     new_position_old_piece = board.pieces.get(new_position)
 
     move = {
         'position': position,
         'new_position': new_position,
         'piece': piece,
-        'new_piece': piece,
+        'new_piece': new_piece,
         'new_position_old_piece': new_position_old_piece
     }
     

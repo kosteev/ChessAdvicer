@@ -39,6 +39,14 @@ PIECES = {
 }
 
 
+def get_piece_by_title(title):
+    for piece, piece_info in PIECES.items():
+        if piece_info['title'].lower() == title.lower():
+            return piece
+
+    return None
+
+
 # Valid piece moves by rules
 DIFFS = {}
 DIFFS['rook'] = [
