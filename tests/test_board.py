@@ -1,5 +1,5 @@
 import unittest
-from nose.tools import assert_equal
+from nose.tools import assert_equal, assert_true
 
 from board import Board
 from mocks import MOCKS_COUNT, get_mock
@@ -18,10 +18,11 @@ class Test(unittest.TestCase):
             (0, 0): ('king', WHITE),
             (7, 6): ('king', BLACK)
         }
-        b1 = Board(pieces, move_color=WHITE)
-        b2 = Board(pieces, move_color=BLACK)
+        b1 = Board(pieces, move_color=WHITE, en_passant=None)
+        b2 = Board(pieces, move_color=BLACK, en_passant=None)
+        b3 = Board(pieces, move_color=BLACK, en_passant=(2, 2))
 
-        assert_equal(len({b1.hash, b2.hash}), 2)
+        assert_equal(len({b1.hash, b2.hash, b3.hash}), 3)
 
     def test_complex(self):
         board = get_mock(3)
@@ -32,7 +33,8 @@ class Test(unittest.TestCase):
                 'new_position': (2, 4),
                 'piece': 'queen',
                 'new_piece': 'queen',
-                'captured_piece': 'rook'
+                'captured_piece': 'rook',
+                'captured_position': (2, 4)
             },
             'evaluation': 18,
             'probable_moves_count': 47
@@ -42,7 +44,8 @@ class Test(unittest.TestCase):
                 'new_position': (5, 6),
                 'piece': 'pawn',
                 'new_piece': 'pawn',
-                'captured_piece': 'knight'
+                'captured_piece': 'knight',
+                'captured_position': (5, 6)
             },
             'evaluation': 16,
             'probable_moves_count': 41
@@ -52,7 +55,8 @@ class Test(unittest.TestCase):
                 'new_position': (5, 6),
                 'piece': 'knight',
                 'new_piece': 'knight',
-                'captured_piece': 'knight'
+                'captured_piece': 'knight',
+                'captured_position': (5, 6)
             },
             'evaluation': 16,
             'probable_moves_count': 45
@@ -62,7 +66,8 @@ class Test(unittest.TestCase):
                 'new_position': (5, 6),
                 'piece': 'rook',
                 'new_piece': 'rook',
-                'captured_piece': 'knight'
+                'captured_piece': 'knight',
+                'captured_position': (5, 6)
             },
             'evaluation': 16,
             'probable_moves_count': 41
@@ -78,3 +83,22 @@ class Test(unittest.TestCase):
             else:
                 assert_equal(board.evaluation, 13)
             cnt += 1
+
+    def test_en_passant(self):
+        board = get_mock(7)
+
+        assert_equal(board.en_passant, (6, 2))
+        assert_equal(board.evaluation, 4)
+        assert_equal(board.probable_moves_count, 0)
+        assert_true(board.pieces[(6, 3)] == ('pawn', WHITE))
+        cnt = 0
+        for move in board.generate_next_board(sort_key=Board.sort_by_take_value):
+            if cnt == 0:
+                assert_equal(move['piece'], 'pawn')
+                assert_equal(move['new_position'], (6, 2))
+                assert_equal(move['captured_piece'], 'pawn')
+                assert_equal(board.evaluation, 3)
+                assert_equal(board.probable_moves_count, -2)
+                assert_true((6, 3) not in board.pieces)
+            cnt += 1
+        assert_true(board.pieces[(6, 3)] == ('pawn', WHITE))

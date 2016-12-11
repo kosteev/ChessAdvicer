@@ -8,27 +8,27 @@ class Test(unittest.TestCase):
     def test_probable_moves(self):
         d = {}
         d[('rook', (1, 3))] = [
-            [(1 + x, 3, None) for x in xrange(1, 7)],
-            [(1 - x, 3, None) for x in xrange(1, 2)],
-            [(1, 3 + x, None) for x in xrange(1, 5)],
-            [(1, 3 - x, None) for x in xrange(1, 4)]
+            [{'new_position': (1 + x, 3)} for x in xrange(1, 7)],
+            [{'new_position': (1 - x, 3)} for x in xrange(1, 2)],
+            [{'new_position': (1, 3 + x)} for x in xrange(1, 5)],
+            [{'new_position': (1, 3 - x)} for x in xrange(1, 4)]
         ]
         d[('bishop', (1, 3))] = [
-            [(1 + x, 3 + x, None) for x in xrange(1, 5)],
-            [(1 - x, 3 + x, None) for x in xrange(1, 2)],
-            [(1 + x, 3 - x, None) for x in xrange(1, 4)],
-            [(1 - x, 3 - x, None) for x in xrange(1, 2)],
+            [{'new_position': (1 + x, 3 + x)} for x in xrange(1, 5)],
+            [{'new_position': (1 - x, 3 + x)} for x in xrange(1, 2)],
+            [{'new_position': (1 + x, 3 - x)} for x in xrange(1, 4)],
+            [{'new_position': (1 - x, 3 - x)} for x in xrange(1, 2)],
         ]
         d[('queen', (1, 3))] = d[('rook', (1, 3))] + d[('bishop', (1, 3))]
         d[('knight', (1, 3))] = [
-            [(2, 5, None)], [(2, 1, None)],
-            [(0, 5, None)], [(0, 1, None)],
-            [(3, 4, None)], [(3, 2, None)]
+            [{'new_position': (2, 5)}], [{'new_position': (2, 1)}],
+            [{'new_position': (0, 5)}], [{'new_position': (0, 1)}],
+            [{'new_position': (3, 4)}], [{'new_position': (3, 2)}]
         ]
         d[('king', (1, 3))] = [
-            [(1, 4, None)], [(1, 2, None)],
-            [(2, 4, None)], [(2, 3, None)], [(2, 2, None)],
-            [(0, 4, None)], [(0, 3, None)], [(0, 2, None)]
+            [{'new_position': (1, 4)}], [{'new_position': (1, 2)}],
+            [{'new_position': (2, 4)}], [{'new_position': (2, 3)}], [{'new_position': (2, 2)}],
+            [{'new_position': (0, 4)}], [{'new_position': (0, 3)}], [{'new_position': (0, 2)}]
         ]
         for (piece, position), variants in d.items():
             assert_equal(sorted(variants), sorted(PROBABLE_MOVES[piece][position]))

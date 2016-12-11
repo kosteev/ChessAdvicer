@@ -137,15 +137,17 @@ def get_fen_from_board(board):
         fen_1.append(row)
 
     # TODO: provide k/q castles
-    # TODO: provide on passan
-    fen = "{} {} - - 0 1".format("/".join(fen_1), "w" if board.move_color == WHITE else "b")
+    fen = '{} {} - {} 0 1'.format(
+        '/'.join(fen_1),
+        'w' if board.move_color == WHITE else 'b',
+        cell_name(board.en_passant) if board.en_passant else '-')
     return fen
 
 
 def get_board_from_fen(fen):
     from board import Board
 
-    p1, p2, _, _, _, _ = fen.split(' ')
+    p1, p2, _, p4, _, _ = fen.split(' ')
 
     board_list = list(reversed(p1.split('/')))
     pieces = {}
@@ -163,8 +165,13 @@ def get_board_from_fen(fen):
                 c += 1
 
     move_color = WHITE if p2 == 'w' else BLACK
+    en_passant = None
+    if p4 != '-':
+        en_passant = name_to_cell(p4)
 
+    # TODO: proved en passant
     return Board(
         pieces=pieces,
-        move_color=move_color
+        move_color=move_color,
+        en_passant=en_passant
     )

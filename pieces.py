@@ -88,8 +88,10 @@ for piece in DIFFS:
             for variant in DIFFS[piece]:
                 moves_variant = []
                 for diff in variant:
-                    move = (c + diff[0], r + diff[1], None)
-                    if not on_board(move[:-1]):
+                    move = {
+                        'new_position': (c + diff[0], r + diff[1])
+                    }
+                    if not on_board(move['new_position']):
                         break
 
                     moves_variant.append(move)

@@ -151,7 +151,7 @@ class AlphaBetaAnalyzer(Analyzer):
     name = 'AlphaBetaAnalyzer'
 
     def __init__(self, *args, **kwargs):
-        max_time = kwargs.pop('max_time', None)
+        max_time = kwargs.pop('max_time', 999999)
         self.max_time = max_time
 
         super(AlphaBetaAnalyzer, self).__init__(*args, **kwargs)
@@ -195,11 +195,18 @@ class AlphaBetaAnalyzer(Analyzer):
         TODO: (kosteev) compare with simple analyzer
         '''
         stats['nodes'] += 1
-#         if time.time() - self.dfs_start_time > self.max_time:
-#             return [{
-#                 'evaluation': -1 * color_sign(move_color) * (Board.MAX_EVALUATION + 1),
-#                 'moves': []
-#             }]
+        if time.time() - self.dfs_start_time > self.max_time:
+            if alpha >= -Board.MAX_EVALUATION:
+                return [{
+                    'evaluation': alpha,  # Return evaluation that will not affect result
+                    'moves': []
+                }]
+
+            if beta <= Board.MAX_EVALUATION:
+                return [{
+                    'evaluation': beta,  # Return evaluation that will not affect result
+                    'moves': []
+                }]
 
         if deep == self.max_deep:
             return self.board_evaluation(board)
@@ -233,14 +240,13 @@ class AlphaBetaAnalyzer(Analyzer):
                 else:
                     beta = min(beta, result[-1]['evaluation'])
 
-            # >= ? >
-            # Try both and see how many nodes
             if alpha >= beta:
-                try:
-                    gen.send(True)
-                except StopIteration:
-                    pass
                 break
+
+        try:
+            gen.send(True)
+        except StopIteration:
+            pass
 
         if not is_any_move:
             sign = color_sign(move_color)

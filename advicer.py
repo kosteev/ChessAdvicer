@@ -18,28 +18,13 @@ def run_analyzer(analyzer_class, board, max_deep, lines, play):
         'lines': lines,
         'evaluation_func': take_evaluation
     }
-    move_time = None
-    if play:
-        min_time = 0.8
-        max_time = 1.2
-        move_time = min_time + (max_time - min_time) * random.random()
-        move_time = 0
-        kwargs['max_time'] = move_time
-
-    # TODO: fix bug with time
     analyzer = analyzer_class(**kwargs)
 
     start_time = time.time()
     analysis = analyzer.analyze(board)
-    # Sleep if analyzer was too fast
-    if play:
-        to_sleep = max(move_time - (time.time() - start_time), 0)
-        print 'Move time: {:.6f} (sleep: {:.6f})'.format(move_time, to_sleep)
-        time.sleep(to_sleep)
-    end_time = time.time()
-
-    print analyzer.name
-    print 'Time = {:.6f}, nodes = {}'.format(end_time - start_time, analysis['stats']['nodes'])
+    analyzer_time = time.time() - start_time
+    print 'Analyzer time = {:.6f}'.format(analyzer_time)
+    print 'Nodes = {}'.format(analysis['stats']['nodes'])
     for line in analysis['result']:
         eval_move_color = board.move_color if len(line['moves']) % 2 == 0 else get_opp_color(board.move_color)
         eval_ind = (len(line['moves']) + (1 if board.move_color == BLACK else 0)) / 2 + 1

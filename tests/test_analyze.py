@@ -103,3 +103,24 @@ class TestAnalyzer(unittest.TestCase):
             assert_equal(to_check[0], (997, 'queen', (6, 7)))
             assert_equal(to_check[1][0], 5)
             assert_equal(len(result), 17)
+
+    def test_on_passan(self):
+        lines = 10
+        for analyzer_class in analyzer_classes:
+            analyzer = analyzer_class(
+                max_deep=3, evaluation_func=simple_evaluation, lines=lines)
+            board = get_mock(6)
+
+            analysis = analyzer.analyze(board)
+            result = analysis['result']
+
+            to_check = []
+            for ind in xrange(3):
+                to_check.append(
+                    (result[ind]['evaluation'], result[ind]['moves'][-1]['piece'], result[ind]['moves'][-1]['new_position']))
+
+            to_check.sort(reverse=True)
+            assert_equal(to_check[0], (4, 'pawn', (7, 3)))
+            assert_equal(to_check[1], (-998, 'pawn', (6, 3)))
+            assert_equal(to_check[2], (-998, 'pawn', (6, 2)))
+            assert_equal(len(result), 3)

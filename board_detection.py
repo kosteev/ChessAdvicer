@@ -327,10 +327,18 @@ def get_board(mode, prev_board):
             print 'Can not determine move color'
             return None
 
+    en_passant = None
+    if (len(yellow_cells) == 2 and
+            abs(yellow_cells[0][1] - yellow_cells[1][1]) == 2):
+        if (pieces.get(yellow_cells[0], (None, None))[0] == 'pawn' or
+                pieces.get(yellow_cells[1], (None, None))[0] == 'pawn'):
+            en_passant = (yellow_cells[0][0], (yellow_cells[0][1] + yellow_cells[1][1]) / 2)
+
     return Board(
         pieces=pieces,
+        move_color=move_color,
+        en_passant=en_passant,
         move_up_color=move_up_color,
-        cell_size=cell_size,
         lt_screen=board_data['lt_screen'],
-        move_color=move_color
+        cell_size=cell_size
     )

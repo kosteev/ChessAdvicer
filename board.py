@@ -9,7 +9,7 @@ class Board(object):
     MAX_EVALUATION = 1000
     # 999 - checkmate in one move, 998 - ...
 
-    def __init__(self, pieces, move_color, move_up_color=WHITE, lt_screen=None, cell_size=None):
+    def __init__(self, pieces, move_color, en_passant, move_up_color=WHITE, lt_screen=None, cell_size=None):
         '''
             `pieces` - dict with pieces
                 pieces = {(1, 2): ('rook', 'white)}
@@ -19,6 +19,7 @@ class Board(object):
         '''
         self.pieces = pieces
         self.move_color = move_color
+        self.en_passant = en_passant
         self.move_up_color = move_up_color
         self.lt_screen = lt_screen
         self.cell_size = cell_size
@@ -28,7 +29,7 @@ class Board(object):
 
     @property
     def hash(self):
-        return hash(json.dumps(sorted(self.pieces.items()) + [self.move_color]))
+        return hash(json.dumps(sorted(self.pieces.items()) + [self.move_color, self.en_passant]))
 
     def get_pieces_eval(self):
         '''
@@ -69,9 +70,11 @@ class Board(object):
 
             for variant in self.get_piece_probable_moves(position):
                 for move in variant:
-                    new_position = move[:-1]
+                    new_position = move['new_position']
+                    new_piece = move.get('new_piece') or piece
+                    captured_position = move.get('captured_position') or new_position
 
-                    captured_piece, captured_color = self.pieces.get(new_position, (None, None))
+                    captured_piece, captured_color = self.pieces.get(captured_position, (None, None))
                     last_diff = False
                     if captured_piece:
                         if captured_color == move_color:
@@ -88,7 +91,8 @@ class Board(object):
                             'position': position,
                             'new_position': new_position,
                             'piece': piece,
-                            'new_piece': move[2] or piece,
+                            'new_piece': new_piece,
+                            'captured_position': captured_position,
                             'captured_piece': captured_piece
                         })
 
@@ -105,8 +109,10 @@ class Board(object):
 
         for move in moves:
             # Make move
-            self.pieces[move['new_position']] = (move['new_piece'], move_color)
             del self.pieces[move['position']]
+            if move['captured_piece']:
+                del self.pieces[move['captured_position']]
+            self.pieces[move['new_position']] = (move['new_piece'], move_color)
             # Recalculate evaluation
             delta_eval = PIECES[move['new_piece']]['value']
             delta_eval -= PIECES[move['piece']]['value']
@@ -119,28 +125,37 @@ class Board(object):
             delta_prob_moves -= COUNT_OF_PROBABLE_MOVES[move['piece']][move['position']]
             if move['captured_piece']:
                 delta_prob_moves += \
-                    COUNT_OF_PROBABLE_MOVES[move['captured_piece']][move['new_position']]
+                    COUNT_OF_PROBABLE_MOVES[move['captured_piece']][move['captured_position']]
             delta_prob_moves *= sign
             self.probable_moves_count += delta_prob_moves
             # Move color
             self.move_color = opp_move_color
+            # En passant
+            old_en_passant = self.en_passant
+            self.en_passant = None
+            if (move['piece'] == 'pawn' and
+                    abs(move['new_position'][1] - move['position'][1]) == 2):
+                self.en_passant = (move['position'][0], (move['new_position'][1] + move['position'][1]) / 2)
+
 
             finish = False
             if not self.is_check():
                 finish = yield move
 
+
             # Recover
-            self.pieces[move['position']] = (move['piece'], move_color)
+            del self.pieces[move['new_position']]
             if move['captured_piece']:
-                self.pieces[move['new_position']] = (move['captured_piece'], opp_move_color)
-            else:
-                del self.pieces[move['new_position']]
+                self.pieces[move['captured_position']] = (move['captured_piece'], opp_move_color)
+            self.pieces[move['position']] = (move['piece'], move_color)
             # Retrun evaluation
             self.evaluation -= delta_eval
             # Return probable moves
             self.probable_moves_count -= delta_prob_moves
             # Move color
             self.move_color = move_color
+            # Return en passant
+            self.en_passant = old_en_passant
 
             if finish:
                 return
@@ -175,20 +190,32 @@ class Board(object):
                 promote_pieces.append(None)
 
             for promote_piece in promote_pieces:
-                # First on side
+                # Firstly, on side
                 for x in [-1, 1]:
-                    probable_move = (position[0] + x, position[1] + sign, promote_piece)
-                    if (probable_move[:-1] in self.pieces and
-                            self.pieces[probable_move[:-1]][1] == opp_move_color):
+                    probable_move = {
+                        'new_position': (position[0] + x, position[1] + sign),
+                        'new_piece': promote_piece
+                    }
+                    if (probable_move['new_position'] in self.pieces and
+                            self.pieces[probable_move['new_position']][1] == opp_move_color):
+                        probable_moves.append([probable_move])
+                    if probable_move['new_position'] == self.en_passant:
+                        probable_move['captured_position'] = (position[0] + x, position[1])
                         probable_moves.append([probable_move])
 
-                # Second move forward
+                # Secondly, move forward
                 # Check if position is empty, to avoid treating as take
-                probable_move = (position[0], position[1] + sign, promote_piece)
-                if probable_move[:-1] not in self.pieces:
+                probable_move = {
+                    'new_position': (position[0], position[1] + sign),
+                    'new_piece': promote_piece
+                }
+                if probable_move['new_position'] not in self.pieces:
                     forward_moves = [probable_move]
-                    probable_move = (position[0], position[1] + 2 * sign, promote_piece)
-                    if (probable_move[:-1] not in self.pieces and
+                    probable_move = {
+                        'new_position': (position[0], position[1] + 2 * sign),
+                        'new_piece': promote_piece
+                    }
+                    if (probable_move['new_position'] not in self.pieces and
                             position[1] - sign in [0, 7]):
                         # Move on two steps
                         forward_moves.append(probable_move)

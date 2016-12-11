@@ -46,12 +46,14 @@ class Test(unittest.TestCase):
                 'new_position': (7, 7),
                 'piece': 'knight',
                 'new_piece': 'knight',
-                'captured_piece': 'knight'
+                'captured_piece': 'knight',
+                'captured_position': (7, 7)
             }, {
                 'position': (3, 4),
                 'new_position': (2, 4),
                 'piece': 'queen',
                 'new_piece': 'queen',
-                'captured_piece': 'rook'
+                'captured_piece': 'rook',
+                'captured_position': (2, 4)
             }]
         })
