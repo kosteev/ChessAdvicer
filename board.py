@@ -1,7 +1,7 @@
 import json
 import random
 
-from pieces import get_opp_color, PIECES, PROBABLE_MOVES, WHITE, COUNT_OF_PROBABLE_MOVES
+from pieces import get_opp_color, PIECES, PROBABLE_MOVES, WHITE, COUNT_OF_PROBABLE_MOVES, CHECK_LINES
 from utils import color_sign
 
 
@@ -241,6 +241,35 @@ class Board(object):
             self.move_color = get_opp_color(self.move_color)
 
         return check
+
+    def is_check2(self, opposite=False):
+        '''
+        Determines if check is by self.move_color to opposite color
+            `opposite` == True, check for the opposites side
+        '''
+        check_color, checked_color = self.move_color, get_opp_color(self.move_color)
+        if opposite:
+            check_color, checked_color = checked_color, check_color
+
+        # Find king of side to check
+        king_cell = None
+        for cell, (piece, color) in self.pieces.items():
+            if (color == checked_color
+                    and piece == 'king'):
+                king_cell = cell
+                break
+
+        if king_cell:
+            for line in CHECK_LINES[checked_color][king_cell]:
+                for cell_info in line:
+                    piece, color = self.pieces.get(cell_info['cell'], (None, None))
+                    if piece:
+                        if (color == check_color and
+                                piece in cell_info['pieces']):
+                            return True
+                        break
+
+        return False
 
     @staticmethod
     def sort_by_take_value(move):

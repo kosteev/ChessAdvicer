@@ -106,3 +106,61 @@ COUNT_OF_PROBABLE_MOVES['pawn'] = {}
 for c in xrange(8):
     for r in xrange(1, 7):
         COUNT_OF_PROBABLE_MOVES['pawn'][(c, r)] = 1 if c in [0, 7] else 2
+
+
+# For all pieces, except pawn and king
+CHECK_VARIANTS = [{
+    'line': [(x, 0) for x in xrange(1, 8)],
+    'pieces': ['rook', 'queen']
+}, {
+    'line': [(-x, 0) for x in xrange(1, 8)],
+    'pieces': ['rook', 'queen']
+}, {
+    'line': [(0, x) for x in xrange(1, 8)],
+    'pieces': ['rook', 'queen']
+}, {
+    'line': [(0, -x) for x in xrange(1, 8)],
+    'pieces': ['rook', 'queen']
+}]
+for s1 in [-1, 1]:
+    for s2 in [-1, 1]:
+        CHECK_VARIANTS.append({
+            'line': [(s1 * x, s2 * x) for x in xrange(1, 8)],
+            'pieces': ['bishop', 'queen']
+        })
+        for x in xrange(1, 3):
+            CHECK_VARIANTS.append({
+                'line': [(s1 * x, s2 * (3-x))],
+                'pieces': ['knight']
+            })
+
+CHECK_LINES = {}
+for color in [WHITE, BLACK]:
+    sign = 1 if color == WHITE else -1
+    CHECK_LINES[color] = {}
+    for c in xrange(8):
+        for r in xrange(8):
+            cell = (c, r)
+            CHECK_LINES[color][cell] = []
+            for variant in CHECK_VARIANTS:
+                line_pieces = []
+                for diff in variant['line']:
+                    check_cell = (c + diff[0], r + diff[1])
+                    if not on_board(check_cell):
+                        break
+
+                    additional_pieces = []
+                    # Extra logic for pawns
+                    if (abs(diff[0]) == 1 and
+                            diff[1] == sign):
+                        additional_pieces += ['pawn']
+                    # Extra logic for kings
+                    if (abs(diff[0]) <= 1 and
+                            abs(diff[1]) <= 1):
+                        additional_pieces += ['king']
+                    line_pieces.append({
+                        'cell': check_cell,
+                        'pieces': variant['pieces'] + additional_pieces
+                    })
+                if line_pieces:
+                    CHECK_LINES[color][cell].append(line_pieces)

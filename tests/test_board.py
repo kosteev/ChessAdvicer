@@ -4,6 +4,7 @@ from nose.tools import assert_equal, assert_true
 from board import Board
 from mocks import MOCKS_COUNT, get_mock
 from pieces import WHITE, BLACK
+from utils import print_board
 
 
 class Test(unittest.TestCase):
@@ -86,6 +87,7 @@ class Test(unittest.TestCase):
 
     def test_en_passant(self):
         board = get_mock(7)
+        print_board(board)
 
         assert_equal(board.en_passant, (6, 2))
         assert_equal(board.evaluation, 4)
