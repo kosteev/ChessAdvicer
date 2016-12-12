@@ -91,7 +91,8 @@ def run_advicer(mode, max_deep, lines, play):
             # print_take_evaluation(board)
             print
 
-            if move_color != move_up_color:
+            if (play and
+                    move_color != move_up_color):
                 print 'Waiting for opponent move'
                 continue
 
