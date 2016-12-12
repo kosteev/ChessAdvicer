@@ -76,7 +76,7 @@ class Test(unittest.TestCase):
 
         cnt = 0
         assert_equal(board.evaluation, 13)
-        for move in board.generate_next_board(sort_key=Board.sort_by_take_value):
+        for move in board.generate_next_board(capture_sort_key=Board.sort_take_by_value):
             if cnt < len(d):
                 assert_equal(move, d[cnt]['move'])
                 assert_equal(board.evaluation, d[cnt]['evaluation'])
@@ -94,7 +94,7 @@ class Test(unittest.TestCase):
         assert_equal(board.probable_moves_count, 0)
         assert_true(board.pieces[(6, 3)] == ('pawn', WHITE))
         cnt = 0
-        for move in board.generate_next_board(sort_key=Board.sort_by_take_value):
+        for move in board.generate_next_board(capture_sort_key=Board.sort_take_by_value):
             if cnt == 0:
                 assert_equal(move['piece'], 'pawn')
                 assert_equal(move['new_position'], (6, 2))

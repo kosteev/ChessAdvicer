@@ -52,8 +52,17 @@ class Board(object):
 
         return total
 
-    def generate_next_board(
-            self, check=False, sort_key=None):
+    def get_beaten_cells(self):
+        '''
+        Returns count of beaten cells.
+        '''
+        total = 0
+        for position, (piece, color) in self.pieces.items():
+            total += color_sign(color) * COUNT_OF_PROBABLE_MOVES[piece][position]
+
+        return total
+
+    def generate_next_board(self, capture_sort_key=None):
         '''
         Method to generate next valid board position
             if check == True, yield if check is occured
@@ -63,7 +72,8 @@ class Board(object):
         opp_move_color = get_opp_color(move_color)
         sign = color_sign(move_color)
 
-        moves = []
+        simple_moves = []
+        capture_moves = []
         for position, (piece, color) in self.pieces.items():
             if color != move_color:
                 continue
@@ -75,39 +85,35 @@ class Board(object):
                     captured_position = move.get('captured_position') or new_position
 
                     captured_piece, captured_color = self.pieces.get(captured_position, (None, None))
-                    last_diff = False
-                    if captured_piece:
-                        if captured_color == move_color:
-                            break
-                        else:
-                            last_diff = True
-
-                    if check:
-                        if captured_piece == 'king':
-                            yield
-                            return
-                    else:
-                        moves.append({
-                            'position': position,
-                            'new_position': new_position,
-                            'piece': piece,
-                            'new_piece': new_piece,
-                            'captured_position': captured_position,
-                            'captured_piece': captured_piece
-                        })
-
-                    if last_diff:
+                    if captured_color == move_color:
                         break
 
-        if check:
-            return
+                    move = {
+                        'position': position,
+                        'new_position': new_position,
+                        'piece': piece,
+                        'new_piece': new_piece,
+                        'captured_position': captured_position,
+                        'captured_piece': captured_piece
+                    }
+                    if captured_piece:
+                        capture_moves.append(move)
+                    else:
+                        simple_moves.append(move)
 
-        random.shuffle(moves)
-        if sort_key is None:
-            sort_key = self.sort_by_take_value
-        moves.sort(key=sort_key)
+                    if captured_color == opp_move_color:
+                        break
 
-        for move in moves:
+        # Shuffle to make generate function not-deterministic
+        random.shuffle(capture_moves)
+        random.shuffle(simple_moves)
+
+        # Sort captured moves
+        if capture_sort_key is None:
+            capture_sort_key = self.sort_take_by_value
+        capture_moves.sort(key=capture_sort_key)
+
+        for move in capture_moves + simple_moves:
             # Make move
             del self.pieces[move['position']]
             if move['captured_piece']:
@@ -254,12 +260,10 @@ class Board(object):
         return False
 
     @staticmethod
-    def sort_by_take_value(move):
+    def sort_take_by_value(move):
         '''
-        Take+the most valueable+by the most cheap
+        The most valueable + by the most cheap
         '''
-        captured_piece = move.get('captured_piece')
-        if captured_piece:
-            return [
-                -1, -PIECES[captured_piece]['value'], PIECES[move['piece']]['value']]
-        return [1]
+        captured_piece = move['captured_piece']
+        return [
+            -PIECES[captured_piece]['value'], PIECES[move['piece']]['value']]
