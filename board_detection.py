@@ -10,6 +10,7 @@ from PIL import ImageGrab
 from board import Board
 from pieces import WHITE, BLACK, PIECES, get_opp_color
 from utils import normalize_cell
+from mocks import get_mock
 
 
 # Big big thanks to https://bitbucket.org/ronaldoussoren/pyobjc/ for updated .bridgesupport files
@@ -314,7 +315,8 @@ def get_board(mode, prev_board):
                     move_color = get_opp_color(pieces[cell][1])
 
     if move_color is None:
-        if not yellow_cells:
+        if (not yellow_cells and
+                get_mock(1).pieces == pieces):
             # Initial position
             move_color = WHITE
         elif (len(yellow_cells) == 2 and
