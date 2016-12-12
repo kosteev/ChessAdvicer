@@ -23,8 +23,8 @@ def run_analyzer(analyzer_class, board, max_deep, lines, play):
     start_time = time.time()
     analysis = analyzer.analyze(board)
     analyzer_time = time.time() - start_time
-    print 'Analyzer time = {:.6f}'.format(analyzer_time)
-    print 'Nodes = {}'.format(analysis['stats']['nodes'])
+    print 'Analyzer time = {:.6f}, nodes = {}'.format(analyzer_time, analysis['stats']['nodes'])
+    print 'Per node = {:.3f}ms'.format(1000.0 * analyzer_time / analysis['stats']['nodes'])
     for line in analysis['result']:
         eval_move_color = board.move_color if len(line['moves']) % 2 == 0 else get_opp_color(board.move_color)
         eval_ind = (len(line['moves']) + (1 if board.move_color == BLACK else 0)) / 2 + 1
@@ -88,7 +88,7 @@ def run_advicer(mode, max_deep, lines, play):
             print '{} to move'.format(move_color.upper())
             print 'Evaluation: {}'.format(board.evaluation)
             print 'Probable moves: {}'.format(board.probable_moves_count)
-            print_take_evaluation(board)
+            # print_take_evaluation(board)
             print
 
             if move_color != move_up_color:

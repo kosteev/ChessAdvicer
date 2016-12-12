@@ -229,24 +229,6 @@ class Board(object):
         Determines if check is by self.move_color to opposite color
             `opposite` == True, check for the opposites side
         '''
-        check = False
-        if opposite:
-            self.move_color = get_opp_color(self.move_color)
-
-        for _ in self.generate_next_board(check=True):
-            check = True
-            # Allow to end this loop to release generator
-
-        if opposite:
-            self.move_color = get_opp_color(self.move_color)
-
-        return check
-
-    def is_check2(self, opposite=False):
-        '''
-        Determines if check is by self.move_color to opposite color
-            `opposite` == True, check for the opposites side
-        '''
         check_color, checked_color = self.move_color, get_opp_color(self.move_color)
         if opposite:
             check_color, checked_color = checked_color, check_color
