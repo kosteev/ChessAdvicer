@@ -1,42 +1,8 @@
 import json
 import random
 
-from pieces import get_opp_color, PIECES, PROBABLE_MOVES, WHITE, COUNT_OF_PROBABLE_MOVES, CHECK_LINES, on_board
+from pieces import get_opp_color, PIECES, PROBABLE_MOVES, WHITE, COUNT_OF_PROBABLE_MOVES, CHECK_LINES
 from utils import color_sign
-
-
-DIRECTIONS = {
-    0: [(0, x) for x in xrange(1, 10)],
-    1: [(x, x) for x in xrange(1, 10)],
-    2: [(x, 0) for x in xrange(1, 10)],
-    3: [(x, -x) for x in xrange(1, 10)],
-    4: [(0, -x) for x in xrange(1, 10)],
-    5: [(-x, -x) for x in xrange(1, 10)],
-    6: [(-x, 0) for x in xrange(1, 10)],
-    7: [(-x, x) for x in xrange(1, 10)]
-}
-PIECE_DIRECTIONS = {
-    'rook': {
-        'directions': lambda _: {0, 2, 4, 6},
-    },
-    'bishop': {
-        'directions': lambda _: {1, 3, 5, 7},
-    },
-    'queen': {
-        'directions': lambda _: {0, 1, 2, 3, 4, 5, 6, 7},
-    },
-    'king': {
-        'directions': lambda _: {0, 1, 2, 3, 4, 5, 6, 7},
-        'short': True
-    },
-    'pawn': {
-        'directions': lambda color: {1, 7} if color == WHITE else {3, 5},
-        'short': True
-    },
-    'knight': {
-        'directions': lambda _: set()
-    }
-}
 
 
 class Board(object):
@@ -51,45 +17,15 @@ class Board(object):
             `lt_screen` - coordinates of board left-top position on the screen, for gui library
             `cell_size` - size of cell, for gui library
         '''
-        self.init_pieces(pieces)
+        self.pieces = pieces
         self.move_color = move_color
         self.en_passant = en_passant
-
         self.move_up_color = move_up_color
         self.lt_screen = lt_screen
         self.cell_size = cell_size
 
         self.evaluation = self.get_pieces_eval()
         self.probable_moves_count = self.get_probable_moves_count()
-
-    def init_pieces(self, pieces):
-        '''
-        Inits pieces, dgraph.
-        Adds to dgraph all border cells with appropriate direction cells.
-        '''
-        self.pieces = {}
-        self.dgraph = {}
-        self.beaten_count = {}
-
-        border_cells = []
-        border_cells += [(c, -1) for c in xrange(8)]
-        border_cells += [(c, 8) for c in xrange(8)]
-        border_cells += [(-1, c) for c in xrange(8)]
-        border_cells += [(8, c) for c in xrange(8)]
-        border_cells += [(-1, -1), (-1, 8), (8, -1), (8, 8)]
-        for cell in border_cells:
-            self.dgraph[cell] = {}
-            for direction, line in DIRECTIONS.items():
-                for diff in line:
-                    line_cell = (cell[0] + diff[0], cell[1] + diff[1])
-                    if not on_board(line_cell):
-                        self.dgraph[cell][direction] = line_cell
-                        break
-                else:
-                    raise IndexError('Not found cell for {}, {}'.format(cell, direction))
-
-        for position, (piece, color) in pieces.items():
-            self.put_piece(position, piece, color)
 
     @property
     def hash(self):
@@ -116,18 +52,21 @@ class Board(object):
 
         return total
 
-    def get_beaten_cells_count(self, print_=False):
+    def get_beaten_cells(self):
+        '''
+        Returns count of beaten cells.
+        '''
         total = 0
-        for position, (_, color) in self.pieces.items():
-            total += color_sign(color) * sum(self.beaten_count[position].values())
-#             if print_:
-#                 print position, color_sign(color) * self.beaten_cells_by_piece(position)
+        for position, (piece, color) in self.pieces.items():
+            total += color_sign(color) * COUNT_OF_PROBABLE_MOVES[piece][position]
 
         return total
 
     def generate_next_board(self, capture_sort_key=None):
         '''
         Method to generate next valid board position
+            if check == True, yield if check is occured
+            if check == False, first yield with moves info
         '''
         move_color = self.move_color
         opp_move_color = get_opp_color(move_color)
@@ -176,14 +115,10 @@ class Board(object):
 
         for move in capture_moves + simple_moves:
             # Make move
-            # del self.pieces[move['position']]
-            self.remove_piece(move['position'])
+            del self.pieces[move['position']]
             if move['captured_piece']:
-                # del self.pieces[move['captured_position']]
-                self.remove_piece(move['captured_position'])
-            # self.pieces[move['new_position']] = (move['new_piece'], move_color)
-            self.put_piece(move['new_position'], move['new_piece'], move_color)
-
+                del self.pieces[move['captured_position']]
+            self.pieces[move['new_position']] = (move['new_piece'], move_color)
             # Recalculate evaluation
             delta_eval = PIECES[move['new_piece']]['value']
             delta_eval -= PIECES[move['piece']]['value']
@@ -215,14 +150,10 @@ class Board(object):
 
 
             # Recover
-            # del self.pieces[move['new_position']]
-            self.remove_piece(move['new_position'])
+            del self.pieces[move['new_position']]
             if move['captured_piece']:
-                # self.pieces[move['captured_position']] = (move['captured_piece'], opp_move_color)
-                self.put_piece(move['captured_position'], move['captured_piece'], opp_move_color)
-            # self.pieces[move['position']] = (move['piece'], move_color)
-            self.put_piece(move['position'], move['piece'], move_color)
-
+                self.pieces[move['captured_position']] = (move['captured_piece'], opp_move_color)
+            self.pieces[move['position']] = (move['piece'], move_color)
             # Retrun evaluation
             self.evaluation -= delta_eval
             # Return probable moves
@@ -336,72 +267,3 @@ class Board(object):
         captured_piece = move['captured_piece']
         return [
             -PIECES[captured_piece]['value'], PIECES[move['piece']]['value']]
-
-    def put_piece(self, put_position, put_piece, put_color):
-        '''
-        Place piece on the board, makes all necessary recalculations
-        '''
-        if put_position in self.pieces:
-            raise ValueError('Some piece is already on this position - {}'.format(put_position))
-
-        self.dgraph[put_position] = {}
-        self.beaten_count[put_position] = {}
-        self.pieces[put_position] = (put_piece, put_color)
-
-#         # Iterate only over first 4 directions, other directions will be considered automatically
-#         for direction in xrange(4):
-#             opp_direction = direction + 4
-#             for diff in DIRECTIONS[direction]:
-#                 d_position = (put_position[0] + diff[0], put_position[1] + diff[1])
-#                 if d_position not in self.dgraph:
-#                     continue
-# 
-#                 opp_position = self.dgraph[d_position][opp_direction]
-# 
-#                 # Update dgraph for put_position
-#                 self.dgraph[put_position][direction] = d_position
-#                 self.dgraph[put_position][opp_direction] = opp_position
-# 
-#                 # Update dgraph for d_position/opp_position
-#                 self.dgraph[d_position][opp_direction] = put_position
-#                 self.dgraph[opp_position][direction] = put_position
-# 
-#                 # Update beaten cells for put_position/d_position
-#                 self.update_beaten_cells(put_position, direction, d_position)
-#                 self.update_beaten_cells(d_position, opp_direction, put_position)
-# 
-#                 # Update beaten cells for put_position/opp_position
-#                 self.update_beaten_cells(put_position, opp_direction, opp_position)
-#                 self.update_beaten_cells(opp_position, direction, put_position)
-#                 break
-
-    def remove_piece(self, remove_position):
-        '''
-        Removes piece from the board, makes all necessary recalculations
-        '''
-#         for direction in xrange(4):
-#             opp_direction = direction + 4
-#             d_position = self.dgraph[remove_position][direction]
-#             opp_position = self.dgraph[remove_position][opp_direction]
-# 
-#             self.dgraph[d_position][opp_direction] = opp_position
-#             self.dgraph[opp_position][direction] = d_position
-# 
-#             # Update beaten cells for d_position/opp_position
-#             self.update_beaten_cells(d_position, opp_direction, opp_position)
-#             self.update_beaten_cells(opp_position, direction, d_position)
-
-        del self.dgraph[remove_position]
-        del self.beaten_count[remove_position]
-        del self.pieces[remove_position]
-
-    def update_beaten_cells(self, position, direction, opp_position):
-        piece, color = self.pieces.get(position, (None, None))
-        if piece:
-            if direction in PIECE_DIRECTIONS[piece]['directions'](color):
-                distance = abs(position[0] - opp_position[0])
-                if distance == 0:
-                    distance = abs(position[1] - opp_position[1])
-                if PIECE_DIRECTIONS[piece].get('short'):
-                    distance = min(2, distance)
-                self.beaten_count[position][direction] = distance - 1

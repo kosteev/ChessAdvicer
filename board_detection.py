@@ -327,9 +327,8 @@ def get_board(mode, prev_board):
                 yellow_cells[0][1] == 7 and yellow_cells[1][1] == 7):
             move_color = WHITE
         else:
-            move_color = WHITE
-            #print 'Can not determine move color'
-            #return None
+            print 'Can not determine move color'
+            return None
 
     en_passant = None
     if (len(yellow_cells) == 2 and
