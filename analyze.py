@@ -38,8 +38,6 @@ class Analyzer(object):
 
 
 class SimpleAnalyzer(Analyzer):
-    name = 'SimpleAnalyzer'
-
     def dfs(self, board, stats, deep=0):
         '''
         max_deep - 2*n for checkmate in `n` moves
@@ -85,8 +83,6 @@ class SimpleAnalyzer(Analyzer):
 
 
 class AlphaAnalyzer(Analyzer):
-    name = 'AlphaAnalyzer'
-
     def dfs(self, board, stats, alpha=None, deep=0):
         '''
         alpha - to reduce brute force
@@ -148,38 +144,34 @@ class AlphaAnalyzer(Analyzer):
 
 
 class AlphaBetaAnalyzer(Analyzer):
-    name = 'AlphaBetaAnalyzer'
-
     def __init__(self, *args, **kwargs):
         max_time = kwargs.pop('max_time', 999999)
+        threads = kwargs.pop('threads', None)
         self.max_time = max_time
+        self.threads = threads
 
         super(AlphaBetaAnalyzer, self).__init__(*args, **kwargs)
 
     def analyze(self, board):
-        stats = {
-            'nodes': 0
-        }
-
+        self.analyze_launch_time = time.time()
         # syzygy_best_move = get_syzygy_best_move(board)
         # Temporary commented
         syzygy_best_move = None
         if syzygy_best_move is None:
-            self.dfs_start_time = time.time()
-            result = self.dfs(board, stats)
+            result = self.dfs(board)
         else:
             result = [{
                 'evaluation': syzygy_best_move['evaluation'],
                 'moves': syzygy_best_move['moves']
             }]
 
+        stats = {'nodes': 1}
         return {
             'result': result,
             'stats': stats
         }
 
-    def dfs(self, board, stats,
-            alpha=-Board.MAX_EVALUATION - 1, beta=Board.MAX_EVALUATION + 1, deep=0):
+    def dfs(self, board, alpha=-Board.MAX_EVALUATION - 1, beta=Board.MAX_EVALUATION + 1, deep=0):
         '''
         If evaluation between (alpha, beta) returns it,
         otherwise if less returns less or equal alpha
@@ -194,8 +186,7 @@ class AlphaBetaAnalyzer(Analyzer):
         TODO: (kosteev) write tests
         TODO: (kosteev) compare with simple analyzer
         '''
-        stats['nodes'] += 1
-        if time.time() - self.dfs_start_time > self.max_time:
+        if time.time() - self.analyze_launch_time > self.max_time:
             if alpha >= -Board.MAX_EVALUATION:
                 return [{
                     'evaluation': alpha,  # Return evaluation that will not affect result
@@ -223,8 +214,7 @@ class AlphaBetaAnalyzer(Analyzer):
             is_any_move = True
 
             cand = self.dfs(
-                board, stats,
-                alpha=alpha, beta=beta, deep=deep + 1)
+                board, alpha=alpha, beta=beta, deep=deep + 1)
 
             result.append(cand[0])
             result[-1]['moves'].append(move)

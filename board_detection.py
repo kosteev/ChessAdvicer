@@ -125,7 +125,7 @@ def get_settings(mode):
     }
 
 
-DEVIATION = 1.5 / 255.0
+DEVIATION = 3.5 / 255.0
 
 
 def show_image(lt, rb):
@@ -327,8 +327,9 @@ def get_board(mode, prev_board):
                 yellow_cells[0][1] == 7 and yellow_cells[1][1] == 7):
             move_color = WHITE
         else:
-            print 'Can not determine move color'
-            return None
+            #print 'Can not determine move color'
+            #return None
+            move_color = BLACK
 
     en_passant = None
     if (len(yellow_cells) == 2 and
