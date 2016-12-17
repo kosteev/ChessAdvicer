@@ -1,7 +1,7 @@
 import json
 import random
 
-from pieces import get_opp_color, PIECES, PROBABLE_MOVES, WHITE, COUNT_OF_PROBABLE_MOVES, CHECK_LINES
+from pieces import get_opp_color, PIECES, PROBABLE_MOVES, WHITE, PIECE_CELL_VALUE, CHECK_LINES
 from utils import color_sign
 
 
@@ -58,17 +58,7 @@ class Board(object):
         '''
         total = 0
         for position, (piece, color) in self.pieces.items():
-            total += color_sign(color) * COUNT_OF_PROBABLE_MOVES[piece][position]
-
-        return total
-
-    def get_beaten_cells(self):
-        '''
-        Returns count of beaten cells.
-        '''
-        total = 0
-        for position, (piece, color) in self.pieces.items():
-            total += color_sign(color) * COUNT_OF_PROBABLE_MOVES[piece][position]
+            total += color_sign(color) * PIECE_CELL_VALUE[piece][position]
 
         return total
 
@@ -139,11 +129,11 @@ class Board(object):
             delta_eval *= sign
             self.evaluation += delta_eval
             # Recalculate probable moves
-            delta_prob_moves = COUNT_OF_PROBABLE_MOVES[move['new_piece']][move['new_position']]
-            delta_prob_moves -= COUNT_OF_PROBABLE_MOVES[move['piece']][move['position']]
+            delta_prob_moves = PIECE_CELL_VALUE[move['new_piece']][move['new_position']]
+            delta_prob_moves -= PIECE_CELL_VALUE[move['piece']][move['position']]
             if move['captured_piece']:
                 delta_prob_moves += \
-                    COUNT_OF_PROBABLE_MOVES[move['captured_piece']][move['captured_position']]
+                    PIECE_CELL_VALUE[move['captured_piece']][move['captured_position']]
             delta_prob_moves *= sign
             self.probable_moves_count += delta_prob_moves
             # Move color

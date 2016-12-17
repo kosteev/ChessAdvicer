@@ -76,12 +76,10 @@ DIFFS['knight'] = [
 ]
 
 
-# Valid piece moves by rules + on board
+# Valid piece moves by rules + on board (all except pawns)
 PROBABLE_MOVES = {}
-COUNT_OF_PROBABLE_MOVES = {}
 for piece in DIFFS:
     PROBABLE_MOVES[piece] = {}
-    COUNT_OF_PROBABLE_MOVES[piece] = {}
     for c in xrange(8):
         for r in xrange(8):
             PROBABLE_MOVES[piece][(c, r)] = []
@@ -99,14 +97,21 @@ for piece in DIFFS:
                 if moves_variant:
                     PROBABLE_MOVES[piece][(c, r)].append(moves_variant)
 
-            COUNT_OF_PROBABLE_MOVES[piece][(c, r)] = sum(
-                len(v) for v in PROBABLE_MOVES[piece][(c, r)])
+PIECE_CELL_VALUE = {}
+for piece in PROBABLE_MOVES:
+    PIECE_CELL_VALUE[piece] = {}
+    for cell in PROBABLE_MOVES[piece]:
+        if piece == 'king':
+            value = 0
+        else:
+            value = sum(
+                len(v) for v in PROBABLE_MOVES[piece][cell])
+        PIECE_CELL_VALUE[piece][cell] = value
 
-COUNT_OF_PROBABLE_MOVES['pawn'] = {}
+PIECE_CELL_VALUE['pawn'] = {}
 for c in xrange(8):
     for r in xrange(1, 7):
-        COUNT_OF_PROBABLE_MOVES['pawn'][(c, r)] = 1 if c in [0, 7] else 2
-
+        PIECE_CELL_VALUE['pawn'][(c, r)] = 1 if c in [0, 7] else 2
 
 # For all pieces, except pawn and king
 CHECK_VARIANTS = [{

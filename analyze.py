@@ -260,7 +260,6 @@ class AlphaBetaAnalyzer(Analyzer):
 
                     if alpha >= beta:
                         break
-            #pool.terminate()
         else:
             for move in gen:
                 is_any_move = True

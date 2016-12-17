@@ -76,7 +76,7 @@ def get_settings(mode):
         white_letter_count = 84
         black_letter_count = 59
     else:
-        board_radius_pixels = 4
+        board_radius_pixels = 3
         colors = {
             'white_piece': (1, 1, 1),
             'black_piece': (0, 0, 0),
@@ -319,8 +319,8 @@ def get_board(mode, prev_board):
 
     if move_color is None:
         if (not yellow_cells and
-                get_mock(1).pieces == pieces):
-            # Initial position
+                all((c, r) in pieces for c in xrange(8) for r in [0, 1, 6, 7])):
+            # Initial position, consider alson 960
             move_color = WHITE
         elif (len(yellow_cells) == 2 and
                 yellow_cells[0][1] == 0 and yellow_cells[1][1] == 0):
