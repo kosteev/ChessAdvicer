@@ -80,9 +80,9 @@ def get_settings(mode):
         colors = {
             'white_piece': (1, 1, 1),
             'black_piece': (0, 0, 0),
-            'white_board_cell': (239 / 255.0, 216 / 255.0, 183 / 255.0),
-            'moved_white_board_cell': (246 / 255.0, 235 / 255.0, 124 / 255.0),
-            'moved_black_board_cell': (217 / 255.0, 194 / 255.0, 85 / 255.0),
+            'white_board_cell': (240 / 255.0, 217 / 255.0, 181 / 255.0),
+            'moved_white_board_cell': (247 / 255.0, 236 / 255.0, 116 / 255.0),
+            'moved_black_board_cell': (218 / 255.0, 195 / 255.0, 75 / 255.0),
             'letter': (152 / 255.0, 150 / 255.0, 149 / 255.0)
         }
         cell_size = 64
@@ -125,7 +125,7 @@ def get_settings(mode):
     }
 
 
-DEVIATION = 3.5 / 255.0
+DEVIATION = 1.5 / 255.0
 
 
 def show_image(lt, rb):
@@ -309,6 +309,8 @@ def get_board(mode, prev_board):
 
             # Determine whose move
             pixel = get_pixel(bitmap, x + 5, y + 5)
+#             if cell == (4, 3):
+#                 print [c * 255 for c in pixel]
             if similiar_pixel(
                     pixel, [settings['colors']['moved_white_board_cell'], settings['colors']['moved_black_board_cell']]):
                 yellow_cells.append(cell)
@@ -327,9 +329,8 @@ def get_board(mode, prev_board):
                 yellow_cells[0][1] == 7 and yellow_cells[1][1] == 7):
             move_color = WHITE
         else:
-            #print 'Can not determine move color'
-            #return None
-            move_color = BLACK
+            print 'Can not determine move color'
+            return None
 
     en_passant = None
     if (len(yellow_cells) == 2 and

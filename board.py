@@ -27,6 +27,16 @@ class Board(object):
         self.evaluation = self.get_pieces_eval()
         self.probable_moves_count = self.get_probable_moves_count()
 
+    def copy(self):
+        return Board(
+            pieces=self.pieces.copy(),
+            move_color=self.move_color,
+            en_passant=self.en_passant,
+            move_up_color=self.move_up_color,
+            lt_screen=self.lt_screen,
+            cell_size=self.cell_size
+        )
+
     @property
     def hash(self):
         return hash(json.dumps(sorted(self.pieces.items()) + [self.move_color, self.en_passant]))
@@ -107,6 +117,8 @@ class Board(object):
         # Shuffle to make generate function not-deterministic
         random.shuffle(capture_moves)
         random.shuffle(simple_moves)
+        #capture_moves.sort(key=lambda x: (x['position'], x['new_position'], x['new_piece']))
+        #simple_moves.sort(key=lambda x: (x['position'], x['new_position'], x['new_piece']))
 
         # Sort captured moves
         if capture_sort_key is None:

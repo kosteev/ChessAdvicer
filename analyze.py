@@ -1,4 +1,5 @@
 import time
+from multiprocessing import Pool, cpu_count
 
 from board import Board
 from endgame import get_syzygy_best_move
@@ -6,8 +7,15 @@ from pieces import WHITE, BLACK
 from utils import color_sign
 
 
-# - implement true check and mate
-# - evaluation with brute force with good takes
+def pool_dfs_wrapper(pool_arg):
+    analyzer, args, kwargs = pool_arg
+    return analyzer.dfs(*args, **kwargs)
+
+
+def chunks(l, n):
+    """Yield successive n-sized chunks from l."""
+    for i in range(0, len(l), n):
+        yield l[i:i + n]
 
 
 class Analyzer(object):
@@ -146,14 +154,20 @@ class AlphaAnalyzer(Analyzer):
 class AlphaBetaAnalyzer(Analyzer):
     def __init__(self, *args, **kwargs):
         max_time = kwargs.pop('max_time', 999999)
-        threads = kwargs.pop('threads', None)
         self.max_time = max_time
-        self.threads = threads
 
         super(AlphaBetaAnalyzer, self).__init__(*args, **kwargs)
 
+    @classmethod
+    def pool(cls):
+        if not hasattr(cls, '_pool'):
+            cls._pool = Pool(processes=cpu_count())
+
+        return cls._pool
+
     def analyze(self, board):
         self.analyze_launch_time = time.time()
+
         # syzygy_best_move = get_syzygy_best_move(board)
         # Temporary commented
         syzygy_best_move = None
@@ -173,6 +187,8 @@ class AlphaBetaAnalyzer(Analyzer):
 
     def dfs(self, board, alpha=-Board.MAX_EVALUATION - 1, beta=Board.MAX_EVALUATION + 1, deep=0):
         '''
+        !!!! This function should be multi-thread safe.
+
         If evaluation between (alpha, beta) returns it,
         otherwise if less returns less or equal alpha
                   if more returns more or equal beta
@@ -209,29 +225,65 @@ class AlphaBetaAnalyzer(Analyzer):
         is_any_move = False
 
         gen = board.generate_next_board()
+        if deep == 0:
+            pool_args = []
+            moves = []
+            for move in gen:
+                is_any_move = True
+                args = (board.copy(), )
+                kwargs = {
+                    'deep': deep + 1
+                }
+                pool_args.append((self, args, kwargs))
+                moves.append(move)
 
-        for move in gen:
-            is_any_move = True
+            # TODO: consider results in already runned
+            threads = cpu_count()
+            for ch_ind, chunk in enumerate(chunks(pool_args, threads)):
+                for _ in chunk:
+                    _[2]['alpha'] = alpha
+                    _[2]['beta'] = beta
+                for ind, cand in enumerate(self.pool().map(pool_dfs_wrapper, chunk)):
+                    result.append(cand[0])
+                    result[-1]['moves'].append(moves[ch_ind * threads + ind])
+                    # XXX: sorting is stable, it will never get newer variant
+                    # (which can be with wrong evaluation).
+                    result.sort(
+                        key=lambda x: x['evaluation'], reverse=(move_color==WHITE))
+                    result = result[:lines]
 
-            cand = self.dfs(
-                board, alpha=alpha, beta=beta, deep=deep + 1)
+                    if len(result) == lines:
+                        if move_color == WHITE:
+                            alpha = max(alpha, result[-1]['evaluation'])
+                        else:
+                            beta = min(beta, result[-1]['evaluation'])
 
-            result.append(cand[0])
-            result[-1]['moves'].append(move)
-            # XXX: sorting is stable, it will never get newer variant
-            # (which can be with wrong evaluation).
-            result.sort(
-                key=lambda x: x['evaluation'], reverse=(move_color==WHITE))
-            result = result[:lines]
+                    if alpha >= beta:
+                        break
+            #pool.terminate()
+        else:
+            for move in gen:
+                is_any_move = True
 
-            if len(result) == lines:
-                if move_color == WHITE:
-                    alpha = max(alpha, result[-1]['evaluation'])
-                else:
-                    beta = min(beta, result[-1]['evaluation'])
+                cand = self.dfs(
+                    board, alpha=alpha, beta=beta, deep=deep + 1)
 
-            if alpha >= beta:
-                break
+                result.append(cand[0])
+                result[-1]['moves'].append(move)
+                # XXX: sorting is stable, it will never get newer variant
+                # (which can be with wrong evaluation).
+                result.sort(
+                    key=lambda x: x['evaluation'], reverse=(move_color==WHITE))
+                result = result[:lines]
+
+                if len(result) == lines:
+                    if move_color == WHITE:
+                        alpha = max(alpha, result[-1]['evaluation'])
+                    else:
+                        beta = min(beta, result[-1]['evaluation'])
+
+                if alpha >= beta:
+                    break
 
         try:
             gen.send(True)
