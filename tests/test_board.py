@@ -39,7 +39,7 @@ class Test(unittest.TestCase):
                 'captured_position': (2, 4)
             },
             'evaluation': 18,
-            'probable_moves_count': 44
+            'positional_eval': 44
         }, {
             'move': {
                 'position': (6, 5),
@@ -50,7 +50,7 @@ class Test(unittest.TestCase):
                 'captured_position': (5, 6)
             },
             'evaluation': 16,
-            'probable_moves_count': 38
+            'positional_eval': 38
         }, {
             'move': {
                 'position': (7, 7),
@@ -61,7 +61,7 @@ class Test(unittest.TestCase):
                 'captured_position': (5, 6)
             },
             'evaluation': 16,
-            'probable_moves_count': 42
+            'positional_eval': 42
         }, {
             'move': {
                 'position': (6, 6),
@@ -72,18 +72,18 @@ class Test(unittest.TestCase):
                 'captured_position': (5, 6)
             },
             'evaluation': 16,
-            'probable_moves_count': 38
+            'positional_eval': 38
         }]
 
         cnt = 0
-        assert_equal(board.evaluation, 13)
+        assert_equal(board.material, 13)
         for move in board.generate_next_board(capture_sort_key=Board.sort_take_by_value):
             if cnt < len(d):
                 assert_equal(move, d[cnt]['move'])
-                assert_equal(board.evaluation, d[cnt]['evaluation'])
-                assert_equal(board.probable_moves_count, d[cnt]['probable_moves_count'])
+                assert_equal(board.material, d[cnt]['evaluation'])
+                assert_equal(board.positional_eval, d[cnt]['positional_eval'])
             else:
-                assert_equal(board.evaluation, 13)
+                assert_equal(board.material, 13)
             cnt += 1
 
     def test_en_passant(self):
@@ -91,8 +91,8 @@ class Test(unittest.TestCase):
         print_board(board)
 
         assert_equal(board.en_passant, (6, 2))
-        assert_equal(board.evaluation, 4)
-        assert_equal(board.probable_moves_count, 3)
+        assert_equal(board.material, 4)
+        assert_equal(board.positional_eval, 3)
         assert_true(board.pieces[(6, 3)] == ('pawn', WHITE))
         cnt = 0
         for move in board.generate_next_board(capture_sort_key=Board.sort_take_by_value):
@@ -100,8 +100,8 @@ class Test(unittest.TestCase):
                 assert_equal(move['piece'], 'pawn')
                 assert_equal(move['new_position'], (6, 2))
                 assert_equal(move['captured_piece'], 'pawn')
-                assert_equal(board.evaluation, 3)
-                assert_equal(board.probable_moves_count, 1)
+                assert_equal(board.material, 3)
+                assert_equal(board.positional_eval, 1)
                 assert_true((6, 3) not in board.pieces)
             cnt += 1
         assert_true(board.pieces[(6, 3)] == ('pawn', WHITE))

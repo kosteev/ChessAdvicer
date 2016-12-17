@@ -6,7 +6,7 @@ from utils import color_sign
 def simple_evaluation(board):
     stats = {}
     result = {
-        'evaluation': board.evaluation,
+        'evaluation': board.material,
         'moves': []
     }
 
@@ -45,7 +45,7 @@ def take_evaluation_dfs(board, stats):
 
     gen = board.generate_next_board(capture_sort_key=Board.sort_take_by_value)
 
-    evaluation = board.evaluation + board.probable_moves_count / 1000.0
+    evaluation = board.evaluation
     evaluation_moves = []
     for move in gen:
         is_any_move = True

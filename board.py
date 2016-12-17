@@ -24,8 +24,8 @@ class Board(object):
         self.lt_screen = lt_screen
         self.cell_size = cell_size
 
-        self.evaluation = self.get_pieces_eval()
-        self.probable_moves_count = self.get_probable_moves_count()
+        self.material = self.get_material_eval()
+        self.positional_eval = self.get_positional_eval()
 
     def copy(self):
         return Board(
@@ -41,7 +41,11 @@ class Board(object):
     def hash(self):
         return hash(json.dumps(sorted(self.pieces.items()) + [self.move_color, self.en_passant]))
 
-    def get_pieces_eval(self):
+    @property
+    def evaluation(self):
+        return self.material + self.positional_eval / 1000.0
+
+    def get_material_eval(self):
         '''
         pieces = {(1, 2): ('rook', 'white)}
         '''
@@ -51,7 +55,7 @@ class Board(object):
 
         return total
 
-    def get_probable_moves_count(self):
+    def get_positional_eval(self):
         '''
         Returns count of probable moves.
         TODO: (kosteev) consider all chess rules
@@ -122,20 +126,20 @@ class Board(object):
                 del self.pieces[move['captured_position']]
             self.pieces[move['new_position']] = (move['new_piece'], move_color)
             # Recalculate evaluation
-            delta_eval = PIECES[move['new_piece']]['value']
-            delta_eval -= PIECES[move['piece']]['value']
+            delta_material = PIECES[move['new_piece']]['value']
+            delta_material -= PIECES[move['piece']]['value']
             if move['captured_piece']:
-                delta_eval += PIECES[move['captured_piece']]['value']
-            delta_eval *= sign
-            self.evaluation += delta_eval
+                delta_material += PIECES[move['captured_piece']]['value']
+            delta_material *= sign
+            self.material += delta_material
             # Recalculate probable moves
-            delta_prob_moves = PIECE_CELL_VALUE[move['new_piece']][move['new_position']]
-            delta_prob_moves -= PIECE_CELL_VALUE[move['piece']][move['position']]
+            delta_positional_eval = PIECE_CELL_VALUE[move['new_piece']][move['new_position']]
+            delta_positional_eval -= PIECE_CELL_VALUE[move['piece']][move['position']]
             if move['captured_piece']:
-                delta_prob_moves += \
+                delta_positional_eval += \
                     PIECE_CELL_VALUE[move['captured_piece']][move['captured_position']]
-            delta_prob_moves *= sign
-            self.probable_moves_count += delta_prob_moves
+            delta_positional_eval *= sign
+            self.positional_eval += delta_positional_eval
             # Move color
             self.move_color = opp_move_color
             # En passant
@@ -157,9 +161,9 @@ class Board(object):
                 self.pieces[move['captured_position']] = (move['captured_piece'], opp_move_color)
             self.pieces[move['position']] = (move['piece'], move_color)
             # Retrun evaluation
-            self.evaluation -= delta_eval
+            self.material -= delta_material
             # Return probable moves
-            self.probable_moves_count -= delta_prob_moves
+            self.positional_eval -= delta_positional_eval
             # Move color
             self.move_color = move_color
             # Return en passant

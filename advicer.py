@@ -87,7 +87,6 @@ def run_advicer(mode, max_deep, lines, play):
             print '{} goes up'.format(move_up_color.upper())
             print '{} to move'.format(move_color.upper())
             print 'Evaluation: {}'.format(board.evaluation)
-            print 'Probable moves: {}'.format(board.probable_moves_count)
             # print_take_evaluation(board)
             print
 
