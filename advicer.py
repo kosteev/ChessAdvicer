@@ -18,7 +18,7 @@ def run_analyzer(analyzer_class, board, max_deep, lines, play):
         'max_deep': max_deep,
         'lines': lines,
         'evaluation_func': take_evaluation,
-        #'max_time': 1
+        #'max_time': 1,
     }
     analyzer = analyzer_class(**kwargs)
 
@@ -34,6 +34,37 @@ def run_analyzer(analyzer_class, board, max_deep, lines, play):
             line['evaluation'],
             moves_stringify(line['moves'], board.move_color),
             moves_stringify(line.get('evaluation_moves', []), eval_move_color, ind=eval_ind))
+    print
+
+    analyze_moves_order = {}
+    for deep in xrange(max_deep - 1, max_deep + 1):
+        kwargs = {
+            'max_deep': deep,
+            'lines': lines if deep == max_deep else 3,
+            'evaluation_func': take_evaluation,
+            #'max_time': 1,
+            'analyze_moves_order': analyze_moves_order
+        }
+        analyzer = analyzer_class(**kwargs)
+    
+        start_time = time.time()
+        analysis = analyzer.analyze(board)
+        analyzer_time = time.time() - start_time
+        print 'Analyzer time = {:.6f}, nodes = {}'.format(analyzer_time, analysis['stats']['nodes'])
+        print 'Per node = {:.3f}ms'.format(1000.0 * analyzer_time / analysis['stats']['nodes'])
+        for line in analysis['result']:
+            eval_move_color = board.move_color if len(line['moves']) % 2 == 0 else get_opp_color(board.move_color)
+            eval_ind = (len(line['moves']) + (1 if board.move_color == BLACK else 0)) / 2 + 1
+            print '({}) {} ({})'.format(
+                line['evaluation'],
+                moves_stringify(line['moves'], board.move_color),
+                moves_stringify(line.get('evaluation_moves', []), eval_move_color, ind=eval_ind))
+        print
+
+        analyze_moves_order = {
+            0: [(line['moves'][-1]['position'], line['moves'][-1]['new_position'])
+                for line in analysis['result']]
+        }
 
     return analysis
 
@@ -74,9 +105,9 @@ def run_advicer(mode, max_deep, lines, play):
         prev_hash = new_hash
 
         if board:
-            os.system('clear')
-            process = psutil.Process(os.getpid())
-            print 'Memory usage: {}mb'.format(process.memory_info().rss / 1000 / 1000)
+            os.system('clear') 
+            print 'Memory usage: {} M'.format(
+                psutil.Process(os.getpid()).memory_info().rss / 1000 / 1000)
             print 'Time: {:.3f}'.format(e - s)
             print 'Iteration: {}'.format(iteration)
             print 'Max deep: {}'.format(max_deep)

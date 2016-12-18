@@ -4,7 +4,7 @@ from multiprocessing import Pool, cpu_count
 from board import Board
 from endgame import get_syzygy_best_move
 from pieces import WHITE, BLACK
-from utils import color_sign
+from utils import color_sign, cell_name
 
 
 def pool_dfs_wrapper(pool_arg):
@@ -154,14 +154,17 @@ class AlphaAnalyzer(Analyzer):
 class AlphaBetaAnalyzer(Analyzer):
     def __init__(self, *args, **kwargs):
         max_time = kwargs.pop('max_time', 999999)
+        analyze_moves_order = kwargs.pop('analyze_moves_order', {})
+
         self.max_time = max_time
+        self.analyze_moves_order = analyze_moves_order
 
         super(AlphaBetaAnalyzer, self).__init__(*args, **kwargs)
 
     @classmethod
     def pool(cls):
         if not hasattr(cls, '_pool'):
-            cls._pool = Pool(processes=cpu_count())
+            cls._pool = Pool(processes=1)#cpu_count())
 
         return cls._pool
 
@@ -172,7 +175,7 @@ class AlphaBetaAnalyzer(Analyzer):
         # Temporary commented
         syzygy_best_move = None
         if syzygy_best_move is None:
-            result = self.dfs(board)
+            result = self.dfs(board, analyze_moves_order=self.analyze_moves_order)
         else:
             result = [{
                 'evaluation': syzygy_best_move['evaluation'],
@@ -185,7 +188,9 @@ class AlphaBetaAnalyzer(Analyzer):
             'stats': stats
         }
 
-    def dfs(self, board, alpha=-Board.MAX_EVALUATION - 1, beta=Board.MAX_EVALUATION + 1, deep=0):
+    def dfs(self, board,
+            alpha=-Board.MAX_EVALUATION - 1, beta=Board.MAX_EVALUATION + 1,
+            deep=0, analyze_moves_order={}):
         '''
         !!!! This function should be multi-thread safe.
 
@@ -227,25 +232,36 @@ class AlphaBetaAnalyzer(Analyzer):
         gen = board.generate_next_board()
         if deep == 0:
             pool_args = []
-            moves = []
             for move in gen:
                 is_any_move = True
                 args = (board.copy(), )
                 kwargs = {
                     'deep': deep + 1
                 }
-                pool_args.append((self, args, kwargs))
-                moves.append(move)
+                pool_args.append({
+                    'move': move,
+                    'args': (self, args, kwargs)
+                })
+
+            sort_dict = {
+                move: ind
+                for ind, move in enumerate(analyze_moves_order.get(deep, []))
+            }
+            pool_args.sort(
+                key=lambda x: sort_dict.get((x['move']['position'], x['move']['new_position']), 999999))
+            for t in xrange(3):
+                print cell_name(pool_args[t]['move']['position']), cell_name(pool_args[t]['move']['new_position'])
 
             # TODO: consider results in already runned
             threads = cpu_count()
-            for ch_ind, chunk in enumerate(chunks(pool_args, threads)):
-                for _ in chunk:
+            for chunk in chunks(pool_args, threads):
+                args_chunk = [t['args'] for t in chunk]
+                for _ in args_chunk:
                     _[2]['alpha'] = alpha
                     _[2]['beta'] = beta
-                for ind, cand in enumerate(self.pool().map(pool_dfs_wrapper, chunk)):
+                for ind, cand in enumerate(self.pool().map(pool_dfs_wrapper, args_chunk)):
                     result.append(cand[0])
-                    result[-1]['moves'].append(moves[ch_ind * threads + ind])
+                    result[-1]['moves'].append(chunk[ind]['move'])
                     # XXX: sorting is stable, it will never get newer variant
                     # (which can be with wrong evaluation).
                     result.sort(
