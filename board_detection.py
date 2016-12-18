@@ -200,11 +200,13 @@ def get_lt_screen_cell_size(mode):
     return lt_screen, cell_size
 
 
-def get_board_data(mode, lt_screen=None, cell_size=None):
+def get_board_data(mode, prev_board):
     settings = get_settings(mode)
 
-    if lt_screen is None:
+    if prev_board is None:
         lt_screen, cell_size = get_lt_screen_cell_size(mode)
+    else:
+        lt_screen, cell_size = prev_board.lt_screen, prev_board.cell_size
 
     if not lt_screen:
         print 'Not found left top corner'
@@ -272,8 +274,8 @@ def get_board_data(mode, lt_screen=None, cell_size=None):
     }
 
 
-def get_board(mode, lt_screen=None, cell_size=None):
-    board_data = get_board_data(mode, lt_screen=lt_screen, cell_size=cell_size)
+def get_board(mode, prev_board):
+    board_data = get_board_data(mode, prev_board)
     if not board_data:
         return None
 

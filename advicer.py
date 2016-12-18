@@ -61,13 +61,7 @@ def run_advicer(mode, max_deep, lines, play):
         iteration += 1
 
         s = time.time()
-        kwargs = {}
-        if board is not None:
-            kwargs = {
-                'lt_screen': board.lt_screen,
-                'cell_size': board.cell_size
-            }
-        board = get_board(mode, **kwargs)
+        board = get_board(mode, board)
         # board = get_mock(2)
         e = time.time()
 
