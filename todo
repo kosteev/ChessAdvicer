@@ -7,5 +7,5 @@
 - endgames
 - evaluation with count of cells to move
 - killed 9
-- memory leak
+- memory leak (garbage collect board)
 - evaluation function better

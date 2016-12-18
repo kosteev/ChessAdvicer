@@ -76,7 +76,7 @@ def get_settings(mode):
         white_letter_count = 84
         black_letter_count = 59
     else:
-        board_radius_pixels = 4
+        board_radius_pixels = 3
         colors = {
             'white_piece': (1, 1, 1),
             'black_piece': (0, 0, 0),
@@ -273,7 +273,7 @@ def get_board_data(mode, lt_screen=None, cell_size=None):
 
 
 def get_board(mode, lt_screen=None, cell_size=None):
-    board_data = get_board_data(mode, lt_screen=None, cell_size=None)
+    board_data = get_board_data(mode, lt_screen=lt_screen, cell_size=cell_size)
     if not board_data:
         return None
 
