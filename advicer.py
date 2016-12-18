@@ -47,7 +47,8 @@ def print_take_evaluation(board):
         moves_stringify(take_eval['stats']['longest_moves'], board.move_color))
     print 'Take evaluation: {} ({})'.format(
         take_eval['result']['evaluation'], moves_stringify(
-            take_eval['result']['moves'], board.move_color))
+            take_eval['result']['moves'], board.move_color), moves_stringify(
+            take_eval['stats']['longest_moves'], board.move_color))
 
 
 def run_advicer(mode, max_deep, lines, play):

@@ -36,6 +36,11 @@ def take_evaluation_dfs(board, stats):
     Takes best of this or current material evaluation.
     # TODO: (kosteev) consider other cases if take is worse than current material evaluation.
     # TODO: (kosteev) make it faster, cut with alpha/beta algo.
+
+
+    Disadvantages:
+    1. If two takes are available considers not the best
+    2.
     '''
     stats['nodes'] += 1
 
