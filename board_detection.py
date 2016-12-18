@@ -159,7 +159,7 @@ def get_pixel(bitmap, x, y):
     return c.redComponent(), c.greenComponent(), c.blueComponent()
 
 
-def get_lt_screen_cell_size(mode, prev_board):
+def get_lt_screen_cell_size(mode):
     '''
     Try to guess left-top of screen and cell size.
     '''
@@ -168,46 +168,44 @@ def get_lt_screen_cell_size(mode, prev_board):
     lt_screen = None
     cell_size = None
 
-    if prev_board is None:
-        im = ImageGrab.grab()
-        im.load()
+    im = ImageGrab.grab()
+    im.load()
 
-        # Determine top-left corner of board
-        for x in xrange(im.width):
-            for y in xrange(im.height):
-                pixel = im.im.getpixel((x, y))
-                pixel = [c / 255.0 for c in pixel[:-1]]
-                if similiar_pixel(pixel, [settings['colors']['white_board_cell'], settings['colors']['moved_white_board_cell']]):
-                    # left-top corner pixel is not our, should move 1 point up
-                    # real coordinates are twice less
-                    lt_screen = (x / 2, y / 2 - settings['board_radius_pixels'])
-                    # determine cell size
-                    while similiar_pixel(pixel, [
-                            settings['colors']['white_board_cell'], settings['colors']['moved_white_board_cell']]):
-                        y += 1
-                        # ??? if out of the image
-                        pixel = im.im.getpixel((x, y))
-                        pixel = [c / 255.0 for c in pixel[:-1]]
-                    cell_size = y / 2 - lt_screen[1]
+    # Determine top-left corner of board
+    for x in xrange(im.width):
+        for y in xrange(im.height):
+            pixel = im.im.getpixel((x, y))
+            pixel = [c / 255.0 for c in pixel[:-1]]
+            if similiar_pixel(pixel, [settings['colors']['white_board_cell'], settings['colors']['moved_white_board_cell']]):
+                # left-top corner pixel is not our, should move 1 point up
+                # real coordinates are twice less
+                lt_screen = (x / 2, y / 2 - settings['board_radius_pixels'])
+                # determine cell size
+                while similiar_pixel(pixel, [
+                        settings['colors']['white_board_cell'], settings['colors']['moved_white_board_cell']]):
+                    y += 1
+                    # ??? if out of the image
+                    pixel = im.im.getpixel((x, y))
+                    pixel = [c / 255.0 for c in pixel[:-1]]
+                cell_size = y / 2 - lt_screen[1]
 #                     xi = lt_screen[0] * 2
 #                     yi = lt_screen[1] * 2
 #                     show_image((xi, yi), (xi + cell_size * 8 * 2, yi + cell_size * 8 * 2))
 #                     raise
-                    break
-
-            if lt_screen:
                 break
-    else:
-        lt_screen = prev_board.lt_screen
-        cell_size = prev_board.cell_size
+
+        if lt_screen:
+            break
 
     return lt_screen, cell_size
 
 
-def get_board_data(mode, prev_board):
+def get_board_data(mode, lt_screen=None, cell_size=None):
     settings = get_settings(mode)
 
-    lt_screen, cell_size = get_lt_screen_cell_size(mode, prev_board)
+    if lt_screen is None:
+        lt_screen, cell_size = get_lt_screen_cell_size(mode)
+
     if not lt_screen:
         print 'Not found left top corner'
         return None
@@ -274,8 +272,8 @@ def get_board_data(mode, prev_board):
     }
 
 
-def get_board(mode, prev_board):
-    board_data = get_board_data(mode, prev_board)
+def get_board(mode, lt_screen=None, cell_size=None):
+    board_data = get_board_data(mode, lt_screen=None, cell_size=None)
     if not board_data:
         return None
 
