@@ -309,8 +309,6 @@ def get_board(mode, prev_board):
 
             # Determine whose move
             pixel = get_pixel(bitmap, x + 5, y + 5)
-#             if cell == (4, 3):
-#                 print [c * 255 for c in pixel]
             if similiar_pixel(
                     pixel, [settings['colors']['moved_white_board_cell'], settings['colors']['moved_black_board_cell']]):
                 yellow_cells.append(cell)

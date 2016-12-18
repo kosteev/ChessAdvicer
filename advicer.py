@@ -16,7 +16,8 @@ def run_analyzer(analyzer_class, board, max_deep, lines, play):
     kwargs = {
         'max_deep': max_deep,
         'lines': lines,
-        'evaluation_func': take_evaluation
+        'evaluation_func': take_evaluation,
+        #'max_time': 1
     }
     analyzer = analyzer_class(**kwargs)
 
