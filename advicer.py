@@ -1,4 +1,5 @@
 import os
+import psutil
 import random
 import sys
 import time
@@ -74,6 +75,8 @@ def run_advicer(mode, max_deep, lines, play):
 
         if board:
             os.system('clear')
+            process = psutil.Process(os.getpid())
+            print 'Memory usage: {}mb'.format(process.memory_info().rss / 1000 / 1000)
             print 'Time: {:.3f}'.format(e - s)
             print 'Iteration: {}'.format(iteration)
             print 'Max deep: {}'.format(max_deep)
