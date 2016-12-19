@@ -10,3 +10,9 @@
 - memory leak (garbage collect board)
 - evaluation function better
 - human takes
+
+
+
+- get_next_board refactoring
+- analyze + analyze deeper with first 2-3 moves
+

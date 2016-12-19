@@ -54,6 +54,7 @@ def print_take_evaluation(board):
 
 def run_advicer(mode, max_deep, lines, play):
     iteration = 0
+    result = None
     prev_hash = None
     board = None
     while True:
@@ -115,8 +116,6 @@ def run_advicer(mode, max_deep, lines, play):
                     move = moves[-1]
                     if move['captured_piece']:
                         # Try to humanize `addy`
-                        print 'Capture move!!!'
-
                         prev_moves = None
                         if prev_result is not None:
                             prev_moves = prev_result['result'][0]['moves']
