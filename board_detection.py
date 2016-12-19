@@ -318,7 +318,7 @@ def get_board(mode, prev_board):
     if move_color is None:
         if (not yellow_cells and
                 all((c, r) in pieces for c in xrange(8) for r in [0, 1, 6, 7])):
-            # Initial position, consider alson 960
+            # Initial position, consider also 960
             move_color = WHITE
         elif (len(yellow_cells) == 2 and
                 yellow_cells[0][1] == 0 and yellow_cells[1][1] == 0):

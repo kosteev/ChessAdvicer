@@ -104,12 +104,42 @@ def run_advicer(mode, max_deep, lines, play):
 
             # result = run_analyzer(SimpleAnalyzer, board, max_deep, lines, play)
             # result = run_analyzer(AlphaAnalyzer, board, max_deep, lines, play)
+            prev_result = result
+            start_time = time.time()
             result = run_analyzer(AlphaBetaAnalyzer, board, max_deep, lines, play)
+            analyzer_time = time.time() - start_time
 
             if play:
                 moves = result['result'][0]['moves']
                 if moves:
                     move = moves[-1]
+                    if move['captured_piece']:
+                        # Try to humanize `addy`
+                        print 'Capture move!!!'
+
+                        prev_moves = None
+                        if prev_result is not None:
+                            prev_moves = prev_result['result'][0]['moves']
+
+                        unexpected = False
+                        if prev_moves is None:
+                            print 'No previous calculations'
+                            unexpected = True
+                        elif (len(prev_moves) < 3 or
+                             prev_moves[-3]['position'] != move['position'] or
+                             prev_moves[-3]['new_position'] != move['new_position']):
+                            # Check only (position, new_position) to reduce count of times it happens
+                            print 'Unxepected line, expected: {}'.format(
+                                moves_stringify(prev_moves, move_color))
+                            unexpected = True
+
+                        if unexpected:
+                            # If capture and not expected line before
+                            time_to_sleep = max(0.7 - analyzer_time, 0)
+                            print 'Sleeping (human unexpected case): {:.3f}'.format(time_to_sleep)
+                            time.sleep(time_to_sleep)
+
+                    print 'Make a move'
                     make_move(board, move['position'], move['new_position'])
                 else:
                     print 'No moves'
