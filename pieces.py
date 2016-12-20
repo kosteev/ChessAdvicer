@@ -114,7 +114,7 @@ for c in xrange(8):
         PIECE_CELL_VALUE['pawn'][(c, r)] = 1 if c in [0, 7] else 2
 
 # For all pieces, except pawn and king
-CHECK_VARIANTS = [{
+BEAT_VARIANTS = [{
     'line': [(x, 0) for x in xrange(1, 8)],
     'pieces': ['rook', 'queen']
 }, {
@@ -129,29 +129,29 @@ CHECK_VARIANTS = [{
 }]
 for s1 in [-1, 1]:
     for s2 in [-1, 1]:
-        CHECK_VARIANTS.append({
+        BEAT_VARIANTS.append({
             'line': [(s1 * x, s2 * x) for x in xrange(1, 8)],
             'pieces': ['bishop', 'queen']
         })
         for x in xrange(1, 3):
-            CHECK_VARIANTS.append({
+            BEAT_VARIANTS.append({
                 'line': [(s1 * x, s2 * (3-x))],
                 'pieces': ['knight']
             })
 
-CHECK_LINES = {}
+BEAT_LINES = {}
 for color in [WHITE, BLACK]:
-    sign = 1 if color == WHITE else -1
-    CHECK_LINES[color] = {}
+    sign = -1 if color == WHITE else 1
+    BEAT_LINES[color] = {}
     for c in xrange(8):
         for r in xrange(8):
             cell = (c, r)
-            CHECK_LINES[color][cell] = []
-            for variant in CHECK_VARIANTS:
+            BEAT_LINES[color][cell] = []
+            for variant in BEAT_VARIANTS:
                 line_pieces = []
                 for diff in variant['line']:
-                    check_cell = (c + diff[0], r + diff[1])
-                    if not on_board(check_cell):
+                    beaten_cell = (c + diff[0], r + diff[1])
+                    if not on_board(beaten_cell):
                         break
 
                     additional_pieces = []
@@ -164,8 +164,8 @@ for color in [WHITE, BLACK]:
                             abs(diff[1]) <= 1):
                         additional_pieces += ['king']
                     line_pieces.append({
-                        'cell': check_cell,
+                        'cell': beaten_cell,
                         'pieces': variant['pieces'] + additional_pieces
                     })
                 if line_pieces:
-                    CHECK_LINES[color][cell].append(line_pieces)
+                    BEAT_LINES[color][cell].append(line_pieces)

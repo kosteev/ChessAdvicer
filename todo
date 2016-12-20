@@ -15,4 +15,8 @@
 
 - get_next_board refactoring
 - analyze + analyze deeper with first 2-3 moves
-
+- test on not castle in deep=2,3
+- test on castle with obstacle
+- pool.map -> pool.iman_unordered
+- test on format O-O
+- tests on board move castle

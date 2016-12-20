@@ -1,9 +1,9 @@
 import unittest
 from nose.tools import assert_equal
 
+from mocks import get_mock, MOCKS_COUNT, FENS
 from pieces import WHITE, BLACK
 from utils import name_to_cell, cell_name, format_move, moves_stringify, get_fen_from_board, get_board_from_fen
-from mocks import get_mock, MOCKS_COUNT
 
 
 
@@ -49,6 +49,20 @@ class Test(unittest.TestCase):
                 'new_piece': 'bishop',
                 'captured_piece': 'queen'
             }, 'Bxb8'),
+            ({
+                'position': (4, 7),
+                'new_position': (6, 7),
+                'piece': 'king',
+                'new_piece': 'king',
+                'captured_piece': None
+            }, 'O-O'),
+            ({
+                'position': (4, 0),
+                'new_position': (2, 0),
+                'piece': 'king',
+                'new_piece': 'king',
+                'captured_piece': None
+            }, 'O-O-O'),
         ]
         for move, text in inputs:
             assert_equal(format_move(move), text)
@@ -97,6 +111,11 @@ class Test(unittest.TestCase):
         inputs = [input_1, input_2]
         for moves, move_color, text in inputs:
             assert_equal(moves_stringify(list(reversed(moves)), move_color), text)
+
+    def test_mock_fens(self):
+        for ind in xrange(MOCKS_COUNT):
+            board = get_mock(ind)
+            assert_equal(get_fen_from_board(board), FENS[ind])
 
     def test_fen(self):
         for ind in xrange(MOCKS_COUNT):
