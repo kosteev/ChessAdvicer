@@ -48,19 +48,23 @@ def take_evaluation_dfs(board, stats):
     sign = color_sign(move_color)
     is_any_move = False
 
-    gen = board.generate_next_board(capture_sort_key=Board.sort_take_by_value)
-
     evaluation = board.evaluation
     evaluation_moves = []
-    for move in gen:
+    for move in board.get_board_moves(capture_sort_key=Board.sort_take_by_value):
+        revert_info = board.make_move(move)
+        if revert_info is None:
+            continue
+
         is_any_move = True
         if not move['captured_piece']:
             # Consider only takes
+            board.revert_move(revert_info)
             break
 
         stats['longest_moves'] = [move] + stats['longest_moves']
         cand = take_evaluation_dfs(
             board, stats)
+        board.revert_move(revert_info)
 
         # TODO: (kosteev) consider no moves
         if move_color == WHITE:
@@ -72,10 +76,6 @@ def take_evaluation_dfs(board, stats):
                 evaluation = cand['evaluation']
                 evaluation_moves = cand['moves'] + [move]
         break
-    try:
-        gen.send(True)
-    except StopIteration:
-        pass
 
     if not is_any_move:
         if board.is_check(opposite=True):

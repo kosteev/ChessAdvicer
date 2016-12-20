@@ -66,15 +66,13 @@ class Board(object):
 
         return total
 
-    def generate_next_board(self, capture_sort_key=None):
+    def get_board_moves(self, capture_sort_key=None):
         '''
-        Method to generate next valid board position
-            if check == True, yield if check is occured
-            if check == False, first yield with moves info
+        Returns current valid moves.
+        Checks are not considered.
         '''
         move_color = self.move_color
         opp_move_color = get_opp_color(move_color)
-        sign = color_sign(move_color)
 
         simple_moves = []
         capture_moves = []
@@ -111,66 +109,87 @@ class Board(object):
         # Shuffle to make generate function not-deterministic
         random.shuffle(capture_moves)
         random.shuffle(simple_moves)
-        #capture_moves.sort(key=lambda x: (x['position'], x['new_position'], x['new_piece']))
-        #simple_moves.sort(key=lambda x: (x['position'], x['new_position'], x['new_piece']))
+        # capture_moves.sort(key=lambda x: (x['position'], x['new_position'], x['new_piece']))
+        # simple_moves.sort(key=lambda x: (x['position'], x['new_position'], x['new_piece']))
 
         # Sort captured moves
         if capture_sort_key is None:
             capture_sort_key = self.sort_take_by_value
         capture_moves.sort(key=capture_sort_key)
 
-        for move in capture_moves + simple_moves:
-            # Make move
-            del self.pieces[move['position']]
-            if move['captured_piece']:
-                del self.pieces[move['captured_position']]
-            self.pieces[move['new_position']] = (move['new_piece'], move_color)
-            # Recalculate evaluation
-            delta_material = PIECES[move['new_piece']]['value']
-            delta_material -= PIECES[move['piece']]['value']
-            if move['captured_piece']:
-                delta_material += PIECES[move['captured_piece']]['value']
-            delta_material *= sign
-            self.material += delta_material
-            # Recalculate probable moves
-            delta_positional_eval = PIECE_CELL_VALUE[move['new_piece']][move['new_position']]
-            delta_positional_eval -= PIECE_CELL_VALUE[move['piece']][move['position']]
-            if move['captured_piece']:
-                delta_positional_eval += \
-                    PIECE_CELL_VALUE[move['captured_piece']][move['captured_position']]
-            delta_positional_eval *= sign
-            self.positional_eval += delta_positional_eval
-            # Move color
-            self.move_color = opp_move_color
-            # En passant
-            old_en_passant = self.en_passant
-            self.en_passant = None
-            if (move['piece'] == 'pawn' and
-                    abs(move['new_position'][1] - move['position'][1]) == 2):
-                self.en_passant = (move['position'][0], (move['new_position'][1] + move['position'][1]) / 2)
+        return capture_moves + simple_moves
 
+    def make_move(self, move):
+        '''
+        Make move on board.
+        Returns dict with info to restore board position.
+        If move is not valid (check occured), returns None.
+        '''
+        move_color = self.move_color
+        opp_move_color = get_opp_color(move_color)
+        sign = color_sign(move_color)
 
-            finish = False
-            if not self.is_check():
-                finish = yield move
+        # Make move
+        del self.pieces[move['position']]
+        if move['captured_piece']:
+            del self.pieces[move['captured_position']]
+        self.pieces[move['new_position']] = (move['new_piece'], move_color)
+        # Recalculate evaluation
+        delta_material = PIECES[move['new_piece']]['value']
+        delta_material -= PIECES[move['piece']]['value']
+        if move['captured_piece']:
+            delta_material += PIECES[move['captured_piece']]['value']
+        delta_material *= sign
+        self.material += delta_material
+        # Recalculate probable moves
+        delta_positional_eval = PIECE_CELL_VALUE[move['new_piece']][move['new_position']]
+        delta_positional_eval -= PIECE_CELL_VALUE[move['piece']][move['position']]
+        if move['captured_piece']:
+            delta_positional_eval += \
+                PIECE_CELL_VALUE[move['captured_piece']][move['captured_position']]
+        delta_positional_eval *= sign
+        self.positional_eval += delta_positional_eval
+        # Move color
+        self.move_color = opp_move_color
+        # En passant
+        old_en_passant = self.en_passant
+        self.en_passant = None
+        if (move['piece'] == 'pawn' and
+                abs(move['new_position'][1] - move['position'][1]) == 2):
+            self.en_passant = (move['position'][0], (move['new_position'][1] + move['position'][1]) / 2)
 
+        revert_info = {
+            'move': move,
+            'delta_material': delta_material,
+            'delta_positional_eval': delta_positional_eval,
+            'old_en_passant': old_en_passant
+        }
 
-            # Recover
-            del self.pieces[move['new_position']]
-            if move['captured_piece']:
-                self.pieces[move['captured_position']] = (move['captured_piece'], opp_move_color)
-            self.pieces[move['position']] = (move['piece'], move_color)
-            # Retrun evaluation
-            self.material -= delta_material
-            # Return probable moves
-            self.positional_eval -= delta_positional_eval
-            # Move color
-            self.move_color = move_color
-            # Return en passant
-            self.en_passant = old_en_passant
+        if self.is_check():
+            self.revert_move(revert_info)
+            return None
 
-            if finish:
-                return
+        return revert_info
+
+    def revert_move(self, revert_info):
+        opp_move_color = self.move_color
+        move_color = get_opp_color(opp_move_color)
+
+        move = revert_info['move']
+
+        # Recover
+        del self.pieces[move['new_position']]
+        if move['captured_piece']:
+            self.pieces[move['captured_position']] = (move['captured_piece'], opp_move_color)
+        self.pieces[move['position']] = (move['piece'], move_color)
+        # Revert evaluation
+        self.material -= revert_info['delta_material']
+        # Revert probable moves
+        self.positional_eval -= revert_info['delta_positional_eval']
+        # Revert move color
+        self.move_color = move_color
+        # Revert en passant
+        self.en_passant = revert_info['old_en_passant']
 
     def get_piece_probable_moves(self, position):
         '''

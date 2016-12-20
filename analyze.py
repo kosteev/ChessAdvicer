@@ -58,13 +58,16 @@ class SimpleAnalyzer(Analyzer):
 
         move_color = board.move_color
 
-        gen = board.generate_next_board()
-
         result = []
         lines = self.lines if deep == 0 else 1
-        for move in gen:
+        for move in board.get_board_moves():
+            revert_info = board.make_move(move)
+            if revert_info is None:
+                continue
+
             cand = self.dfs(
                 board, stats, deep=deep + 1)
+            board.revert_move(revert_info)
 
             result.append(cand[0])
             result[-1]['moves'].append(move)
@@ -105,14 +108,18 @@ class AlphaAnalyzer(Analyzer):
 
         move_color = board.move_color
 
-        gen = board.generate_next_board()
-
         result = []
         lines = self.lines if deep == 0 else 1
-        for move in gen:
+        for move in board.get_board_moves():
+            revert_info = board.make_move(move)
+            if revert_info is None:
+                continue
+
             cand = self.dfs(
                 board, stats,
                 alpha=result[-1]['evaluation'] if len(result) == lines else None, deep=deep + 1)
+            board.revert_move(revert_info)
+
             if cand is None:
                 # Not found better move
                 continue
@@ -127,10 +134,6 @@ class AlphaAnalyzer(Analyzer):
             if alpha is not None:
                 if (move_color == BLACK and result[0]['evaluation'] <= alpha or
                         move_color == WHITE and result[0]['evaluation'] >= alpha):
-                    try:
-                        gen.send(True)
-                    except StopIteration:
-                        pass
                     return None
 
         sign = color_sign(move_color)
@@ -224,11 +227,14 @@ class AlphaBetaAnalyzer(Analyzer):
         result = []
         is_any_move = False
 
-        gen = board.generate_next_board()
         if deep == 0:
             pool_args = []
             moves = []
-            for move in gen:
+            for move in board.get_board_moves():
+                revert_info = board.make_move(move)
+                if revert_info is None:
+                    continue
+
                 is_any_move = True
                 args = (board.copy(), )
                 kwargs = {
@@ -236,6 +242,8 @@ class AlphaBetaAnalyzer(Analyzer):
                 }
                 pool_args.append((self, args, kwargs))
                 moves.append(move)
+
+                board.revert_move(revert_info)
 
             # TODO: consider results in already runned
             threads = cpu_count()
@@ -261,11 +269,15 @@ class AlphaBetaAnalyzer(Analyzer):
                     if alpha >= beta:
                         break
         else:
-            for move in gen:
-                is_any_move = True
+            for move in board.get_board_moves():
+                revert_info = board.make_move(move)
+                if revert_info is None:
+                    continue
 
+                is_any_move = True
                 cand = self.dfs(
                     board, alpha=alpha, beta=beta, deep=deep + 1)
+                board.revert_move(revert_info)
 
                 result.append(cand[0])
                 result[-1]['moves'].append(move)
@@ -283,11 +295,6 @@ class AlphaBetaAnalyzer(Analyzer):
 
                 if alpha >= beta:
                     break
-
-        try:
-            gen.send(True)
-        except StopIteration:
-            pass
 
         if not is_any_move:
             sign = color_sign(move_color)

@@ -77,7 +77,11 @@ class Test(unittest.TestCase):
 
         cnt = 0
         assert_equal(board.material, 13)
-        for move in board.generate_next_board(capture_sort_key=Board.sort_take_by_value):
+        for move in board.get_board_moves(capture_sort_key=Board.sort_take_by_value):
+            revert_info = board.make_move(move)
+            if revert_info is None:
+                continue
+
             if cnt < len(d):
                 assert_equal(move, d[cnt]['move'])
                 assert_equal(board.material, d[cnt]['evaluation'])
@@ -85,6 +89,8 @@ class Test(unittest.TestCase):
             else:
                 assert_equal(board.material, 13)
             cnt += 1
+
+            board.revert_move(revert_info)
 
     def test_en_passant(self):
         board = get_mock(7)
@@ -95,7 +101,11 @@ class Test(unittest.TestCase):
         assert_equal(board.positional_eval, 3)
         assert_true(board.pieces[(6, 3)] == ('pawn', WHITE))
         cnt = 0
-        for move in board.generate_next_board(capture_sort_key=Board.sort_take_by_value):
+        for move in board.get_board_moves(capture_sort_key=Board.sort_take_by_value):
+            revert_info = board.make_move(move)
+            if revert_info is None:
+                continue
+
             if cnt == 0:
                 assert_equal(move['piece'], 'pawn')
                 assert_equal(move['new_position'], (6, 2))
@@ -104,4 +114,7 @@ class Test(unittest.TestCase):
                 assert_equal(board.positional_eval, 1)
                 assert_true((6, 3) not in board.pieces)
             cnt += 1
+
+            board.revert_move(revert_info)
+
         assert_true(board.pieces[(6, 3)] == ('pawn', WHITE))

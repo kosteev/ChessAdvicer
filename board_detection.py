@@ -76,7 +76,7 @@ def get_settings(mode):
         white_letter_count = 84
         black_letter_count = 59
     else:
-        board_radius_pixels = 4
+        board_radius_pixels = 3
         colors = {
             'white_piece': (1, 1, 1),
             'black_piece': (0, 0, 0),
