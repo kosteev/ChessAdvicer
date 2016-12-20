@@ -40,6 +40,13 @@ def cell_name(cell):
 
 
 def format_move(move):
+    if (move['piece'] == 'king' and
+            abs(move['position'][0] - move['new_position'][0]) == 2):
+        # Castles
+        if move['new_position'][0] == 6:
+            return 'O-O'
+        return 'O-O-O'
+
     if move['piece'] == 'pawn':
         if move['captured_piece']:
             piece_title = v_name(move['position'])
@@ -106,6 +113,7 @@ def print_board(board):
             else:
                 line += termcolor.colored(PIECES[p[0]]['title'], BOARD_COLORS[p[1]])
         print line
+    print get_fen_from_board(board)
 
 
 def get_fen_from_board(board):
@@ -137,17 +145,30 @@ def get_fen_from_board(board):
         fen_1.append(row)
 
     # TODO: provide k/q castles
-    fen = '{} {} - {} 0 1'.format(
+    castles = ''
+    if board.white_kc:
+        castles += 'K'
+    if board.white_qc:
+        castles += 'Q'
+    if board.black_kc:
+        castles += 'k'
+    if board.black_qc:
+        castles += 'q'
+    if not castles:
+        castles = '-'
+    fen = '{} {} {} {} - -'.format(
         '/'.join(fen_1),
         'w' if board.move_color == WHITE else 'b',
+        castles,
         cell_name(board.en_passant) if board.en_passant else '-')
+
     return fen
 
 
 def get_board_from_fen(fen):
     from board import Board
 
-    p1, p2, _, p4, _, _ = fen.split(' ')
+    p1, p2, p3, p4, _, _ = fen.split(' ')
 
     board_list = list(reversed(p1.split('/')))
     pieces = {}
@@ -165,13 +186,22 @@ def get_board_from_fen(fen):
                 c += 1
 
     move_color = WHITE if p2 == 'w' else BLACK
+
+    white_kc = 'K' in p3
+    white_qc = 'Q' in p3
+    black_kc = 'k' in p3
+    black_qc = 'q' in p3
+
     en_passant = None
     if p4 != '-':
         en_passant = name_to_cell(p4)
 
-    # TODO: proved en passant
     return Board(
         pieces=pieces,
         move_color=move_color,
-        en_passant=en_passant
+        en_passant=en_passant,
+        white_kc=white_kc,
+        white_qc=white_qc,
+        black_kc=black_kc,
+        black_qc=black_qc
     )

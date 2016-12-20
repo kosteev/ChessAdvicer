@@ -1,7 +1,7 @@
 import json
 import random
 
-from pieces import get_opp_color, PIECES, PROBABLE_MOVES, WHITE, PIECE_CELL_VALUE, CHECK_LINES
+from pieces import get_opp_color, PIECES, PROBABLE_MOVES, WHITE, PIECE_CELL_VALUE, BEAT_LINES
 from utils import color_sign
 
 
@@ -9,7 +9,10 @@ class Board(object):
     MAX_EVALUATION = 1000
     # 999 - checkmate in one move, 998 - ...
 
-    def __init__(self, pieces, move_color, en_passant, move_up_color=WHITE, lt_screen=None, cell_size=None):
+    def __init__(self, pieces, move_color, en_passant=None,
+                 white_qc=False, white_kc=False,
+                 black_qc=False, black_kc=False,
+                 move_up_color=WHITE, lt_screen=None, cell_size=None):
         '''
             `pieces` - dict with pieces
                 pieces = {(1, 2): ('rook', 'white)}
@@ -20,6 +23,11 @@ class Board(object):
         self.pieces = pieces
         self.move_color = move_color
         self.en_passant = en_passant
+        self.white_qc = white_qc
+        self.white_kc = white_kc
+        self.black_qc = black_qc
+        self.black_kc = black_kc
+
         self.move_up_color = move_up_color
         self.lt_screen = lt_screen
         self.cell_size = cell_size
@@ -43,8 +51,10 @@ class Board(object):
 
     @property
     def hash(self):
-        return hash('{}{}{}'.format(
-            Board.pieces_hash(self.pieces), self.move_color, self.en_passant))
+        return hash(json.dumps(
+            sorted(self.pieces.items()) +
+            [self.white_kc, self.white_qc, self.black_kc, self.black_qc] +
+            [self.move_color, self.en_passant]))
 
     @property
     def evaluation(self):
@@ -139,6 +149,16 @@ class Board(object):
         if move['captured_piece']:
             del self.pieces[move['captured_position']]
         self.pieces[move['new_position']] = (move['new_piece'], move_color)
+        # Castle
+        if (move['piece'] == 'king' and
+                abs(move['new_position'][0] - move['position'][0]) == 2):
+            r = move['position'][1]
+            rook_position = (0, r) if move['new_position'][0] == 2 else (7, r)
+            rook_new_position = ((move['position'][0] + move['new_position'][0]) / 2, r)
+
+            self.pieces[rook_new_position] = self.pieces[rook_position]
+            del self.pieces[rook_position]
+
         # Recalculate evaluation
         delta_material = PIECES[move['new_piece']]['value']
         delta_material -= PIECES[move['piece']]['value']
@@ -187,6 +207,16 @@ class Board(object):
         if move['captured_piece']:
             self.pieces[move['captured_position']] = (move['captured_piece'], opp_move_color)
         self.pieces[move['position']] = (move['piece'], move_color)
+        # Uncastle
+        if (move['piece'] == 'king' and
+                abs(move['new_position'][0] - move['position'][0]) == 2):
+            r = move['position'][1]
+            rook_position = (0, r) if move['new_position'][0] == 2 else (7, r)
+            rook_new_position = ((move['position'][0] + move['new_position'][0]) / 2, r)
+
+            self.pieces[rook_position] = self.pieces[rook_new_position]
+            del self.pieces[rook_new_position]
+
         # Revert evaluation
         self.material -= revert_info['delta_material']
         # Revert probable moves
@@ -208,14 +238,13 @@ class Board(object):
         2. 0-0 | 0-0-0
         '''
         piece, move_color = self.pieces[position]
+        opp_move_color = get_opp_color(move_color)
+        sign = color_sign(move_color)
 
         probable_moves = []
         if piece != 'pawn':
             probable_moves = PROBABLE_MOVES[piece][position]
         else:
-            opp_move_color = get_opp_color(move_color)
-            sign = color_sign(move_color)
-
             promote_pieces = []
             if position[1] + sign in [0, 7]:
                 # Last rank
@@ -258,6 +287,35 @@ class Board(object):
 
                     probable_moves.append(forward_moves)
 
+        # Extra logic for castles
+        if piece == 'king':
+            # If (king, rook) haven't moved +
+            # if not under check + king don't passing beaten cell +
+            # if no piece is on the way
+            kc = self.white_kc if move_color == WHITE else self.black_kc
+            qc = self.white_qc if move_color == WHITE else self.black_qc
+            if kc or qc:
+                r = 0 if move_color == WHITE else 7
+                is_under_check = self.beaten_cell(position, opp_move_color)
+                if (kc and
+                        not is_under_check and
+                        not self.beaten_cell((position[0] + 1, r), opp_move_color)):
+                    assert(position == (4, r))
+                    assert(self.pieces[(7, r)] == ('rook', move_color))
+                    if not any((x, r) in self.pieces for x in [5, 6]):
+                        probable_moves.append([{
+                            'new_position': (6, r)
+                        }])
+                if (qc and
+                        not is_under_check and
+                        not self.beaten_cell((position[0] - 1, r), opp_move_color)):
+                    assert(position == (4, r))
+                    assert(self.pieces[(0, r)] == ('rook', move_color))
+                    if not any((x, r) in self.pieces for x in [5, 6]):
+                        probable_moves.append([{
+                            'new_position': (2, r)
+                        }])
+
         return probable_moves
 
     def is_check(self, opposite=False):
@@ -278,14 +336,22 @@ class Board(object):
                 break
 
         if king_cell:
-            for line in CHECK_LINES[checked_color][king_cell]:
-                for cell_info in line:
-                    piece, color = self.pieces.get(cell_info['cell'], (None, None))
-                    if piece:
-                        if (color == check_color and
-                                piece in cell_info['pieces']):
-                            return True
-                        break
+            return self.beaten_cell(king_cell, check_color)
+
+        return False
+
+    def beaten_cell(self, position, by_color):
+        '''
+            `by_color` - color of side to beat.
+        '''
+        for line in BEAT_LINES[by_color][position]:
+            for cell_info in line:
+                piece, color = self.pieces.get(cell_info['cell'], (None, None))
+                if piece:
+                    if (color == by_color and
+                            piece in cell_info['pieces']):
+                        return True
+                    break
 
         return False
 

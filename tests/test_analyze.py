@@ -18,15 +18,15 @@ class TestAnalyzer(unittest.TestCase):
                 max_deep=1, evaluation_func=simple_evaluation, lines=lines)
             board = get_mock(0)
             print_board(board)
-    
+
             analysis = analyzer.analyze(board)
             result = analysis['result']
-    
+
             to_check = []
             for ind in xrange(3):
                 to_check.append(
                     (result[ind]['evaluation'], result[ind]['moves'][-1]['piece'], result[ind]['moves'][-1]['new_position']))
-    
+
             to_check.sort()
             assert_equal(to_check[0], (-2, 'pawn', (0, 1)))
             assert_equal(to_check[1], (-2, 'rook', (0, 1)))
@@ -39,15 +39,15 @@ class TestAnalyzer(unittest.TestCase):
             analyzer = analyzer_class(
                 max_deep=2, evaluation_func=simple_evaluation, lines=lines)
             board = get_mock(0)
-    
+
             analysis = analyzer.analyze(board)
             result = analysis['result']
-    
+
             to_check = []
             for ind in xrange(8):
                 to_check.append(
                     (result[ind]['evaluation'], result[ind]['moves'][-1]['piece'], result[ind]['moves'][-1]['new_position']))
-    
+
             to_check.sort()
             assert_equal(to_check[0], (-1, 'king', (3, 0)))
             assert_equal(to_check[1], (-1, 'king', (3, 1)))
@@ -65,15 +65,15 @@ class TestAnalyzer(unittest.TestCase):
             analyzer = analyzer_class(
                 max_deep=3, evaluation_func=simple_evaluation, lines=lines)
             board = get_mock(0)
-    
+
             analysis = analyzer.analyze(board)
             result = analysis['result']
-    
+
             to_check = []
             for ind in xrange(9):
                 to_check.append(
                     (result[ind]['evaluation'], result[ind]['moves'][-1]['piece'], result[ind]['moves'][-1]['new_position']))
-    
+
             to_check.sort()
             assert_equal(to_check[0], (-2, 'king', (3, 0)))
             assert_equal(to_check[1], (-2, 'king', (3, 1)))
@@ -92,15 +92,15 @@ class TestAnalyzer(unittest.TestCase):
             analyzer = analyzer_class(
                 max_deep=4, evaluation_func=simple_evaluation, lines=lines)
             board = get_mock(2)
-    
+
             analysis = analyzer.analyze(board)
             result = analysis['result']
-    
+
             to_check = []
             for ind in xrange(9):
                 to_check.append(
                     (result[ind]['evaluation'], result[ind]['moves'][-1]['piece'], result[ind]['moves'][-1]['new_position']))
-    
+
             to_check.sort(reverse=True)
             assert_equal(to_check[0], (997, 'queen', (6, 7)))
             assert_equal(to_check[1][0], 5)
@@ -126,3 +126,24 @@ class TestAnalyzer(unittest.TestCase):
             assert_equal(to_check[1], (-998, 'pawn', (6, 3)))
             assert_equal(to_check[2], (-998, 'pawn', (6, 2)))
             assert_equal(len(result), 3)
+
+    def test_king_castle(self):
+        lines = 10
+        for analyzer_class in analyzer_classes:
+            analyzer = analyzer_class(
+                max_deep=2, evaluation_func=simple_evaluation, lines=lines)
+            board = get_mock(8)
+
+            analysis = analyzer.analyze(board)
+            result = analysis['result']
+
+            to_check = []
+            for ind in xrange(1):
+                to_check.append(
+                    (result[ind]['evaluation'],
+                     result[ind]['moves'][-1]['piece'],
+                     result[ind]['moves'][-1]['position'],
+                     result[ind]['moves'][-1]['new_position']))
+
+            to_check.sort(reverse=True)
+            assert_equal(to_check[0], (999, 'king', (4, 0), (6, 0)))

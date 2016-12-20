@@ -19,3 +19,8 @@
 - tests more
 - tests for castles
 - tests for moves_to_consider
+- test on not castle in deep=2,3
+- test on castle with obstacle
+- pool.map -> pool.iman_unordered
+- test on format O-O
+- tests on board move castle

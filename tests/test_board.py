@@ -19,11 +19,16 @@ class Test(unittest.TestCase):
             (0, 0): ('king', WHITE),
             (7, 6): ('king', BLACK)
         }
-        b1 = Board(pieces, move_color=WHITE, en_passant=None)
-        b2 = Board(pieces, move_color=BLACK, en_passant=None)
-        b3 = Board(pieces, move_color=BLACK, en_passant=(2, 2))
 
-        assert_equal(len({b1.hash, b2.hash, b3.hash}), 3)
+        hashes = set()
+        hashes.add(Board(pieces, move_color=WHITE).hash)
+        hashes.add(Board(pieces, move_color=BLACK).hash)
+        hashes.add(Board(pieces, move_color=BLACK, en_passant=(2, 2)).hash)
+        hashes.add(Board(pieces, move_color=BLACK, white_qc=True, black_kc=True).hash)
+        hashes.add(Board(pieces, move_color=BLACK, white_kc=True).hash)
+        hashes.add(Board(pieces, move_color=BLACK, black_qc=True).hash)
+
+        assert_equal(len(hashes), 6)
 
     def test_complex(self):
         board = get_mock(3)

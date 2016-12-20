@@ -337,10 +337,28 @@ def get_board(mode, prev_board):
                 pieces.get(yellow_cells[1], (None, None))[0] == 'pawn'):
             en_passant = (yellow_cells[0][0], (yellow_cells[0][1] + yellow_cells[1][1]) / 2)
 
+    # Castles
+    white_kc = False
+    white_qc = False
+    black_kc = False
+    black_qc = False
+    if sum((c, r) in pieces
+           for c in xrange(8)
+           for r in [0, 1, 6, 7]) >= 15:
+        # Make a guess that it is either initial position or one move ahead
+        white_kc = True
+        white_qc = True
+        black_kc = True
+        black_qc = True
+
     return Board(
         pieces=pieces,
         move_color=move_color,
         en_passant=en_passant,
+        white_kc=white_kc,
+        white_qc=white_qc,
+        black_kc=black_kc,
+        black_qc=black_qc,
         move_up_color=move_up_color,
         lt_screen=board_data['lt_screen'],
         cell_size=cell_size
