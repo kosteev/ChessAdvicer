@@ -15,4 +15,7 @@
 
 - get_next_board refactoring
 - analyze + analyze deeper with first 2-3 moves
-
+- openings tests
+- tests more
+- tests for castles
+- tests for moves_to_consider

@@ -37,9 +37,14 @@ class Board(object):
             cell_size=self.cell_size
         )
 
+    @staticmethod
+    def pieces_hash(pieces):
+        return hash(json.dumps(sorted(pieces.items())))
+
     @property
     def hash(self):
-        return hash(json.dumps(sorted(self.pieces.items()) + [self.move_color, self.en_passant]))
+        return hash('{}{}{}'.format(
+            Board.pieces_hash(self.pieces), self.move_color, self.en_passant))
 
     @property
     def evaluation(self):
