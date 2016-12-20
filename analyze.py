@@ -179,7 +179,6 @@ class AlphaBetaAnalyzer(Analyzer):
             result = self.dfs(board)
 
             opening_move = get_opening_move(board)
-            print 'opening_move', opening_move
             if opening_move is not None:
                 opening_result = self.dfs(board, moves_to_consider=[opening_move])
                 # TODO: check moves == []

@@ -344,7 +344,7 @@ def get_board(mode, prev_board):
     black_qc = False
     if sum((c, r) in pieces
            for c in xrange(8)
-           for r in [0, 1, 6, 7]) >= 15:
+           for r in [0, 1, 6, 7]) >= 31:
         # Make a guess that it is either initial position or one move ahead
         white_kc = True
         white_qc = True
