@@ -24,3 +24,9 @@
 - pool.map -> pool.iman_unordered
 - test on format O-O
 - tests on board move castle
+
+
+- castles remove in make move
+- get castles from prev board
+- remove castles in get_board
+- think about 31

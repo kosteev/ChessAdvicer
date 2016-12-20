@@ -284,7 +284,8 @@ class AlphaBetaAnalyzer(Analyzer):
                     if alpha >= beta:
                         break
         else:
-            for move in board.get_board_moves():
+            board_moves = board.get_board_moves() if moves_to_consider is None else moves_to_consider
+            for move in board_moves:
                 revert_info = board.make_move(move)
                 if revert_info is None:
                     continue
