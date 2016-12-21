@@ -36,11 +36,14 @@ class Board(object):
         self.positional_eval = self.get_positional_eval()
 
     def copy(self):
-        # BUG !!!!
         return Board(
             pieces=self.pieces.copy(),
             move_color=self.move_color,
             en_passant=self.en_passant,
+            white_kc=self.white_kc,
+            white_qc=self.white_qc,
+            black_kc=self.black_kc,
+            black_qc=self.black_qc,
             move_up_color=self.move_up_color,
             lt_screen=self.lt_screen,
             cell_size=self.cell_size
@@ -150,7 +153,7 @@ class Board(object):
         if move['captured_piece']:
             del self.pieces[move['captured_position']]
         self.pieces[move['new_position']] = (move['new_piece'], move_color)
-        # Castle
+        # Castle move
         castle_info = None
         if (move['piece'] == 'king' and
                 abs(move['new_position'][0] - move['position'][0]) == 2):
@@ -188,13 +191,35 @@ class Board(object):
         if (move['piece'] == 'pawn' and
                 abs(move['new_position'][1] - move['position'][1]) == 2):
             self.en_passant = (move['position'][0], (move['new_position'][1] + move['position'][1]) / 2)
+        # Castles
+        old_white_kc = self.white_kc
+        old_white_qc = self.white_qc
+        old_black_kc = self.black_kc
+        old_black_qc = self.black_qc
+        positions = [move['position'], move['new_position']]
+        if ((4, 0) in positions or
+                (7, 0) in positions):
+            self.white_kc = False
+        if ((4, 0) in positions or
+                (0, 0) in positions):
+            self.white_qc = False
+        if ((4, 7) in positions or
+                (7, 7) in positions):
+            self.black_kc = False
+        if ((4, 7) in positions or
+                (0, 7) in positions):
+            self.black_qc = False
 
         revert_info = {
             'move': move,
             'delta_material': delta_material,
             'delta_positional_eval': delta_positional_eval,
             'old_en_passant': old_en_passant,
-            'castle_info': castle_info
+            'castle_info': castle_info,
+            'old_white_kc': old_white_kc,
+            'old_white_qc': old_white_qc,
+            'old_black_kc': old_black_kc,
+            'old_black_qc': old_black_qc
         }
 
         if self.is_check():
@@ -215,7 +240,7 @@ class Board(object):
         if move['captured_piece']:
             self.pieces[move['captured_position']] = (move['captured_piece'], opp_move_color)
         self.pieces[move['position']] = (move['piece'], move_color)
-        # Uncastle
+        # Castle move
         if castle_info is not None:
             rook_position = castle_info['rook_position']
             rook_new_position = castle_info['rook_new_position']
@@ -231,6 +256,11 @@ class Board(object):
         self.move_color = move_color
         # Revert en passant
         self.en_passant = revert_info['old_en_passant']
+        # Revert castle signs
+        self.white_kc = revert_info['old_white_kc']
+        self.white_qc = revert_info['old_white_qc']
+        self.black_kc = revert_info['old_black_kc']
+        self.black_qc = revert_info['old_black_qc']
 
     def get_piece_probable_moves(self, position):
         '''
