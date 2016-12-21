@@ -1,15 +1,24 @@
+import sys
 import time
+import traceback
 from multiprocessing import Pool, cpu_count
 
 from board import Board
 from endgame import get_syzygy_best_move
+from openings import get_opening_move
 from pieces import WHITE, BLACK
 from utils import color_sign
 
 
 def pool_dfs_wrapper(pool_arg):
+    '''
+    Wraps dfs in try/except, multiprocessing doesn't provide actual stack trace.
+    '''
     analyzer, args, kwargs = pool_arg
-    return analyzer.dfs(*args, **kwargs)
+    try:
+        return analyzer.dfs(*args, **kwargs)
+    except Exception:
+        raise Exception("".join(traceback.format_exception(*sys.exc_info())))
 
 
 def chunks(l, n):
@@ -176,6 +185,16 @@ class AlphaBetaAnalyzer(Analyzer):
         syzygy_best_move = None
         if syzygy_best_move is None:
             result = self.dfs(board)
+
+            # opening_move = get_opening_move(board)
+            opening_move = None
+            if opening_move is not None:
+                opening_result = self.dfs(board, moves_to_consider=[opening_move])
+                # TODO: check moves == []
+                if (opening_result[0]['moves'] and
+                        abs(result[0]['evaluation'] - opening_result[0]['evaluation']) < 0.5):
+                    # If line is exist (moves != []) and evaluation is pretty close to best
+                    result = opening_result
         else:
             result = [{
                 'evaluation': syzygy_best_move['evaluation'],
@@ -188,7 +207,8 @@ class AlphaBetaAnalyzer(Analyzer):
             'stats': stats
         }
 
-    def dfs(self, board, alpha=-Board.MAX_EVALUATION - 1, beta=Board.MAX_EVALUATION + 1, deep=0):
+    def dfs(self, board, alpha=-Board.MAX_EVALUATION - 1, beta=Board.MAX_EVALUATION + 1,
+            deep=0, moves_to_consider=None):
         '''
         !!!! This function should be multi-thread safe.
 
@@ -201,6 +221,8 @@ class AlphaBetaAnalyzer(Analyzer):
         Alpha-beta pruning
             if alpha and beta not passed dfs will return always true evaluation
         max_deep - 2*n for checkmate in `n` moves
+
+        `moves_to_consider` - moves to consider, if None than all valid moves are considered
 
         TODO: (kosteev) write tests
         TODO: (kosteev) compare with simple analyzer
@@ -230,12 +252,14 @@ class AlphaBetaAnalyzer(Analyzer):
         if deep == 0:
             pool_args = []
             moves = []
-            for move in board.get_board_moves():
+            # TODO: provide same logic for not multiprocessing
+            board_moves = board.get_board_moves() if moves_to_consider is None else moves_to_consider
+            for move in board_moves:
                 revert_info = board.make_move(move)
                 if revert_info is None:
                     continue
-
                 is_any_move = True
+
                 args = (board.copy(), )
                 kwargs = {
                     'deep': deep + 1
@@ -269,7 +293,8 @@ class AlphaBetaAnalyzer(Analyzer):
                     if alpha >= beta:
                         break
         else:
-            for move in board.get_board_moves():
+            board_moves = board.get_board_moves() if moves_to_consider is None else moves_to_consider
+            for move in board_moves:
                 revert_info = board.make_move(move)
                 if revert_info is None:
                     continue
