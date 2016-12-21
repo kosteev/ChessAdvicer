@@ -76,7 +76,7 @@ def get_settings(mode):
         white_letter_count = 84
         black_letter_count = 59
     else:
-        board_radius_pixels = 4
+        board_radius_pixels = 3
         colors = {
             'white_piece': (1, 1, 1),
             'black_piece': (0, 0, 0),
@@ -342,14 +342,37 @@ def get_board(mode, prev_board):
     white_qc = False
     black_kc = False
     black_qc = False
-    if sum((c, r) in pieces
+    if prev_board is not None:
+        white_kc = prev_board.white_kc
+        white_qc = prev_board.white_qc
+        black_kc = prev_board.black_kc
+        black_qc = prev_board.black_qc
+    else:
+        # TODO: check actual cells
+        if sum((c, r) in pieces
            for c in xrange(8)
-           for r in [0, 1, 6, 7]) >= 15:
-        # Make a guess that it is either initial position or one move ahead
-        white_kc = True
-        white_qc = True
-        black_kc = True
-        black_qc = True
+           for r in [0, 1]) == 16:
+            white_kc = True
+            white_qc = True
+        if sum((c, r) in pieces
+           for c in xrange(8)
+           for r in [6, 7]) == 16:
+            black_kc = True
+            black_qc = True
+
+    # Refresh castles regarding to move
+    if ((4, 0) in yellow_cells or
+            (7, 0) in yellow_cells):
+        white_kc = False
+    if ((4, 0) in yellow_cells or
+            (0, 0) in yellow_cells):
+        white_qc = False
+    if ((4, 7) in yellow_cells or
+            (7, 7) in yellow_cells):
+        black_kc = False
+    if ((4, 7) in yellow_cells or
+            (0, 7) in yellow_cells):
+        black_qc = False
 
     return Board(
         pieces=pieces,

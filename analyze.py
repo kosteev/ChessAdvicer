@@ -186,8 +186,7 @@ class AlphaBetaAnalyzer(Analyzer):
         if syzygy_best_move is None:
             result = self.dfs(board)
 
-            # opening_move = get_opening_move(board)
-            opening_move = None
+            opening_move = get_opening_move(board)
             if opening_move is not None:
                 opening_result = self.dfs(board, moves_to_consider=[opening_move])
                 # TODO: check moves == []
