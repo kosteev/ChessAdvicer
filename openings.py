@@ -1,7 +1,7 @@
 from board import Board
 from mocks import get_mock
 from pieces import WHITE
-from utils import name_to_cell
+from utils import name_to_cell, get_color_pieces
 
 
 OPENINGS = [{
@@ -17,11 +17,7 @@ OPENINGS = [{
 
 for opening in OPENINGS:
     board = get_mock(1)
-    color_pieces = {
-        position: (piece, color)
-        for position, (piece, color) in board.pieces.items()
-        if color == opening['color']
-    }
+    color_pieces = get_color_pieces(board.pieces, opening['color'])
 
     hashes = []
     for name_from, name_to in opening['from_to']:
@@ -44,11 +40,7 @@ def get_opening_move(board):
     for move in board.get_board_moves():
         moves_dict[(move['position'], move['new_position'])] = move
 
-    color_pieces = {
-        position: (piece, color)
-        for position, (piece, color) in board.pieces.items()
-        if color == board.move_color
-    }
+    color_pieces = get_color_pieces(board.pieces, board.move_color)
     pieces_hash = Board.pieces_hash(color_pieces)
 
     for opening in OPENINGS:

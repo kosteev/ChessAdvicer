@@ -205,3 +205,10 @@ def get_board_from_fen(fen):
         black_kc=black_kc,
         black_qc=black_qc
     )
+
+def get_color_pieces(pieces, leave_color):
+    return {
+        position: (piece, color)
+        for position, (piece, color) in pieces.items()
+        if color == leave_color
+    }

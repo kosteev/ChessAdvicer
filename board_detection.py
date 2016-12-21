@@ -9,7 +9,7 @@ from PIL import ImageGrab
 
 from board import Board
 from pieces import WHITE, BLACK, PIECES, get_opp_color
-from utils import normalize_cell
+from utils import normalize_cell, get_color_pieces
 from mocks import get_mock
 
 
@@ -319,6 +319,7 @@ def get_board(mode, prev_board):
         if (not yellow_cells and
                 all((c, r) in pieces for c in xrange(8) for r in [0, 1, 6, 7])):
             # Initial position, consider also 960
+            # Maybe no 960???
             move_color = WHITE
         elif (len(yellow_cells) == 2 and
                 yellow_cells[0][1] == 0 and yellow_cells[1][1] == 0):
@@ -348,17 +349,18 @@ def get_board(mode, prev_board):
         black_kc = prev_board.black_kc
         black_qc = prev_board.black_qc
     else:
-        # TODO: check actual cells
-        if sum((c, r) in pieces
-           for c in xrange(8)
-           for r in [0, 1]) == 16:
-            white_kc = True
-            white_qc = True
-        if sum((c, r) in pieces
-           for c in xrange(8)
-           for r in [6, 7]) == 16:
-            black_kc = True
-            black_qc = True
+        # Init position
+        init_board = get_mock(1)
+        for color in [WHITE, BLACK]:
+            color_pieces = get_color_pieces(pieces, color)
+            init_pieces = get_color_pieces(init_board.pieces, color)
+            if color_pieces == init_pieces:
+                if color == WHITE:
+                    white_kc = True
+                    white_qc = True
+                else:
+                    black_kc = True
+                    black_qc = True
 
     # Refresh castles regarding to move
     if ((4, 0) in yellow_cells or
