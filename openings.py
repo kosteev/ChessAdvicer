@@ -1,16 +1,36 @@
+import random
+
 from board import Board
 from mocks import get_mock
-from pieces import WHITE
+from pieces import WHITE, BLACK
 from utils import name_to_cell, get_color_pieces
 
 
 OPENINGS = [{
-    'name': 'fiancetto',
+    'name': 'fiancetto_white',
     'color': WHITE,
     'from_to': [
         ('g1', 'f3'),
         ('g2', 'g3'),
         ('f1', 'g2'),
+        ('e1', 'g1')
+    ]
+}, {
+    'name': 'fiancetto_black',
+    'color': BLACK,
+    'from_to': [
+        ('g8', 'f6'),
+        ('g7', 'g6'),
+        ('f8', 'g7'),
+        ('e8', 'g8')
+    ]
+}, {
+    'name': 'e2e3_castle',
+    'color': WHITE,
+    'from_to': [
+        ('e2', 'e3'),
+        ('g1', 'f3'),
+        ('f1', 'e2'),
         ('e1', 'g1')
     ]
 }]
@@ -43,6 +63,7 @@ def get_opening_move(board):
     color_pieces = get_color_pieces(board.pieces, board.move_color)
     pieces_hash = Board.pieces_hash(color_pieces)
 
+    moves = []
     for opening in OPENINGS:
         for ind, move_hash in enumerate(opening['hashes']):
             if move_hash == pieces_hash:
@@ -51,6 +72,10 @@ def get_opening_move(board):
                 new_position = name_to_cell(name_to)
 
                 move = moves_dict.get((position, new_position))
-                return move
+                moves.append(move)
+                break
+
+    if moves:
+        return random.choice(moves)
 
     return None

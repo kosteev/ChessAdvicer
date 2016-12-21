@@ -1,31 +1,14 @@
-- analyzer write on the fly
-- make Move class
 - optparse
-- make Play class
-- analyzer max time
-- debuts
 - endgames
 - evaluation with count of cells to move
-- killed 9
 - memory leak (garbage collect board)
 - evaluation function better
-- human takes
 
 
 
-- get_next_board refactoring
 - analyze + analyze deeper with first 2-3 moves
 - openings tests
 - tests more
-- tests for castles
 - tests for moves_to_consider
-- test on not castle in deep=2,3 (true and false)
-- test on castle with obstacle
 - pool.map -> pool.iman_unordered
-- test on format O-O
-- tests on board move castle
-
-
-- tests on board.copy()
-- test on list(probable_moves)
 - refactoring of castles (white_*, black_*)

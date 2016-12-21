@@ -1,5 +1,5 @@
 import unittest
-from nose.tools import assert_equal
+from nose.tools import assert_equal, assert_true
 
 from analyze import SimpleAnalyzer, AlphaAnalyzer, AlphaBetaAnalyzer
 from evaluation import simple_evaluation
@@ -147,3 +147,28 @@ class TestAnalyzer(unittest.TestCase):
 
             to_check.sort(reverse=True)
             assert_equal(to_check[0], (999, 'king', (4, 0), (6, 0)))
+
+    def test_king_castle_deep_4(self):
+        lines = 10
+        for analyzer_class in analyzer_classes:
+            analyzer = analyzer_class(
+                max_deep=4, evaluation_func=simple_evaluation, lines=lines)
+            board = get_mock(15)
+
+            analysis = analyzer.analyze(board)
+            result = analysis['result']
+
+            to_check = []
+            for ind in xrange(2):
+                to_check.append(
+                    (result[ind]['evaluation'],
+                     result[ind]['moves'][-1]['piece'],
+                     result[ind]['moves'][-1]['position'],
+                     result[ind]['moves'][-1]['new_position'],
+                     result[ind]['moves'][-3]['piece'],
+                     result[ind]['moves'][-3]['position'],
+                     result[ind]['moves'][-3]['new_position']))
+
+            to_check.sort(reverse=True)
+            assert_equal(to_check[0], (997, 'knight', (6, 0), (7, 2), 'king', (4, 0), (6, 0)))
+            assert_true(to_check[1][0] != 997)

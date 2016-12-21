@@ -123,3 +123,98 @@ class Test(unittest.TestCase):
             board.revert_move(revert_info)
 
         assert_true(board.pieces[(6, 3)] == ('pawn', WHITE))
+
+    def test_castle_obstacle_not_valid(self):
+        for mock_id in [1, 9, 14]:
+            board = get_mock(mock_id)
+            print_board(board)
+
+            for move in board.get_board_moves():
+                revert_info = board.make_move(move)
+                if revert_info is None:
+                    continue
+
+                board.revert_move(revert_info)
+
+                if (move['piece'] == 'king' and
+                        move['new_position'] == (6, 0)):
+                    assert_true(False)
+
+    def test_castle_valid(self):
+        for mock_id in [10]:
+            board = get_mock(mock_id)
+            print_board(board)
+
+            assert_equal(board.white_kc, True)
+            assert_equal(board.white_qc, True)
+            for move in board.get_board_moves():
+                revert_info = board.make_move(move)
+                if revert_info is None:
+                    continue
+
+                if (move['piece'] == 'king' and
+                    move['new_position'] == (6, 0) and
+                    (4, 0) not in board.pieces and
+                    board.pieces[(5, 0)] == ('rook', WHITE) and
+                    board.pieces[(6, 0)] == ('king', WHITE) and
+                        (7, 0) not in board.pieces):
+                    break
+
+                board.revert_move(revert_info)
+            else:
+                assert_true(False)
+
+    def test_castle_beaten_cell_check(self):
+        for mock_id in [11, 12, 13]:
+            board = get_mock(mock_id)
+            print_board(board)
+
+            for move in board.get_board_moves():
+                revert_info = board.make_move(move)
+                if revert_info is None:
+                    continue
+
+                board.revert_move(revert_info)
+
+                if (move['piece'] == 'king' and
+                        abs(move['new_position'][0] - move['position'][0]) == 2):
+                    assert_true(False)
+
+    def test_castle_become_invalid(self):
+        for mock_id in [16]:
+            board = get_mock(mock_id)
+            print_board(board)
+
+            assert_equal(board.black_qc, True)
+            is_any_move = False
+            for move in board.get_board_moves():
+                revert_info = board.make_move(move)
+                if revert_info is None:
+                    continue
+
+                assert_equal(board.black_qc, False)
+                board.revert_move(revert_info)
+                is_any_move = True
+
+            assert_equal(is_any_move, True)
+            assert_equal(board.black_qc, True)
+
+    def test_copy(self):
+        for mock_id in xrange(MOCKS_COUNT):
+            board = get_mock(mock_id)
+            board2 = board.copy()
+
+            assert_equal(board.hash, board2.hash)
+
+    def test_get_board_moves(self):
+        l1 = []
+        for mock_id in xrange(MOCKS_COUNT):
+            board = get_mock(mock_id)
+            l1.append(sorted(board.get_board_moves()))
+
+        l2 = []
+        for mock_id in xrange(MOCKS_COUNT):
+            board = get_mock(mock_id)
+            l2.append(sorted(board.get_board_moves()))
+
+        assert_equal(l1, l2)
