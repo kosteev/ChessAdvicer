@@ -36,6 +36,7 @@ class Board(object):
         self.positional_eval = self.get_positional_eval()
 
     def copy(self):
+        # BUG !!!!
         return Board(
             pieces=self.pieces.copy(),
             move_color=self.move_color,
@@ -248,7 +249,8 @@ class Board(object):
 
         probable_moves = []
         if piece != 'pawn':
-            probable_moves = PROBABLE_MOVES[piece][position]
+            # Awful bug!!!
+            probable_moves = list(PROBABLE_MOVES[piece][position])
         else:
             promote_pieces = []
             if position[1] + sign in [0, 7]:

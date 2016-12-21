@@ -76,7 +76,7 @@ def get_settings(mode):
         white_letter_count = 84
         black_letter_count = 59
     else:
-        board_radius_pixels = 3
+        board_radius_pixels = 4
         colors = {
             'white_piece': (1, 1, 1),
             'black_piece': (0, 0, 0),
@@ -344,7 +344,7 @@ def get_board(mode, prev_board):
     black_qc = False
     if sum((c, r) in pieces
            for c in xrange(8)
-           for r in [0, 1, 6, 7]) >= 31:
+           for r in [0, 1, 6, 7]) >= 15:
         # Make a guess that it is either initial position or one move ahead
         white_kc = True
         white_qc = True

@@ -19,7 +19,7 @@
 - tests more
 - tests for castles
 - tests for moves_to_consider
-- test on not castle in deep=2,3
+- test on not castle in deep=2,3 (true and false)
 - test on castle with obstacle
 - pool.map -> pool.iman_unordered
 - test on format O-O
@@ -30,3 +30,5 @@
 - get castles from prev board
 - remove castles in get_board
 - think about 31
+- tests on board.copy()
+- test on list(probable_moves)

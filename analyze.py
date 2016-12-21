@@ -1,4 +1,6 @@
+import sys
 import time
+import traceback
 from multiprocessing import Pool, cpu_count
 
 from board import Board
@@ -9,8 +11,14 @@ from utils import color_sign
 
 
 def pool_dfs_wrapper(pool_arg):
+    '''
+    Wraps dfs in try/except, multiprocessing doesn't provide actual stack trace.
+    '''
     analyzer, args, kwargs = pool_arg
-    return analyzer.dfs(*args, **kwargs)
+    try:
+        return analyzer.dfs(*args, **kwargs)
+    except Exception:
+        raise Exception("".join(traceback.format_exception(*sys.exc_info())))
 
 
 def chunks(l, n):
@@ -178,7 +186,8 @@ class AlphaBetaAnalyzer(Analyzer):
         if syzygy_best_move is None:
             result = self.dfs(board)
 
-            opening_move = get_opening_move(board)
+            # opening_move = get_opening_move(board)
+            opening_move = None
             if opening_move is not None:
                 opening_result = self.dfs(board, moves_to_consider=[opening_move])
                 # TODO: check moves == []
