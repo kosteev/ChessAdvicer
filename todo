@@ -26,9 +26,6 @@
 - tests on board move castle
 
 
-- castles remove in make move
-- get castles from prev board
-- remove castles in get_board
-- think about 31
 - tests on board.copy()
 - test on list(probable_moves)
+- refactoring of castles (white_*, black_*)
