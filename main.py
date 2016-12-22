@@ -113,7 +113,7 @@ if __name__ == '__main__':
                         if unexpected:
                             # If capture and not expected line before
                             # move_time = 0.5 + random.random() * 0.5
-                            move_time = 0.65 + random.random() * 0.2
+                            move_time = 0.85 + random.random() * 0.2
                             time_to_sleep = max(move_time - spent_time, 0)
                             print 'Sleeping (human unexpected case): {:.3f}'.format(time_to_sleep)
                             time.sleep(time_to_sleep)
