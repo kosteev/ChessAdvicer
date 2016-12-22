@@ -2,7 +2,8 @@ import copy
 import json
 import random
 
-from pieces import get_opp_color, PIECES, PROBABLE_MOVES, WHITE, PIECE_CELL_VALUE, BEAT_LINES, BLACK
+from pieces import get_opp_color, PIECES, PROBABLE_MOVES, WHITE, PIECE_CELL_VALUE, BEAT_LINES, BLACK, \
+    get_castles, WHITE_KC, WHITE_QC, BLACK_KC, BLACK_QC, get_castle_id
 from utils import color_sign
 
 
@@ -10,7 +11,7 @@ class Board(object):
     MAX_EVALUATION = 1000
     # 999 - checkmate in one move, 998 - ...
 
-    def __init__(self, pieces, move_color, en_passant=None, castles={},
+    def __init__(self, pieces, move_color, en_passant=None, castles=[],
                  move_up_color=WHITE, lt_screen=None, cell_size=None):
         '''
             `pieces` - dict with pieces
@@ -19,14 +20,9 @@ class Board(object):
             `lt_screen` - coordinates of board left-top position on the screen, for gui library
             `cell_size` - size of cell, for gui library
         '''
-        # Make castles dict with right format
-        for color in [WHITE, BLACK]:
-            castles.setdefault(color, {
-                'k': False,
-                'q': False
-            })
-            for t in ['k', 'q']:
-                castles[color].setdefault(t, False)
+        # Init castles
+        if not castles:
+            castles = get_castles()
 
         self.pieces = pieces
         self.move_color = move_color
@@ -45,7 +41,7 @@ class Board(object):
             pieces=self.pieces.copy(),
             move_color=self.move_color,
             en_passant=self.en_passant,
-            castles=copy.deepcopy(self.castles), # TODO: make here bug and check
+            castles=list(self.castles), # TODO: make here bug and check
             move_up_color=self.move_up_color,
             lt_screen=self.lt_screen,
             cell_size=self.cell_size
@@ -59,9 +55,8 @@ class Board(object):
     def hash(self):
         # XXX: Maybe use here hash(fen)
         return hash(json.dumps(
-            sorted(self.pieces.items()) +
-            sorted(self.castles[WHITE].items()) + sorted(self.castles[BLACK].items()) +
-            [self.move_color, self.en_passant]))
+            [Board.pieces_hash(self.pieces)] +
+            self.castles + [self.move_color, self.en_passant]))
 
     @property
     def evaluation(self):
@@ -195,20 +190,20 @@ class Board(object):
                 abs(move['new_position'][1] - move['position'][1]) == 2):
             self.en_passant = (move['position'][0], (move['new_position'][1] + move['position'][1]) / 2)
         # Castles
-        old_castles = copy.deepcopy(self.castles)
+        old_castles = list(self.castles)
         positions = [move['position'], move['new_position']]
         if ((4, 0) in positions or
                 (7, 0) in positions):
-            self.castles[WHITE]['k'] = False
+            self.castles[WHITE_KC] = False
         if ((4, 0) in positions or
                 (0, 0) in positions):
-            self.castles[WHITE]['q'] = False
+            self.castles[WHITE_QC] = False
         if ((4, 7) in positions or
                 (7, 7) in positions):
-            self.castles[BLACK]['k'] = False
+            self.castles[BLACK_KC] = False
         if ((4, 7) in positions or
                 (0, 7) in positions):
-            self.castles[BLACK]['q'] = False
+            self.castles[BLACK_QC] = False
 
         revert_info = {
             'move': move,
@@ -253,7 +248,7 @@ class Board(object):
         self.move_color = move_color
         # Revert en passant
         self.en_passant = revert_info['old_en_passant']
-        # Revert castle signs
+        # Revert castles
         self.castles = revert_info['old_castles']
 
     def get_piece_probable_moves(self, position):
@@ -323,8 +318,8 @@ class Board(object):
             # If (king, rook) haven't moved +
             # if not under check + king don't passing beaten cell +
             # if no piece is on the way
-            kc = self.castles[move_color]['k']
-            qc = self.castles[move_color]['q']
+            kc = self.castles[get_castle_id(move_color, 'k')]
+            qc = self.castles[get_castle_id(move_color, 'q')]
             if (kc or
                     qc):
                 r = 0 if move_color == WHITE else 7

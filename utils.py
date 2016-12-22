@@ -1,6 +1,6 @@
 import termcolor
 
-from pieces import PIECES, WHITE, BLACK
+from pieces import PIECES, WHITE, BLACK, get_castles, WHITE_KC, WHITE_QC, BLACK_KC, BLACK_QC
 
 
 def color_sign(color):
@@ -146,13 +146,13 @@ def get_fen_from_board(board):
 
     # TODO: provide k/q castles
     castles = ''
-    if board.castles[WHITE]['k']:
+    if board.castles[WHITE_KC]:
         castles += 'K'
-    if board.castles[WHITE]['q']:
+    if board.castles[WHITE_QC]:
         castles += 'Q'
-    if board.castles[BLACK]['k']:
+    if board.castles[BLACK_KC]:
         castles += 'k'
-    if board.castles[BLACK]['q']:
+    if board.castles[BLACK_QC]:
         castles += 'q'
     if not castles:
         castles = '-'
@@ -187,16 +187,8 @@ def get_board_from_fen(fen):
 
     move_color = WHITE if p2 == 'w' else BLACK
 
-    castles = {
-        WHITE: {
-            'k': 'K' in p3,
-            'q': 'Q' in p3
-        },
-        BLACK: {
-            'k': 'k' in p3,
-            'q': 'q' in p3
-        }
-    }
+    castles = get_castles(
+        white_kc='K' in p3, white_qc='Q' in p3, black_kc='k' in p3, black_qc='q' in p3)
 
     en_passant = None
     if p4 != '-':

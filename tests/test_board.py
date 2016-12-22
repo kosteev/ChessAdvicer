@@ -3,7 +3,7 @@ from nose.tools import assert_equal, assert_true
 
 from board import Board
 from mocks import MOCKS_COUNT, get_mock
-from pieces import WHITE, BLACK
+from pieces import WHITE, BLACK, WHITE_KC, WHITE_QC, BLACK_QC, get_castles
 from utils import print_board
 
 
@@ -24,15 +24,9 @@ class Test(unittest.TestCase):
         hashes.add(Board(pieces, move_color=WHITE).hash)
         hashes.add(Board(pieces, move_color=BLACK).hash)
         hashes.add(Board(pieces, move_color=BLACK, en_passant=(2, 2)).hash)
-        hashes.add(Board(pieces, move_color=BLACK, castles={
-            WHITE: {'q': True}, BLACK: {'k': True}
-        }).hash)
-        hashes.add(Board(pieces, move_color=BLACK, castles={
-            WHITE: {'k': True}
-        }).hash)
-        hashes.add(Board(pieces, move_color=BLACK, castles={
-            BLACK: {'q': True}
-        }).hash)
+        hashes.add(Board(pieces, move_color=BLACK, castles=get_castles(white_qc=True, black_kc=True)).hash)
+        hashes.add(Board(pieces, move_color=BLACK, castles=get_castles(white_kc=True)).hash)
+        hashes.add(Board(pieces, move_color=BLACK, castles=get_castles(black_qc=True)).hash)
 
         assert_equal(len(hashes), 6)
 
@@ -151,8 +145,8 @@ class Test(unittest.TestCase):
             board = get_mock(mock_id)
             print_board(board)
 
-            assert_equal(board.castles[WHITE]['k'], True)
-            assert_equal(board.castles[WHITE]['q'], True)
+            assert_equal(board.castles[WHITE_KC], True)
+            assert_equal(board.castles[WHITE_QC], True)
             for move in board.get_board_moves():
                 revert_info = board.make_move(move)
                 if revert_info is None:
@@ -191,19 +185,19 @@ class Test(unittest.TestCase):
             board = get_mock(mock_id)
             print_board(board)
 
-            assert_equal(board.castles[BLACK]['q'], True)
+            assert_equal(board.castles[BLACK_QC], True)
             is_any_move = False
             for move in board.get_board_moves():
                 revert_info = board.make_move(move)
                 if revert_info is None:
                     continue
 
-                assert_equal(board.castles[BLACK]['q'], False)
+                assert_equal(board.castles[BLACK_QC], False)
                 board.revert_move(revert_info)
                 is_any_move = True
 
             assert_equal(is_any_move, True)
-            assert_equal(board.castles[BLACK]['q'], True)
+            assert_equal(board.castles[BLACK_QC], True)
 
     def test_copy(self):
         for mock_id in xrange(MOCKS_COUNT):

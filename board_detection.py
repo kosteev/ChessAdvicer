@@ -10,7 +10,8 @@ from PIL import ImageGrab
 import copy
 
 from board import Board
-from pieces import WHITE, BLACK, PIECES, get_opp_color
+from pieces import WHITE, BLACK, PIECES, get_opp_color, get_castles, get_castle_id, \
+    WHITE_KC, WHITE_QC, BLACK_KC, BLACK_QC
 from utils import normalize_cell, get_color_pieces
 from mocks import get_mock
 
@@ -341,18 +342,9 @@ def get_board(mode, prev_board):
             en_passant = (yellow_cells[0][0], (yellow_cells[0][1] + yellow_cells[1][1]) / 2)
 
     # Castles
-    castles = {
-        WHITE: {
-            'k': False,
-            'q': False
-        },
-        BLACK: {
-            'k': False,
-            'q': False
-        }
-    }
+    castles = get_castles()
     if prev_board is not None:
-        castles = copy.deepcopy(prev_board.castles)
+        castles = list(prev_board.castles)
     else:
         # Init position
         init_board = get_mock(1)
@@ -360,22 +352,22 @@ def get_board(mode, prev_board):
             color_pieces = get_color_pieces(pieces, color)
             init_pieces = get_color_pieces(init_board.pieces, color)
             if color_pieces == init_pieces:
-                castles[color]['k'] = True
-                castles[color]['q'] = True
+                castles[get_castle_id(color, 'k')] = True
+                castles[get_castle_id(color, 'q')] = True
 
     # Refresh castles regarding to move
     if ((4, 0) in yellow_cells or
             (7, 0) in yellow_cells):
-        castles[WHITE]['k'] = False
+        castles[WHITE_KC] = False
     if ((4, 0) in yellow_cells or
             (0, 0) in yellow_cells):
-        castles[WHITE]['q'] = False
+        castles[WHITE_QC] = False
     if ((4, 7) in yellow_cells or
             (7, 7) in yellow_cells):
-        castles[BLACK]['k'] = False
+        castles[BLACK_KC] = False
     if ((4, 7) in yellow_cells or
             (0, 7) in yellow_cells):
-        castles[BLACK]['q'] = False
+        castles[BLACK_QC] = False
 
     return Board(
         pieces=pieces,

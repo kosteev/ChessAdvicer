@@ -2,9 +2,23 @@ WHITE = 'white'
 BLACK = 'black'
 COLORS = [WHITE, BLACK]
 
-
 def get_opp_color(color):
     return WHITE if color == BLACK else BLACK
+
+
+WHITE_KC, WHITE_QC, BLACK_KC, BLACK_QC = range(4)
+
+def get_castles(white_kc=False, white_qc=False, black_kc=False, black_qc=False):
+    return [white_kc, white_qc, black_kc, black_qc]
+
+def get_castle_id(color, t):
+    d = {
+         (WHITE, 'k'): WHITE_KC,
+         (WHITE, 'q'): WHITE_QC,
+         (BLACK, 'k'): BLACK_KC,
+         (BLACK, 'q'): BLACK_QC
+    }
+    return d[(color, t)]
 
 
 def on_board((c, r)):
