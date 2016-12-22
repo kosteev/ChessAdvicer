@@ -56,9 +56,9 @@ def get_opening_info(board):
     '''
     Returns opening valid move (check is supposed to be verified additionally).
     '''
-    moves_dict = {}
+    available_moves_dict = {}
     for move in board.get_board_moves():
-        moves_dict[(move['position'], move['new_position'])] = move
+        available_moves_dict[(move['position'], move['new_position'])] = move
 
     color_pieces = get_color_pieces(board.pieces, board.move_color)
     pieces_hash = Board.pieces_hash(color_pieces)
@@ -71,11 +71,12 @@ def get_opening_info(board):
                 position = name_to_cell(name_from)
                 new_position = name_to_cell(name_to)
 
-                move = moves_dict.get((position, new_position))
-                opening_infos.append({
-                    'name': opening['name'],
-                    'move': move
-                })
+                move = available_moves_dict.get((position, new_position))
+                if move:
+                    opening_infos.append({
+                        'name': opening['name'],
+                        'move': move
+                    })
                 break
 
     if opening_infos:
