@@ -2,7 +2,6 @@
 - endgames
 - evaluation with count of cells to move
 - memory leak (garbage collect board)
-- evaluation function better
 
 
 

@@ -146,13 +146,13 @@ def get_fen_from_board(board):
 
     # TODO: provide k/q castles
     castles = ''
-    if board.white_kc:
+    if board.castles[WHITE]['k']:
         castles += 'K'
-    if board.white_qc:
+    if board.castles[WHITE]['q']:
         castles += 'Q'
-    if board.black_kc:
+    if board.castles[BLACK]['k']:
         castles += 'k'
-    if board.black_qc:
+    if board.castles[BLACK]['q']:
         castles += 'q'
     if not castles:
         castles = '-'
@@ -187,10 +187,16 @@ def get_board_from_fen(fen):
 
     move_color = WHITE if p2 == 'w' else BLACK
 
-    white_kc = 'K' in p3
-    white_qc = 'Q' in p3
-    black_kc = 'k' in p3
-    black_qc = 'q' in p3
+    castles = {
+        WHITE: {
+            'k': 'K' in p3,
+            'q': 'Q' in p3
+        },
+        BLACK: {
+            'k': 'k' in p3,
+            'q': 'q' in p3
+        }
+    }
 
     en_passant = None
     if p4 != '-':
@@ -200,10 +206,7 @@ def get_board_from_fen(fen):
         pieces=pieces,
         move_color=move_color,
         en_passant=en_passant,
-        white_kc=white_kc,
-        white_qc=white_qc,
-        black_kc=black_kc,
-        black_qc=black_qc
+        castles=castles
     )
 
 def get_color_pieces(pieces, leave_color):

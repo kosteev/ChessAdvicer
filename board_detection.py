@@ -7,6 +7,8 @@ from Quartz.CoreGraphics import CGMainDisplayID
 
 from PIL import ImageGrab
 
+import copy
+
 from board import Board
 from pieces import WHITE, BLACK, PIECES, get_opp_color
 from utils import normalize_cell, get_color_pieces
@@ -339,15 +341,18 @@ def get_board(mode, prev_board):
             en_passant = (yellow_cells[0][0], (yellow_cells[0][1] + yellow_cells[1][1]) / 2)
 
     # Castles
-    white_kc = False
-    white_qc = False
-    black_kc = False
-    black_qc = False
+    castles = {
+        WHITE: {
+            'k': False,
+            'q': False
+        },
+        BLACK: {
+            'k': False,
+            'q': False
+        }
+    }
     if prev_board is not None:
-        white_kc = prev_board.white_kc
-        white_qc = prev_board.white_qc
-        black_kc = prev_board.black_kc
-        black_qc = prev_board.black_qc
+        castles = copy.deepcopy(prev_board.castles)
     else:
         # Init position
         init_board = get_mock(1)
@@ -355,35 +360,28 @@ def get_board(mode, prev_board):
             color_pieces = get_color_pieces(pieces, color)
             init_pieces = get_color_pieces(init_board.pieces, color)
             if color_pieces == init_pieces:
-                if color == WHITE:
-                    white_kc = True
-                    white_qc = True
-                else:
-                    black_kc = True
-                    black_qc = True
+                castles[color]['k'] = True
+                castles[color]['q'] = True
 
     # Refresh castles regarding to move
     if ((4, 0) in yellow_cells or
             (7, 0) in yellow_cells):
-        white_kc = False
+        castles[WHITE]['k'] = False
     if ((4, 0) in yellow_cells or
             (0, 0) in yellow_cells):
-        white_qc = False
+        castles[WHITE]['q'] = False
     if ((4, 7) in yellow_cells or
             (7, 7) in yellow_cells):
-        black_kc = False
+        castles[BLACK]['k'] = False
     if ((4, 7) in yellow_cells or
             (0, 7) in yellow_cells):
-        black_qc = False
+        castles[BLACK]['q'] = False
 
     return Board(
         pieces=pieces,
         move_color=move_color,
         en_passant=en_passant,
-        white_kc=white_kc,
-        white_qc=white_qc,
-        black_kc=black_kc,
-        black_qc=black_qc,
+        castles=castles,
         move_up_color=move_up_color,
         lt_screen=board_data['lt_screen'],
         cell_size=cell_size
