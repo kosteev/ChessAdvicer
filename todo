@@ -10,4 +10,3 @@
 - tests more
 - tests for moves_to_consider
 - pool.map -> pool.iman_unordered
-- refactoring of castles (white_*, black_*)
