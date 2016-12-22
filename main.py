@@ -31,7 +31,7 @@ if __name__ == '__main__':
 
     iteration = 0
     prev_hash = None
-    result = None
+    analysis = None
     board = None
     while True:
         # Should be in the beginning (continue issue)
@@ -75,13 +75,13 @@ if __name__ == '__main__':
                 print 'Waiting for opponent move'
                 continue
 
-            result = run_advicer(
+            analysis = run_advicer(
                 mode=mode,
                 max_deep=max_deep,
                 lines=lines,
                 play=play,
                 board=board,
-                prev_result=result
+                prev_analysis=analysis
             )
         else:
             print 'No board found'

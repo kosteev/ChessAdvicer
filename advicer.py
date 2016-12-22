@@ -3,22 +3,16 @@ import time
 
 from analyze import AlphaBetaAnalyzer
 from evaluation import take_evaluation
+from openings import get_opening_move
 from pieces import get_opp_color, BLACK
-from utils import moves_stringify
+from utils import moves_stringify, format_move
 
 
-def run_analyzer(analyzer_class, board, max_deep, lines, play):
-    kwargs = {
-        'max_deep': max_deep,
-        'lines': lines,
-        'evaluation_func': take_evaluation,
-        #'max_time': 1
-    }
-    analyzer = analyzer_class(**kwargs)
-
+def run_analyzer(analyzer, board):
     start_time = time.time()
     analysis = analyzer.analyze(board)
     analyzer_time = time.time() - start_time
+
     print 'Analyzer time = {:.6f}, nodes = {}'.format(analyzer_time, analysis['stats']['nodes'])
     print 'Per node = {:.3f}ms'.format(1000.0 * analyzer_time / analysis['stats']['nodes'])
     for ind, line in enumerate(analysis['result']):
@@ -33,21 +27,41 @@ def run_analyzer(analyzer_class, board, max_deep, lines, play):
     return analysis
 
 
-def run_advicer(mode, max_deep, lines, play, board, prev_result):
-    print 'Calculating lines...'
+def run_advicer(mode, max_deep, lines, play, board, prev_analysis):
+    print 'Run advicer...'
+
+    kwargs = {
+        'max_deep': max_deep,
+        'lines': lines,
+        'evaluation_func': take_evaluation,
+        #'max_time': 1
+    }
+    analyzer = AlphaBetaAnalyzer(**kwargs)
+
     start_time = time.time()
-    result = run_analyzer(AlphaBetaAnalyzer, board, max_deep, lines, play)
-    analyzer_time = time.time() - start_time
+    analysis = run_analyzer(analyzer, board)
+    opening_move = get_opening_move(board)
+    if opening_move is not None:
+        opening_analysis = analyzer.analyze(board, moves_to_consider=[opening_move])
+        # TODO: check moves == []
+        if (opening_analysis['result'][0]['moves'] and
+                abs(analysis['result'][0]['evaluation'] - opening_analysis['result'][0]['evaluation']) < 0.5):
+            # If line is exist (moves != []) and evaluation is pretty close to best
+            analysis = opening_analysis
+            print 'Opening move selected'
+            print format_move(opening_move)
+
+    spent_time = time.time() - start_time
 
     if play:
-        moves = result['result'][0]['moves']
+        moves = analysis['result'][0]['moves']
         if moves:
             move = moves[-1]
             if move['captured_piece']:
                 # Try to humanize `addy`
                 prev_moves = None
-                if prev_result is not None:
-                    prev_moves = prev_result['result'][0]['moves']
+                if prev_analysis is not None:
+                    prev_moves = prev_analysis['result'][0]['moves']
 
                 unexpected = False
                 if prev_moves is None:
@@ -65,8 +79,10 @@ def run_advicer(mode, max_deep, lines, play, board, prev_result):
                     # If capture and not expected line before
                     # move_time = 0.5 + random.random() * 0.5
                     move_time = 0.65 + random.random() * 0.2
-                    time_to_sleep = max(move_time - analyzer_time, 0)
+                    time_to_sleep = max(move_time - spent_time, 0)
                     print 'Sleeping (human unexpected case): {:.3f}'.format(time_to_sleep)
                     time.sleep(time_to_sleep)
+        else:
+            print 'No moves'
 
-    return result
+    return analysis

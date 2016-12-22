@@ -177,28 +177,9 @@ class AlphaBetaAnalyzer(Analyzer):
 
         return cls._pool
 
-    def analyze(self, board):
+    def analyze(self, board, moves_to_consider=None):
         self.analyze_launch_time = time.time()
-
-        # syzygy_best_move = get_syzygy_best_move(board)
-        # Temporary commented
-        syzygy_best_move = None
-        if syzygy_best_move is None:
-            result = self.dfs(board)
-
-            opening_move = get_opening_move(board)
-            if opening_move is not None:
-                opening_result = self.dfs(board, moves_to_consider=[opening_move])
-                # TODO: check moves == []
-                if (opening_result[0]['moves'] and
-                        abs(result[0]['evaluation'] - opening_result[0]['evaluation']) < 0.5):
-                    # If line is exist (moves != []) and evaluation is pretty close to best
-                    result = opening_result
-        else:
-            result = [{
-                'evaluation': syzygy_best_move['evaluation'],
-                'moves': syzygy_best_move['moves']
-            }]
+        result = self.dfs(board, moves_to_consider=moves_to_consider)
 
         stats = {'nodes': 1}
         return {
