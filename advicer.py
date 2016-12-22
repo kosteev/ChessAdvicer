@@ -115,7 +115,7 @@ def run_advicer(mode, max_deep, lines, play):
                 moves = result['result'][0]['moves']
                 if moves:
                     move = moves[-1]
-                    if True or move['captured_piece']:
+                    if move['captured_piece']:
                         # Try to humanize `addy`
                         prev_moves = None
                         if prev_result is not None:
@@ -135,7 +135,8 @@ def run_advicer(mode, max_deep, lines, play):
 
                         if unexpected:
                             # If capture and not expected line before
-                            move_time = 0.5 + random.random() * 0.5
+                            # move_time = 0.5 + random.random() * 0.5
+                            move_time = 0.65 + random.random() * 0.2
                             time_to_sleep = max(move_time - analyzer_time, 0)
                             print 'Sleeping (human unexpected case): {:.3f}'.format(time_to_sleep)
                             time.sleep(time_to_sleep)
