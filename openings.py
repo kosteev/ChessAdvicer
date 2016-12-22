@@ -52,7 +52,7 @@ for opening in OPENINGS:
     opening['hashes'] = hashes
 
 
-def get_opening_move(board):
+def get_opening_info(board):
     '''
     Returns opening valid move (check is supposed to be verified additionally).
     '''
@@ -63,7 +63,7 @@ def get_opening_move(board):
     color_pieces = get_color_pieces(board.pieces, board.move_color)
     pieces_hash = Board.pieces_hash(color_pieces)
 
-    moves = []
+    opening_infos = []
     for opening in OPENINGS:
         for ind, move_hash in enumerate(opening['hashes']):
             if move_hash == pieces_hash:
@@ -72,10 +72,13 @@ def get_opening_move(board):
                 new_position = name_to_cell(name_to)
 
                 move = moves_dict.get((position, new_position))
-                moves.append(move)
+                opening_infos.append({
+                    'name': opening['name'],
+                    'move': move
+                })
                 break
 
-    if moves:
-        return random.choice(moves)
+    if opening_infos:
+        return random.choice(opening_infos)
 
     return None

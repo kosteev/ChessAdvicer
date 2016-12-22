@@ -4,8 +4,6 @@ import traceback
 from multiprocessing import Pool, cpu_count
 
 from board import Board
-from endgame import get_syzygy_best_move
-from openings import get_opening_move
 from pieces import WHITE, BLACK
 from utils import color_sign
 

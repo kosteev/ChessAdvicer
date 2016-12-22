@@ -1,9 +1,8 @@
-import random
 import time
 
 from analyze import AlphaBetaAnalyzer
 from evaluation import take_evaluation
-from openings import get_opening_move
+from openings import get_opening_info
 from pieces import get_opp_color, BLACK
 from utils import moves_stringify, format_move
 
@@ -22,14 +21,15 @@ def run_advicer(mode, max_deep, lines, play, board):
     start_time = time.time()
     analysis = analyzer.analyze(board)
     first_line = analysis['result'][0]
-    opening_move = get_opening_move(board)
-    if opening_move is not None:
-        opening_analysis = analyzer.analyze(board, moves_to_consider=[opening_move])
+    opening_info = get_opening_info(board)
+    if opening_info is not None:
+        opening_analysis = analyzer.analyze(board, moves_to_consider=[opening_info['move']])
         # TODO: check moves == []
         if (opening_analysis['result'][0]['moves'] and
                 abs(analysis['result'][0]['evaluation'] - opening_analysis['result'][0]['evaluation']) < 0.5):
             # If line is exist (moves != []) and evaluation is pretty close to best
-            print 'Opening line selected: {}'.format(format_move(opening_move))
+            print 'Opening `{}` line selected: {}'.format(
+                opening_info['name'], format_move(opening_info['move']))
             first_line = opening_analysis['result'][0]
     advicer_time = time.time() - start_time
 
