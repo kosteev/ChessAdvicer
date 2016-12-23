@@ -9,6 +9,7 @@ from board_detection import get_board
 from evaluation import take_evaluation
 from gui import make_move
 from utils import print_board, moves_stringify
+from mocks import get_mock
 
 
 def print_take_evaluation(board):
@@ -41,8 +42,8 @@ if __name__ == '__main__':
         iteration += 1
 
         s = time.time()
-        board = get_board(mode, board)
-        # board = get_mock(2)
+        # board = get_board(mode, board)
+        board = get_mock(2)
         e = time.time()
 
         new_hash = board.hash if board else -1337
