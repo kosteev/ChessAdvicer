@@ -10,6 +10,7 @@ from evaluation import take_evaluation
 from gui import make_move
 from utils import print_board, moves_stringify
 from mocks import get_mock
+from pieces import WHITE
 
 
 def print_take_evaluation(board):
@@ -93,31 +94,40 @@ if __name__ == '__main__':
                 moves = first_line['moves']
                 if moves:
                     move = moves[-1]
-                    if move['captured_piece']:
-                        # Try to humanize `addy`, sleep if needed
-                        prev_moves = None
-                        if prev_first_line is not None:
-                            prev_moves = prev_first_line['moves']
-
-                        unexpected = False
-                        if prev_moves is None:
-                            print 'No previous calculations'
-                            unexpected = True
-                        elif (len(prev_moves) < 3 or
+                    # Try to humanize `addy`, sleep if needed
+                    unexpected = False
+                    if prev_first_line is None:
+                        print 'No pre calculations'
+                        unexpected = True
+                    elif move['captured_piece']:
+                        prev_moves = prev_first_line['moves']
+                        if (len(prev_moves) < 3 or
                              prev_moves[-3]['position'] != move['position'] or
                              prev_moves[-3]['new_position'] != move['new_position']):
                             # Check only (position, new_position) to reduce count of times it happens
-                            print 'Unxepected line, expected: {}'.format(
-                                moves_stringify(prev_moves, board.move_color))
+                            print 'Not expected capture'
                             unexpected = True
+                    else:
+                        # If evaluation changed too much
+                        diff = first_line['evaluation'] - prev_first_line['evaluation']
+                        tolerance = 1.5
+                        if move_color == WHITE:
+                            if diff > tolerance:
+                                print 'Evaluation changed too much'
+                                unexpected = True
+                        else:
+                            if diff < -tolerance:
+                                print 'Evaluation changed too much'
+                                unexpected = True
 
-                        if unexpected:
-                            # If capture and not expected line before
-                            # move_time = 0.5 + random.random() * 0.5
-                            move_time = 0.85 + random.random() * 0.2
-                            time_to_sleep = max(move_time - spent_time, 0)
-                            print 'Sleeping (human unexpected case): {:.3f}'.format(time_to_sleep)
-                            time.sleep(time_to_sleep)
+                    if unexpected:
+                        print 'Unxepected line, expected: {}'.format(
+                                moves_stringify(prev_first_line['moves'], board.move_color) if prev_first_line else None)
+                        # move_time = 0.5 + random.random() * 0.5
+                        move_time = 0.85 + random.random() * 0.2
+                        time_to_sleep = max(move_time - spent_time, 0)
+                        print 'Sleeping (human unexpected case): {:.3f}'.format(time_to_sleep)
+                        time.sleep(time_to_sleep)
 
                     print 'Make a move'
                     make_move(board, move['position'], move['new_position'])

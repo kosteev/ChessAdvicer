@@ -9,5 +9,4 @@
 - openings tests
 - tests more
 - tests for moves_to_consider
-- pool.map -> pool.iman_unordered
 - cpu_count -> higher
