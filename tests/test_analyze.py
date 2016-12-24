@@ -92,6 +92,7 @@ class TestAnalyzer(unittest.TestCase):
             analyzer = analyzer_class(
                 max_deep=4, evaluation_func=simple_evaluation, lines=lines)
             board = get_mock(2)
+            print_board(board)
 
             analysis = analyzer.analyze(board)
             result = analysis['result']
