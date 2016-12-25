@@ -20,6 +20,26 @@ def run_advicer(mode, max_deep, lines, play, board):
 
     start_time = time.time()
     analysis = analyzer.analyze(board)
+
+    # Get more deep analysis
+    deep_kwargs = {
+        'max_deep': max_deep,
+        'lines': 1,
+        'evaluation_func': take_evaluation,
+        #'max_time': 1
+    }
+    deep_analyzer = AlphaBetaAnalyzer(**deep_kwargs)
+    moves_to_consider = []
+    for line in analysis['result']:
+        if line['moves']:
+            moves_to_consider.append(line['moves'][-1])
+    for move in moves_to_consider:
+        revert_info = board.make_move(move)
+        deeper_analysis = deep_analyzer.analyze(board)
+        print format_move(move)
+        print deeper_analysis['result'][0]['evaluation']
+        board.revert_move(revert_info)
+
     first_line = analysis['result'][0]
     opening_info = get_opening_info(board)
     if opening_info is not None:

@@ -177,9 +177,19 @@ class AlphaBetaAnalyzer(Analyzer):
 
         return cls._manager
 
-    def analyze(self, board, moves_to_consider=None):
+    def analyze(self, board, alpha=-Board.MAX_EVALUATION - 1, beta=Board.MAX_EVALUATION + 1,
+                moves_to_consider=None):
+        '''
+        If evaluation between (alpha, beta) returns it,
+        otherwise if less returns less or equal alpha
+                  if more returns more or equal beta
+
+        Alpha-beta pruning
+            if alpha and beta not passed it will return always true evaluation
+        '''
         self.analyze_launch_time = time.time()
-        result, _ = self.dfs_parallel(board, moves_to_consider=moves_to_consider)
+        result, _ = self.dfs_parallel(
+            board, alpha, beta, moves_to_consider=moves_to_consider)
 
         stats = {'nodes': 1}
         return {
@@ -187,20 +197,11 @@ class AlphaBetaAnalyzer(Analyzer):
             'stats': stats
         }
 
-    def dfs(self, board,
-            alpha=-Board.MAX_EVALUATION - 1, beta=Board.MAX_EVALUATION + 1,
-            deep=0, moves_to_consider=None, parent_alpha_beta=None, parent_ind=None):
+    def dfs(self, board, alpha, beta, moves_to_consider=None,
+            deep=0, parent_alpha_beta=None, parent_ind=None):
         '''
         !!!! This function should be multi-thread safe.
-
-        If evaluation between (alpha, beta) returns it,
-        otherwise if less returns less or equal alpha
-                  if more returns more or equal beta
-
         !!!! It always returns result of non-zero length
-
-        Alpha-beta pruning
-            if alpha and beta not passed dfs will return always true evaluation
 
         `moves_to_consider` - moves to consider, if None than all valid moves are considered
         '''
@@ -234,7 +235,7 @@ class AlphaBetaAnalyzer(Analyzer):
 
             is_any_move = True
             cand, _ = self.dfs(
-                board, alpha=alpha, beta=beta, deep=deep + 1)
+                board, alpha, beta, deep=deep + 1)
             board.revert_move(revert_info)
 
             result.append(cand[0])
@@ -279,9 +280,7 @@ class AlphaBetaAnalyzer(Analyzer):
 
         return result, parent_ind
 
-    def dfs_parallel(self, board,
-                     alpha=-Board.MAX_EVALUATION - 1, beta=Board.MAX_EVALUATION + 1,
-                     moves_to_consider=None):
+    def dfs_parallel(self, board, alpha, beta, moves_to_consider=None):
         '''
         !!!! It always returns result of non-zero length
 
@@ -305,11 +304,9 @@ class AlphaBetaAnalyzer(Analyzer):
                 continue
             is_any_move = True
 
-            args = (board.copy(), )
+            args = (board.copy(), alpha, beta)
             kwargs = {
                 'deep': 1,
-                'alpha': alpha,
-                'beta': beta,
                 'parent_alpha_beta': parent_alpha_beta,
                 'parent_ind': len(moves)
             }
