@@ -124,10 +124,10 @@ class Board(object):
                         break
 
         # Shuffle to make generate function not-deterministic
-        # random.shuffle(capture_moves)
-        # random.shuffle(simple_moves)
-        capture_moves.sort(key=lambda x: (x['position'], x['new_position'], x['new_piece']))
-        simple_moves.sort(key=lambda x: (x['position'], x['new_position'], x['new_piece']))
+        random.shuffle(capture_moves)
+        random.shuffle(simple_moves)
+        # capture_moves.sort(key=lambda x: (x['position'], x['new_position'], x['new_piece']))
+        # simple_moves.sort(key=lambda x: (x['position'], x['new_position'], x['new_piece']))
 
         # Sort captured moves
         if capture_sort_key is None:

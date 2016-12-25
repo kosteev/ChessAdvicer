@@ -36,6 +36,20 @@ OPENINGS = [{
         ('e1', 'g1'),
         ('d2', 'd4')
     ]
+}, {
+    'name': 'e4d4',
+    'color': WHITE,
+    'from_to': [
+        ('e2', 'e4'),
+        ('d2', 'd4')
+    ]
+}, {
+    'name': 'e7e5',
+    'color': WHITE,
+    'from_to': [
+        ('e7', 'e5'),
+        ('d7', 'd5')
+    ]
 }]
 
 for opening in OPENINGS:
