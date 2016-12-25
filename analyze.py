@@ -331,6 +331,14 @@ class AlphaBetaAnalyzer(Analyzer):
                 else:
                     parent_alpha_beta.value = min(parent_alpha_beta.value, result[-1]['evaluation'])
 
+            # Here is the first time it could happen
+            if move_color == WHITE:
+                if parent_alpha_beta.value >= beta:
+                    break
+            else:
+                if alpha >= parent_alpha_beta.value:
+                    break
+
         if not is_any_move:
             sign = color_sign(move_color)
             if board.is_check(opposite=True):

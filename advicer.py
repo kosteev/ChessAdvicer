@@ -3,7 +3,7 @@ import time
 from analyze import AlphaBetaAnalyzer
 from evaluation import take_evaluation
 from openings import get_opening_info
-from pieces import get_opp_color, BLACK
+from pieces import get_opp_color, BLACK, WHITE
 from utils import moves_stringify, format_move
 
 
@@ -22,23 +22,41 @@ def run_advicer(mode, max_deep, lines, play, board):
     analysis = analyzer.analyze(board)
 
     # Get more deep analysis
-    deep_kwargs = {
-        'max_deep': max_deep,
-        'lines': 1,
-        'evaluation_func': take_evaluation,
-        #'max_time': 1
-    }
-    deep_analyzer = AlphaBetaAnalyzer(**deep_kwargs)
-    moves_to_consider = []
-    for line in analysis['result']:
-        if line['moves']:
-            moves_to_consider.append(line['moves'][-1])
-    for move in moves_to_consider:
-        revert_info = board.make_move(move)
-        deeper_analysis = deep_analyzer.analyze(board)
-        print format_move(move)
-        print deeper_analysis['result'][0]['evaluation']
-        board.revert_move(revert_info)
+#     deep_kwargs = {
+#         'max_deep': max_deep,
+#         'lines': 1,
+#         'evaluation_func': take_evaluation,
+#         #'max_time': 1
+#     }
+#     deep_analyzer = AlphaBetaAnalyzer(**deep_kwargs)
+#     moves_to_consider = []
+#     for line in analysis['result']:
+#         if line['moves']:
+#             moves_to_consider.append(line['moves'][-1])
+# 
+#     alpha = None
+#     beta = None
+#     for move in moves_to_consider:
+#         revert_info = board.make_move(move)
+#         analyze_kwargs = {}
+#         if alpha is not None:
+#             analyze_kwargs['alpha'] = alpha
+#         if beta is not None:
+#             analyze_kwargs['beta'] = beta
+#         deeper_analysis = deep_analyzer.analyze(board, **analyze_kwargs)
+#         line = deeper_analysis['result'][0]
+#         print line['evaluation'], format_move(move), moves_stringify(line['moves'], board.move_color)
+#         board.revert_move(revert_info)
+#         if board.move_color == WHITE:
+#             if alpha is None:
+#                 alpha = line['evaluation']
+#             else:
+#                 alpha = max(alpha, line['evaluation'])
+#         else:
+#             if beta is None:
+#                 beta = line['evaluation']
+#             else:
+#                 beta = min(beta, line['evaluation'])
 
     first_line = analysis['result'][0]
     opening_info = get_opening_info(board)
