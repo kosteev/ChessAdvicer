@@ -187,7 +187,8 @@ class AlphaBetaAnalyzer(Analyzer):
             'stats': stats
         }
 
-    def dfs(self, board, alpha=-Board.MAX_EVALUATION - 1, beta=Board.MAX_EVALUATION + 1,
+    def dfs(self, board,
+            alpha=-Board.MAX_EVALUATION - 1, beta=Board.MAX_EVALUATION + 1,
             deep=0, moves_to_consider=None, parent_alpha_beta=None, parent_ind=None):
         '''
         !!!! This function should be multi-thread safe.
@@ -278,7 +279,9 @@ class AlphaBetaAnalyzer(Analyzer):
 
         return result, parent_ind
 
-    def dfs_parallel(self, board, moves_to_consider=None):
+    def dfs_parallel(self, board,
+                     alpha=-Board.MAX_EVALUATION - 1, beta=Board.MAX_EVALUATION + 1,
+                     moves_to_consider=None):
         '''
         !!!! It always returns result of non-zero length
 
@@ -292,9 +295,9 @@ class AlphaBetaAnalyzer(Analyzer):
         moves = []
         board_moves = board.get_board_moves() if moves_to_consider is None else moves_to_consider
         if move_color == WHITE:
-            parent_alpha_beta = self.manager().Value('i', -Board.MAX_EVALUATION - 1)
+            parent_alpha_beta = self.manager().Value('i', alpha)
         else:
-            parent_alpha_beta = self.manager().Value('i', Board.MAX_EVALUATION + 1)
+            parent_alpha_beta = self.manager().Value('i', beta)
 
         for move in board_moves:
             revert_info = board.make_move(move)
@@ -305,6 +308,8 @@ class AlphaBetaAnalyzer(Analyzer):
             args = (board.copy(), )
             kwargs = {
                 'deep': 1,
+                'alpha': alpha,
+                'beta': beta,
                 'parent_alpha_beta': parent_alpha_beta,
                 'parent_ind': len(moves)
             }
