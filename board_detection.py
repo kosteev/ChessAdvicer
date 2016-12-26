@@ -40,13 +40,13 @@ LICHESS = 'lichess'
 
 def get_settings(mode):
     if mode == LICHESS:
-        board_radius_pixels = 1
+        board_radius_pixels = 0
         colors = {
             'white_piece': (1, 1, 1),
             'black_piece': (0, 0, 0),
-            'white_board_cell': (239 / 255.0, 216 / 255.0, 183 / 255.0),
-            'moved_white_board_cell': (206 / 255.0, 209 / 255.0, 113 / 255.0),
-            'moved_black_board_cell': (170 / 255.0, 161 / 255.0, 67 / 255.0),
+            'white_board_cell': (240 / 255.0, 217 / 255.0, 181 / 255.0),
+            'moved_white_board_cell': (206 / 255.0, 210 / 255.0, 107 / 255.0),
+            'moved_black_board_cell': (170 / 255.0, 162 / 255.0, 59 / 255.0),
             'letter': (137 / 255.0, 137 / 255.0, 137 / 255.0)
         }
         cell_size = 64

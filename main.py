@@ -3,6 +3,7 @@ import psutil
 import random
 import sys
 import time
+from collections import defaultdict
 
 from advicer import run_advicer
 from board_detection import get_board
@@ -33,6 +34,7 @@ if __name__ == '__main__':
     lines = int(sys.argv[3])
     play = len(sys.argv) > 4 and (sys.argv[4] == '1')
 
+    board_hashes = defaultdict(int)
     iteration = 0
     prev_hash = None
     first_line = None
@@ -53,6 +55,9 @@ if __name__ == '__main__':
         prev_hash = new_hash
 
         if board:
+            # Collect hashes, can be used by advicer.
+            board_hashes[board.hash] += 1
+
             os.system('clear')
             process = psutil.Process(os.getpid())
             print 'Memory usage: {}mb'.format(process.memory_info().rss / 1000 / 1000)
