@@ -110,7 +110,7 @@ if __name__ == '__main__':
                     else:
                         # If evaluation changed too much
                         diff = first_line['evaluation'] - prev_first_line['evaluation']
-                        tolerance = 3.5
+                        tolerance = 2.5
                         if move_color == WHITE:
                             if diff > tolerance:
                                 print 'Evaluation changed too much'
@@ -124,7 +124,7 @@ if __name__ == '__main__':
                         print 'Unxepected line, expected: {}'.format(
                                 moves_stringify(prev_first_line['moves'], board.move_color) if prev_first_line else None)
                         # move_time = 0.5 + random.random() * 0.5
-                        move_time = 0.7 + random.random() * 0.1
+                        move_time = 0.75 + random.random() * 0.2
                         time_to_sleep = max(move_time - spent_time, 0)
                         print 'Sleeping (human unexpected case): {:.3f}'.format(time_to_sleep)
                         time.sleep(time_to_sleep)
