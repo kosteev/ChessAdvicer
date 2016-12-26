@@ -33,7 +33,7 @@ def run_advicer(mode, max_deep, lines, play, board):
 #     for line in analysis['result']:
 #         if line['moves']:
 #             moves_to_consider.append(line['moves'][-1])
-# 
+#
 #     alpha = None
 #     beta = None
 #     for move in moves_to_consider:
