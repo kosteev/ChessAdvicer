@@ -187,9 +187,8 @@ class AlphaBetaAnalyzer(Analyzer):
         Alpha-beta pruning
             if alpha and beta not passed it will return always true evaluation
         '''
-        self.analyze_launch_time = time.time()
         result, _ = self.dfs_parallel(
-            board, alpha, beta, moves_to_consider=moves_to_consider)
+            board, alpha, beta, time.time(), moves_to_consider=moves_to_consider)
 
         stats = {'nodes': 1}
         return {
@@ -197,7 +196,7 @@ class AlphaBetaAnalyzer(Analyzer):
             'stats': stats
         }
 
-    def dfs(self, board, alpha, beta, moves_to_consider=None,
+    def dfs(self, board, alpha, beta, analyze_launch_time, moves_to_consider=None,
             deep=0, parent_alpha_beta=None, parent_ind=None):
         '''
         !!!! This function should be multi-thread safe.
@@ -205,8 +204,8 @@ class AlphaBetaAnalyzer(Analyzer):
 
         `moves_to_consider` - moves to consider, if None than all valid moves are considered
         '''
-        # !!! BUG with multi processing
-        if time.time() - self.analyze_launch_time > self.max_time:
+        if time.time() - analyze_launch_time > self.max_time:
+            # If alpha or beta is determined here, than there is calculated one variant already
             if alpha >= -Board.MAX_EVALUATION:
                 return [{
                     'evaluation': alpha,  # Return evaluation that will not affect result
@@ -235,7 +234,7 @@ class AlphaBetaAnalyzer(Analyzer):
 
             is_any_move = True
             cand, _ = self.dfs(
-                board, alpha, beta, deep=deep + 1)
+                board, alpha, beta, analyze_launch_time, deep=deep + 1)
             board.revert_move(revert_info)
 
             result.append(cand[0])
@@ -280,7 +279,7 @@ class AlphaBetaAnalyzer(Analyzer):
 
         return result, parent_ind
 
-    def dfs_parallel(self, board, alpha, beta, moves_to_consider=None):
+    def dfs_parallel(self, board, alpha, beta, analyze_launch_time, moves_to_consider=None):
         '''
         !!!! It always returns result of non-zero length
 
@@ -304,7 +303,7 @@ class AlphaBetaAnalyzer(Analyzer):
                 continue
             is_any_move = True
 
-            args = (board.copy(), alpha, beta)
+            args = (board.copy(), alpha, beta, analyze_launch_time)
             kwargs = {
                 'deep': 1,
                 'parent_alpha_beta': parent_alpha_beta,

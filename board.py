@@ -269,7 +269,7 @@ class Board(object):
 
         probable_moves = []
         if piece != 'pawn':
-            # Awful bug!!!
+            # Make a copy!!!
             probable_moves = list(PROBABLE_MOVES[piece][position])
         else:
             promote_pieces = []
