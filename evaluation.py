@@ -41,7 +41,7 @@ def take_evaluation(board):
     }
 
 
-def take_evaluation_dfs(board, stats, max_piece_value=PIECES['queen']['value']):
+def take_evaluation_dfs(board, stats, deep=0, max_piece_value=PIECES['queen']['value']):
     '''
     Evaluates position.
 
@@ -64,14 +64,18 @@ def take_evaluation_dfs(board, stats, max_piece_value=PIECES['queen']['value']):
 
     evaluation = board.evaluation
     evaluation_moves = []
+    captured_piece_value = None
     for move in board.get_board_moves(capture_sort_key=Board.sort_take_by_value):
         revert_info = board.make_move(move)
         if revert_info is None:
             continue
 
         is_any_move = True
-        if not move['captured_piece']:
+        if (not move['captured_piece'] or
+            captured_piece_value is not None and
+                (deep != 0 or captured_piece_value != PIECES[move['captured_piece']]['value'])):
             # Consider only takes
+            # If deep == 0, consider all possible takes with equal value
             board.revert_move(revert_info)
             break
         captured_piece_value = PIECES[move['captured_piece']]['value']
@@ -86,7 +90,7 @@ def take_evaluation_dfs(board, stats, max_piece_value=PIECES['queen']['value']):
 
         stats['longest_moves'] = [move] + stats['longest_moves']
         cand = take_evaluation_dfs(
-            board, stats, captured_piece_value)
+            board, stats, deep=deep + 1, max_piece_value=captured_piece_value)
         board.revert_move(revert_info)
 
         # TODO: (kosteev) consider no moves
@@ -98,7 +102,6 @@ def take_evaluation_dfs(board, stats, max_piece_value=PIECES['queen']['value']):
             if cand['evaluation'] < evaluation:
                 evaluation = cand['evaluation']
                 evaluation_moves = cand['moves'] + [move]
-        break
 
     if not is_any_move:
         if board.is_check(opposite=True):
