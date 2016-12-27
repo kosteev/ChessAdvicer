@@ -3,10 +3,23 @@ from pieces import WHITE
 from utils import color_sign
 
 
-def simple_evaluation(board):
+def material_evaluation(board):
     stats = {}
     result = {
         'evaluation': board.material,
+        'moves': []
+    }
+
+    return {
+        'result': result,
+        'stats': stats
+    }
+
+
+def simple_evaluation(board):
+    stats = {}
+    result = {
+        'evaluation': board.evaluation,
         'moves': []
     }
 

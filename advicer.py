@@ -1,7 +1,7 @@
 import time
 
 from analyze import AlphaBetaAnalyzer
-from evaluation import take_evaluation
+from evaluation import take_evaluation, simple_evaluation
 from openings import get_opening_info
 from pieces import get_opp_color, BLACK, WHITE
 from utils import moves_stringify, format_move
@@ -13,7 +13,7 @@ def run_advicer(mode, max_deep, lines, play, board):
     kwargs = {
         'max_deep': max_deep,
         'lines': lines,
-        'evaluation_func': take_evaluation,
+        'evaluation_func': simple_evaluation,
         #'max_time': 3
     }
     analyzer = AlphaBetaAnalyzer(**kwargs)

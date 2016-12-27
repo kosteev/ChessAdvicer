@@ -45,8 +45,8 @@ if __name__ == '__main__':
         iteration += 1
 
         s = time.time()
-        # board = get_board(mode, board)
-        board = get_mock(2)
+        board = get_board(mode, board)
+        # board = get_mock(2)
         e = time.time()
 
         new_hash = board.hash if board else -1337

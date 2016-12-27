@@ -2,7 +2,7 @@ import unittest
 from nose.tools import assert_equal, assert_true
 
 from analyze import SimpleAnalyzer, AlphaAnalyzer, AlphaBetaAnalyzer
-from evaluation import simple_evaluation
+from evaluation import material_evaluation
 from mocks import get_mock
 from utils import print_board
 
@@ -15,7 +15,7 @@ class TestAnalyzer(unittest.TestCase):
         lines = 5
         for analyzer_class in analyzer_classes:
             analyzer = analyzer_class(
-                max_deep=1, evaluation_func=simple_evaluation, lines=lines)
+                max_deep=1, evaluation_func=material_evaluation, lines=lines)
             board = get_mock(0)
             print_board(board)
 
@@ -37,7 +37,7 @@ class TestAnalyzer(unittest.TestCase):
         lines = 10
         for analyzer_class in analyzer_classes:
             analyzer = analyzer_class(
-                max_deep=2, evaluation_func=simple_evaluation, lines=lines)
+                max_deep=2, evaluation_func=material_evaluation, lines=lines)
             board = get_mock(0)
 
             analysis = analyzer.analyze(board)
@@ -63,7 +63,7 @@ class TestAnalyzer(unittest.TestCase):
         lines = 17
         for analyzer_class in analyzer_classes:
             analyzer = analyzer_class(
-                max_deep=3, evaluation_func=simple_evaluation, lines=lines)
+                max_deep=3, evaluation_func=material_evaluation, lines=lines)
             board = get_mock(0)
 
             analysis = analyzer.analyze(board)
@@ -90,7 +90,7 @@ class TestAnalyzer(unittest.TestCase):
         lines = 17
         for analyzer_class in analyzer_classes:
             analyzer = analyzer_class(
-                max_deep=4, evaluation_func=simple_evaluation, lines=lines)
+                max_deep=4, evaluation_func=material_evaluation, lines=lines)
             board = get_mock(2)
             print_board(board)
 
@@ -111,7 +111,7 @@ class TestAnalyzer(unittest.TestCase):
         lines = 10
         for analyzer_class in analyzer_classes:
             analyzer = analyzer_class(
-                max_deep=3, evaluation_func=simple_evaluation, lines=lines)
+                max_deep=3, evaluation_func=material_evaluation, lines=lines)
             board = get_mock(6)
 
             analysis = analyzer.analyze(board)
@@ -132,7 +132,7 @@ class TestAnalyzer(unittest.TestCase):
         lines = 10
         for analyzer_class in analyzer_classes:
             analyzer = analyzer_class(
-                max_deep=2, evaluation_func=simple_evaluation, lines=lines)
+                max_deep=2, evaluation_func=material_evaluation, lines=lines)
             board = get_mock(8)
 
             analysis = analyzer.analyze(board)
@@ -153,7 +153,7 @@ class TestAnalyzer(unittest.TestCase):
         lines = 10
         for analyzer_class in analyzer_classes:
             analyzer = analyzer_class(
-                max_deep=4, evaluation_func=simple_evaluation, lines=lines)
+                max_deep=4, evaluation_func=material_evaluation, lines=lines)
             board = get_mock(15)
 
             analysis = analyzer.analyze(board)
