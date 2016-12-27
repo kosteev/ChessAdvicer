@@ -90,7 +90,6 @@ if __name__ == '__main__':
                 mode=mode,
                 max_deep=max_deep,
                 lines=lines,
-                play=play,
                 board=board,
                 board_hashes=board_hashes
             )

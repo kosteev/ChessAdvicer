@@ -4,25 +4,18 @@ from analyze import AlphaBetaAnalyzer
 from evaluation import take_evaluation
 from openings import get_opening_info
 from pieces import get_opp_color, BLACK
-from utils import moves_stringify, format_move
+from utils import moves_stringify, format_move, color_sign
 
 
-def run_advicer(mode, max_deep, lines, play, board, board_hashes):
+def run_advicer(mode, max_deep, lines, board, board_hashes):
     print 'Run advicer...'
-
-    kwargs = {
-        'max_deep': max_deep,
-        'lines': lines,
-        'evaluation_func': take_evaluation,
-        #'max_time': 3
-    }
-    analyzer = AlphaBetaAnalyzer(**kwargs)
-    analysis = run_analyzer(analyzer, board)
+    analysis = run_analyzer(max_deep, lines, board)
 
     first_line = analysis['result'][0]
     opening_info = get_opening_info(board)
     if opening_info is not None:
-        opening_analysis = run_analyzer(analyzer, board, moves_to_consider=[opening_info['move']])
+        opening_analysis = run_analyzer(
+            max_deep, 1, board, moves_to_consider=[opening_info['move']])
         # TODO: check moves == []
         opening_first_line = opening_analysis['result'][0]
         if (opening_first_line['moves'] and
@@ -33,19 +26,49 @@ def run_advicer(mode, max_deep, lines, play, board, board_hashes):
             first_line = opening_first_line
 
     # Consider repetition
-#     first_line_moves = first_line['moves']
-#     if first_line_moves:
-#         revert_info = board.make_move(first_line_moves[-1])
-#         if board_hashes.get(board.hash) >= 3:
-#             analysis = run_analyzer(analyzer, board)
-#  
-#         board.revert_move(revert_info)
+    first_line_moves = first_line['moves']
+    sign = color_sign(board.move_color)
+    if first_line_moves:
+        revert_info = board.make_move(first_line_moves[-1])
+        if board_hashes.get(board.hash) >= 2:
+            board.revert_move(revert_info)
+
+            print
+            print 'First line leads to three times repetition'
+            proper_evaluation = -2.5
+            if sign * first_line['evaluation'] > proper_evaluation:
+                # If position is not so bad, prevent three times repetition
+                # Try to find another line
+                analysis = run_analyzer(max_deep, 2, board)
+                result = analysis['result']
+                if (first_line_moves[-1] != result[0]['moves'][-1] and
+                        sign * result[0]['evaluation'] > proper_evaluation):
+                    first_line = result[0]
+                elif (len(result) > 1 and
+                        sign * result[1]['evaluation'] > proper_evaluation):
+                    first_line = result[1]
+                else:
+                    print 'Not found any other good line'
+
+                print 'Selected line: ({}) {}'.format(
+                    first_line['evaluation'], moves_stringify(first_line['moves'], board.move_color))
+            else:
+                print 'Position is not so good to prevent repetitions'
+        else:
+            board.revert_move(revert_info)
 
     return first_line
 
 
-def run_analyzer(analyzer, board, moves_to_consider=None):
+def run_analyzer(max_deep, lines, board, moves_to_consider=None):
+    kwargs = {
+        'max_deep': max_deep,
+        'lines': lines,
+        'evaluation_func': take_evaluation,
+    }
+
     start_time = time.time()
+    analyzer = AlphaBetaAnalyzer(**kwargs)
     analysis = analyzer.analyze(board, moves_to_consider=moves_to_consider)
     end_time = time.time() - start_time
 
