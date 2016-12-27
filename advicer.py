@@ -13,7 +13,7 @@ def run_advicer(mode, max_deep, lines, play, board):
     kwargs = {
         'max_deep': max_deep,
         'lines': lines,
-        'evaluation_func': simple_evaluation,
+        'evaluation_func': take_evaluation,
         #'max_time': 3
     }
     analyzer = AlphaBetaAnalyzer(**kwargs)

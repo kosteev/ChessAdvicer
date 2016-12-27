@@ -1,5 +1,5 @@
 from board import Board
-from pieces import WHITE
+from pieces import WHITE, PIECES
 from utils import color_sign
 
 
@@ -41,12 +41,13 @@ def take_evaluation(board):
     }
 
 
-def take_evaluation_dfs(board, stats):
+def take_evaluation_dfs(board, stats, max_piece_value=PIECES['queen']['value']):
     '''
     Evaluates position.
 
     Makes a move with the most valuable take.
     Takes best of this or current material evaluation.
+
     # TODO: (kosteev) consider other cases if take is worse than current material evaluation.
     # TODO: (kosteev) make it faster, cut with alpha/beta algo.
 
@@ -73,10 +74,19 @@ def take_evaluation_dfs(board, stats):
             # Consider only takes
             board.revert_move(revert_info)
             break
+        captured_piece_value = PIECES[move['captured_piece']]['value']
+        if captured_piece_value > max_piece_value:
+            board.revert_move(revert_info)
+
+            # Break recursion, do not consider line if opponent takes more valuable piece
+            # Return something that will not affect result
+            evaluation = sign * (Board.MAX_EVALUATION + 1)
+            evaluation_moves = []
+            break
 
         stats['longest_moves'] = [move] + stats['longest_moves']
         cand = take_evaluation_dfs(
-            board, stats)
+            board, stats, captured_piece_value)
         board.revert_move(revert_info)
 
         # TODO: (kosteev) consider no moves

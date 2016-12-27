@@ -115,7 +115,7 @@ if __name__ == '__main__':
                     else:
                         # If evaluation changed too much
                         diff = first_line['evaluation'] - prev_first_line['evaluation']
-                        tolerance = 2.5
+                        tolerance = 1.5
                         if move_color == WHITE:
                             if diff > tolerance:
                                 print 'Evaluation changed too much'
