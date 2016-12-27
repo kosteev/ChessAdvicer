@@ -91,7 +91,8 @@ if __name__ == '__main__':
                 max_deep=max_deep,
                 lines=lines,
                 play=play,
-                board=board
+                board=board,
+                board_hashes=board_hashes
             )
             spent_time = time.time() - start_time
 
