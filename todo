@@ -11,5 +11,7 @@
 - tests for moves_to_consider
 - cpu_count -> higher
 - test on shuffle
-- !!! better take_evaluation
 - repetitions
+
+- 3 -> 4
+- better take_evaluation
