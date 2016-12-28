@@ -11,8 +11,10 @@
 - tests for moves_to_consider
 - cpu_count -> higher
 - test on shuffle
-- repetitions
+- test on repetitions
 - format_move with double pieces
+- get_simple_moves
 
 - 3 -> 4
 - better take_evaluation
+- get_board_moves improve performance
