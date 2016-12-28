@@ -76,7 +76,7 @@ def run_analyzer(max_deep, lines, board, moves_to_consider=None):
     result = analysis['result']
     print
     print 'Analyzer time = {:.6f}, nodes = {}'.format(end_time, stats['nodes'])
-    print 'Per node = {:.3f}ms'.format(1000.0 * end_time / stats['nodes'])
+    # print 'Per node = {:.3f}ms'.format(1000.0 * end_time / stats['nodes'])
     for ind, line in enumerate(result):
         eval_move_color = board.move_color if len(line['moves']) % 2 == 0 else get_opp_color(board.move_color)
         eval_ind = (len(line['moves']) + (1 if board.move_color == BLACK else 0)) / 2 + 1

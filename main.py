@@ -9,7 +9,7 @@ from advicer import run_advicer
 from board_detection import get_board
 from evaluation import take_evaluation
 from gui import make_move
-from utils import print_board, moves_stringify
+from utils import print_board, moves_stringify, color_sign
 from mocks import get_mock
 from pieces import WHITE
 
@@ -71,6 +71,7 @@ if __name__ == '__main__':
             print_board(board)
             move_up_color = board.move_up_color
             move_color = board.move_color
+            sign = color_sign(move_color)
             print
 
             print '{} goes up'.format(move_up_color.upper())
@@ -101,6 +102,7 @@ if __name__ == '__main__':
                     move = moves[-1]
                     # Try to humanize `addy`, sleep if needed
                     unexpected = False
+                    print
                     if prev_first_line is None:
                         print 'No pre calculations'
                         unexpected = True
@@ -116,25 +118,19 @@ if __name__ == '__main__':
                         # If evaluation changed too much
                         diff = first_line['evaluation'] - prev_first_line['evaluation']
                         tolerance = 1.5
-                        if move_color == WHITE:
-                            if diff > tolerance:
-                                print 'Evaluation changed too much'
-                                unexpected = True
-                        else:
-                            if diff < -tolerance:
-                                print 'Evaluation changed too much'
-                                unexpected = True
+                        if sign * diff > tolerance:
+                            print 'Evaluation changed too much: {:.3f}'.format(sign * diff)
+                            unexpected = True
 
                     if unexpected:
-                        print 'Unxepected line, expected: {}'.format(
-                                moves_stringify(prev_first_line['moves'], board.move_color) if prev_first_line else None)
                         # move_time = 0.5 + random.random() * 0.5
                         move_time = 0.75 + random.random() * 0.2
                         time_to_sleep = max(move_time - spent_time, 0)
-                        print 'Sleeping (human unexpected case): {:.3f}'.format(time_to_sleep)
+                        print 'Unxepected line, expected: {}, sleeping: {:.3f}'.format(
+                            moves_stringify(prev_first_line['moves'], board.move_color) if prev_first_line else None,
+                            time_to_sleep)
                         time.sleep(time_to_sleep)
 
-                    print 'Make a move'
                     make_move(board, move['position'], move['new_position'])
                 else:
                     print 'No moves'

@@ -12,6 +12,7 @@
 - cpu_count -> higher
 - test on shuffle
 - repetitions
+- format_move with double pieces
 
 - 3 -> 4
 - better take_evaluation
