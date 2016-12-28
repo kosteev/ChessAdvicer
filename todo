@@ -18,3 +18,4 @@
 - 3 -> 4
 - better take_evaluation
 - get_board_moves improve performance
+- get_captured_moves

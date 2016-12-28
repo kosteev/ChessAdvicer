@@ -13,8 +13,13 @@ class Test(unittest.TestCase):
         print_board(board)
 
         assert_equal(take_evaluation(board)['result'], {
-            'evaluation': -1.006,
-            'moves': []
+            'evaluation': -2.006,
+            'moves': [{'captured_piece': 'pawn',
+                'captured_position': (0, 1),
+                'new_piece': 'pawn',
+                'new_position': (0, 1),
+                'piece': 'pawn',
+                'position': (1, 2)}]
         })
 
     def test_evaluation_1(self):
