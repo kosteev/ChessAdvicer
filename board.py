@@ -316,6 +316,7 @@ class Board(object):
 
         # Extra logic for castles
         if piece == 'king':
+            # Make a copy
             probable_moves = list(probable_moves)
 
             # If (king, rook) haven't moved +
