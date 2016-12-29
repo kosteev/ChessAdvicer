@@ -4,7 +4,7 @@ import random
 
 from pieces import get_opp_color, PIECES, PROBABLE_MOVES, WHITE, PIECE_CELL_VALUE, BEAT_LINES, BLACK, \
     get_castles, WHITE_KC, WHITE_QC, BLACK_KC, BLACK_QC, get_castle_id
-from utils import color_sign
+from utils import color_sign, update_castles
 
 
 class Board(object):
@@ -192,19 +192,8 @@ class Board(object):
             self.en_passant = (move['position'][0], (move['new_position'][1] + move['position'][1]) / 2)
         # Castles
         old_castles = list(self.castles)
-        positions = [move['position'], move['new_position']]
-        if ((4, 0) in positions or
-                (7, 0) in positions):
-            self.castles[WHITE_KC] = False
-        if ((4, 0) in positions or
-                (0, 0) in positions):
-            self.castles[WHITE_QC] = False
-        if ((4, 7) in positions or
-                (7, 7) in positions):
-            self.castles[BLACK_KC] = False
-        if ((4, 7) in positions or
-                (0, 7) in positions):
-            self.castles[BLACK_QC] = False
+        self.castles = update_castles(
+            self.castles, [move['position'], move['new_position']])
 
         revert_info = {
             'move': move,

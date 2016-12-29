@@ -10,10 +10,10 @@ from PIL import ImageGrab
 import copy
 
 from board import Board
+from mocks import get_mock
 from pieces import WHITE, BLACK, PIECES, get_opp_color, get_castles, get_castle_id, \
     WHITE_KC, WHITE_QC, BLACK_KC, BLACK_QC
-from utils import normalize_cell, get_color_pieces
-from mocks import get_mock
+from utils import normalize_cell, get_color_pieces, update_castles
 
 
 # Big big thanks to https://bitbucket.org/ronaldoussoren/pyobjc/ for updated .bridgesupport files
@@ -356,18 +356,7 @@ def get_board(mode, prev_board):
                 castles[get_castle_id(color, 'q')] = True
 
     # Refresh castles regarding to move
-    if ((4, 0) in yellow_cells or
-            (7, 0) in yellow_cells):
-        castles[WHITE_KC] = False
-    if ((4, 0) in yellow_cells or
-            (0, 0) in yellow_cells):
-        castles[WHITE_QC] = False
-    if ((4, 7) in yellow_cells or
-            (7, 7) in yellow_cells):
-        castles[BLACK_KC] = False
-    if ((4, 7) in yellow_cells or
-            (0, 7) in yellow_cells):
-        castles[BLACK_QC] = False
+    castles = update_castles(castles, yellow_cells)
 
     return Board(
         pieces=pieces,

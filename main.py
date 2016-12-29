@@ -105,7 +105,6 @@ if __name__ == '__main__':
                     print
                     if prev_first_line is None:
                         print 'No pre calculations'
-                        unexpected = True
                     elif move['captured_piece']:
                         prev_moves = prev_first_line['moves']
                         if (len(prev_moves) < 3 or

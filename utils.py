@@ -201,9 +201,27 @@ def get_board_from_fen(fen):
         castles=castles
     )
 
+
 def get_color_pieces(pieces, leave_color):
     return {
         position: (piece, color)
         for position, (piece, color) in pieces.items()
         if color == leave_color
     }
+
+
+def update_castles(castles, positions):
+    if ((4, 0) in positions or
+            (7, 0) in positions):
+        castles[WHITE_KC] = False
+    if ((4, 0) in positions or
+            (0, 0) in positions):
+        castles[WHITE_QC] = False
+    if ((4, 7) in positions or
+            (7, 7) in positions):
+        castles[BLACK_KC] = False
+    if ((4, 7) in positions or
+            (0, 7) in positions):
+        castles[BLACK_QC] = False
+
+    return castles
