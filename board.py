@@ -270,7 +270,7 @@ class Board(object):
         probable_moves = []
         if piece != 'pawn':
             # Make a copy!!!
-            probable_moves = list(PROBABLE_MOVES[piece][position])
+            probable_moves = PROBABLE_MOVES[piece][position]
         else:
             promote_pieces = []
             if position[1] + sign in [0, 7]:
@@ -316,6 +316,8 @@ class Board(object):
 
         # Extra logic for castles
         if piece == 'king':
+            probable_moves = list(probable_moves)
+
             # If (king, rook) haven't moved +
             # if not under check + king don't passing beaten cell +
             # if no piece is on the way
