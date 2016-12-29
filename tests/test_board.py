@@ -218,3 +218,9 @@ class Test(unittest.TestCase):
             l2.append(sorted(board.get_board_moves()))
 
         assert_equal(l1, l2)
+
+    def test_get_board_moves_2(self):
+        for mock_id in xrange(MOCKS_COUNT):
+            board = get_mock(mock_id)
+
+            assert_equal(sorted(board.get_board_moves()), sorted(board.get_board_moves_old()))

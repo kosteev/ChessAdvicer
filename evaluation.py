@@ -60,21 +60,18 @@ def take_evaluation_dfs(board, stats, deep=0, max_piece_value=PIECES['queen']['v
 
     move_color = board.move_color
     sign = color_sign(move_color)
-    is_any_move = False
 
     evaluation = board.evaluation
     evaluation_moves = []
     captured_piece_value = None
-    for move in board.get_board_moves(capture_sort_key=Board.sort_take_by_value):
+    for move in board.get_board_captures(capture_sort_key=Board.sort_take_by_value):
         revert_info = board.make_move(move)
         if revert_info is None:
             continue
 
-        is_any_move = True
-        if (not move['captured_piece'] or
-            captured_piece_value is not None and deep != 0):
-            # Consider only takes
-            # If deep == 0, consider all possible takes with equal value
+        if (captured_piece_value is not None and
+                deep != 0):
+            # If deep == 0, consider all possible takes
             board.revert_move(revert_info)
             break
         captured_piece_value = PIECES[move['captured_piece']]['value']
@@ -101,21 +98,6 @@ def take_evaluation_dfs(board, stats, deep=0, max_piece_value=PIECES['queen']['v
             if cand['evaluation'] < evaluation:
                 evaluation = cand['evaluation']
                 evaluation_moves = cand['moves'] + [move]
-
-    if not is_any_move:
-        if board.is_check(opposite=True):
-            # Checkmate
-            # ???? self.MAX_EVALUATION / 2
-            return {
-                'evaluation': -sign * Board.MAX_EVALUATION / 5,
-                'moves': []
-            }
-        else:
-            # Draw
-            return {
-                'evaluation': 0,
-                'moves': []
-            }
 
     return {
         'evaluation': evaluation,

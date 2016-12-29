@@ -1,9 +1,8 @@
-import copy
 import json
 import random
 
-from pieces import get_opp_color, PIECES, PROBABLE_MOVES, WHITE, PIECE_CELL_VALUE, BEAT_LINES, BLACK, \
-    get_castles, WHITE_KC, WHITE_QC, BLACK_KC, BLACK_QC, get_castle_id
+from pieces import get_opp_color, PIECES, PROBABLE_MOVES, WHITE, PIECE_CELL_VALUE, BEAT_LINES, \
+    get_castles, get_castle_id, LINE_TYPES, LINES_INFO, NEXT_CELL, CELL_TO_LINE_ID, LINE_TYPE_LT, get_promotion_pieces
 from utils import color_sign, update_castles
 
 
@@ -25,6 +24,15 @@ class Board(object):
             castles = get_castles()
 
         self.pieces = pieces
+        self.masks = {}
+        for line_type in LINE_TYPES:
+            self.masks[line_type] = {
+                x: 0
+                for x in xrange(15)
+            }
+        for position in self.pieces.keys():
+            self.update_mask_add(position)
+
         self.move_color = move_color
         self.en_passant = en_passant
         self.castles = castles
@@ -89,6 +97,17 @@ class Board(object):
         Returns current valid moves.
         Checks are not considered.
         '''
+        for move in self.get_board_captures(capture_sort_key=capture_sort_key):
+            yield move
+
+        for move in self.get_board_simple_moves():
+            yield move
+
+    def get_board_moves_old(self, capture_sort_key=None):
+        '''
+        Returns current valid moves.
+        Checks are not considered.
+        '''
         move_color = self.move_color
         opp_move_color = get_opp_color(move_color)
 
@@ -135,6 +154,12 @@ class Board(object):
             capture_sort_key = self.sort_take_by_value
         capture_moves.sort(key=capture_sort_key)
 
+#         if sorted(capture_moves + simple_moves) != sorted(self.get_board_moves_new(capture_sort_key)):
+#             print_board(self)
+#             print capture_moves
+#             print simple_moves
+#             raise
+
         return capture_moves + simple_moves
 
     def make_move(self, move):
@@ -149,9 +174,13 @@ class Board(object):
 
         # Make move
         del self.pieces[move['position']]
+        self.update_mask_remove(move['position'])
         if move['captured_piece']:
             del self.pieces[move['captured_position']]
+            self.update_mask_remove(move['captured_position'])
         self.pieces[move['new_position']] = (move['new_piece'], move_color)
+        self.update_mask_add(move['new_position'])
+
         # Castle move
         castle_info = None
         if (move['piece'] == 'king' and
@@ -165,7 +194,9 @@ class Board(object):
                 'rook_new_position': rook_new_position
             }
             self.pieces[rook_new_position] = self.pieces[rook_position]
+            self.update_mask_add(rook_new_position)
             del self.pieces[rook_position]
+            self.update_mask_remove(rook_position)
 
         # Recalculate evaluation
         delta_material = PIECES[move['new_piece']]['value']
@@ -219,16 +250,22 @@ class Board(object):
 
         # Recover
         del self.pieces[move['new_position']]
+        self.update_mask_remove(move['new_position'])
         if move['captured_piece']:
             self.pieces[move['captured_position']] = (move['captured_piece'], opp_move_color)
+            self.update_mask_add(move['captured_position'])
         self.pieces[move['position']] = (move['piece'], move_color)
+        self.update_mask_add(move['position'])
+
         # Castle move
         if castle_info is not None:
             rook_position = castle_info['rook_position']
             rook_new_position = castle_info['rook_new_position']
 
             self.pieces[rook_position] = self.pieces[rook_new_position]
+            self.update_mask_add(rook_position)
             del self.pieces[rook_new_position]
+            self.update_mask_remove(rook_new_position)
 
         # Revert evaluation
         self.material -= revert_info['delta_material']
@@ -240,6 +277,141 @@ class Board(object):
         self.en_passant = revert_info['old_en_passant']
         # Revert castles
         self.castles = revert_info['old_castles']
+
+    #@line_profile()
+    def get_board_captures(self, capture_sort_key=None):
+        move_color = self.move_color
+        opp_move_color = get_opp_color(move_color)
+        sign = color_sign(move_color)
+        capture_moves = []
+
+        for position, (piece, color) in self.pieces.items():
+            if color != move_color:
+                continue
+
+            if piece == 'knight':
+                for variant in PROBABLE_MOVES['knight'][position]:
+                    for move in variant:
+                        new_position = move['new_position']
+                        new_piece = piece
+                        captured_position = new_position
+
+                        captured_piece, captured_color = self.pieces.get(captured_position, (None, None))
+                        if captured_color != opp_move_color:
+                            break
+
+                        move = {
+                            'position': position,
+                            'new_position': new_position,
+                            'piece': piece,
+                            'new_piece': new_piece,
+                            'captured_position': captured_position,
+                            'captured_piece': captured_piece
+                        }
+                        capture_moves.append(move)
+            else:
+                promotion_pieces = [piece]
+                if (piece == 'pawn' and
+                        position[1] + sign in [0, 7]):
+                    # Last rank
+                    promotion_pieces = get_promotion_pieces()
+
+                for line_type in LINE_TYPES:
+                    if piece not in LINES_INFO[line_type]['pieces']:
+                        continue
+
+                    line_id, _ = CELL_TO_LINE_ID[line_type][position]
+                    mask = self.masks[line_type][line_id]
+                    next_cells = NEXT_CELL[position][line_type][mask]
+                    en_passant_cells = ()
+
+                    if (piece == 'pawn' and
+                            self.en_passant):
+                        # Extra logic for pawn
+                        x = -1 if line_type == LINE_TYPE_LT else 1
+                        new_position = (position[0] + x, position[1] + sign)
+                        if new_position == self.en_passant:
+                            en_passant_cells = (new_position, )
+
+                    for new_position in next_cells + en_passant_cells:
+                        if new_position is None:
+                            continue
+                        if piece == 'king':
+                            # Extra logic for king
+                            diff = abs(new_position[0] - position[0])
+                            if diff == 0:
+                                diff = abs(new_position[1] - position[1])
+                            if diff > 1:
+                                continue
+                        elif piece == 'pawn':
+                            # Extra logic for pawn
+                            diff = new_position[1] - position[1]
+                            if diff != sign:
+                                continue
+
+                        for new_piece in promotion_pieces:
+                            captured_position = new_position
+                            captured_piece, captured_color = self.pieces.get(captured_position, (None, None))
+                            if not captured_piece:
+                                # En passant
+                                captured_position = (self.en_passant[0], self.en_passant[1] - sign)
+                                captured_piece, captured_color = self.pieces[captured_position]
+
+                            if captured_color == move_color:
+                                break
+
+                            move = {
+                                'position': position,
+                                'new_position': new_position,
+                                'piece': piece,
+                                'new_piece': new_piece,
+                                'captured_position': captured_position,
+                                'captured_piece': captured_piece
+                            }
+                            capture_moves.append(move)
+
+        # capture_moves.sort(key=lambda x: (x['position'], x['new_position'], x['new_piece']))
+        random.shuffle(capture_moves)
+        # Sort captured moves
+        if capture_sort_key is None:
+            capture_sort_key = self.sort_take_by_value
+        capture_moves.sort(key=capture_sort_key)
+
+        return capture_moves
+
+    def get_board_simple_moves(self):
+        move_color = self.move_color
+
+        simple_moves = []
+        for position, (piece, color) in self.pieces.items():
+            if color != move_color:
+                continue
+
+            # Get rid of takes
+            for variant in self.get_piece_probable_moves(position):
+                for move in variant:
+                    new_position = move['new_position']
+                    new_piece = move.get('new_piece') or piece
+                    captured_position = move.get('captured_position') or new_position
+
+                    if captured_position in self.pieces:
+                        break
+
+                    move = {
+                        'position': position,
+                        'new_position': new_position,
+                        'piece': piece,
+                        'new_piece': new_piece,
+                        'captured_position': captured_position,
+                        'captured_piece': None
+                    }
+                    simple_moves.append(move)
+
+        # Shuffle to make generate function not-deterministic
+        random.shuffle(simple_moves)
+        # simple_moves.sort(key=lambda x: (x['position'], x['new_position'], x['new_piece']))
+
+        return simple_moves
 
     def get_piece_probable_moves(self, position):
         '''
@@ -387,3 +559,15 @@ class Board(object):
         captured_piece = move['captured_piece']
         return [
             -PIECES[captured_piece]['value'], PIECES[move['piece']]['value']]
+
+    def update_mask_add(self, position):
+        for line_type in LINE_TYPES:
+            line_id, cell_id = CELL_TO_LINE_ID[line_type][position]
+            # ^???
+            self.masks[line_type][line_id] ^= 1 << cell_id
+
+    def update_mask_remove(self, position):
+        for line_type in LINE_TYPES:
+            line_id, cell_id = CELL_TO_LINE_ID[line_type][position]
+            # ^???
+            self.masks[line_type][line_id] ^= 1 << cell_id

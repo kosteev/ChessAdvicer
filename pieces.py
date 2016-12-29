@@ -53,6 +53,14 @@ PIECES = {
 }
 
 
+def get_promotion_pieces():
+    return [
+        piece
+        for piece in PIECES
+        if piece not in ['king', 'pawn']
+    ]
+
+
 def get_piece_by_title(title):
     for piece, piece_info in PIECES.items():
         if piece_info['title'].lower() == title.lower():
@@ -183,3 +191,81 @@ for color in [WHITE, BLACK]:
                     })
                 if line_pieces:
                     BEAT_LINES[color][cell].append(line_pieces)
+
+
+LINE_TYPES = range(4)
+(LINE_TYPE_V, LINE_TYPE_H, LINE_TYPE_LB, LINE_TYPE_LT) = LINE_TYPES
+
+LINES_INFO = {
+    LINE_TYPE_V: {
+        'pieces': ['rook', 'queen', 'king']
+    },
+    LINE_TYPE_H: {
+        'pieces': ['rook', 'queen', 'king']
+    },
+    LINE_TYPE_LB: {
+        'pieces': ['bishop', 'queen', 'king', 'pawn']
+    },
+    LINE_TYPE_LT: {
+        'pieces': ['bishop', 'queen', 'king', 'pawn']
+    }
+}
+def cell_to_id(line_type, cell):
+    if line_type == LINE_TYPE_V:
+        return (cell[0], cell[1])
+    elif line_type == LINE_TYPE_H:
+        return (cell[1], cell[0])
+    elif line_type == LINE_TYPE_LB:
+        return (cell[0] - cell[1] + 7, cell[1] if cell[0] > cell[1] else cell[0])
+    else:
+        return (cell[0] + cell[1], cell[1] if cell[0] + cell[1] < 8 else (7 - cell[1]))
+
+LINE_CELL_ID_TO_CELL = {}
+CELL_TO_LINE_ID = {}
+for line_type in LINE_TYPES:
+    LINES_INFO[line_type]['length'] = {}
+    LINE_CELL_ID_TO_CELL[line_type] = {}
+    CELL_TO_LINE_ID[line_type] = {}
+    for c in xrange(8):
+        for r in xrange(8):
+            cell = (c, r)
+            line_id, cell_id = cell_to_id(line_type, (c, r))
+
+            LINES_INFO[line_type]['length'][line_id] = max(
+                LINES_INFO[line_type]['length'].get(line_id, -1), cell_id + 1)
+
+            LINE_CELL_ID_TO_CELL[line_type].setdefault(line_id, {})
+            LINE_CELL_ID_TO_CELL[line_type][line_id][cell_id] = cell
+            CELL_TO_LINE_ID[line_type][cell] = line_id, cell_id
+
+def mask_to_list(m, l):
+    return [
+        ((m >> p) & 1) for p in xrange(l)
+    ]
+
+NEXT_CELL = {}
+for c in xrange(8):
+    for r in xrange(8):
+        cell = (c, r)
+        NEXT_CELL[cell] = {}
+        for line_type in LINE_TYPES:
+            line_id, cell_id = cell_to_id(line_type, cell)
+            length = LINES_INFO[line_type]['length'][line_id]
+
+            NEXT_CELL[cell][line_type] = {}
+            for m in xrange(1 << length):
+                m_list = mask_to_list(m, length)
+
+                p1 = cell_id + 1
+                while (p1 < length and
+                        not m_list[p1]):
+                    p1 += 1
+                p2 = cell_id - 1
+                while (p2 >= 0 and
+                        not m_list[p2]):
+                    p2 -= 1
+
+                #print line_type, line_id, p1, p2
+                NEXT_CELL[cell][line_type][m] = (
+                    LINE_CELL_ID_TO_CELL[line_type][line_id][p1] if p1 < length else None,
+                    LINE_CELL_ID_TO_CELL[line_type][line_id][p2] if p2 >= 0 else None)
