@@ -78,7 +78,8 @@ if __name__ == '__main__':
             print '{} goes up'.format(move_up_color.upper())
             print '{} to move'.format(move_color.upper())
             print 'Evaluation: {}'.format(board.evaluation)
-            print 'Total sleep: {:.3f}'.format(total_sleep)
+            if play:
+                print 'Total sleep: {:.3f}'.format(total_sleep)
             # print_take_evaluation(board)
             print
 
