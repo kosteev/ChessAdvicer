@@ -94,7 +94,7 @@ def take_evaluation_dfs(board, stats, deep=0, max_piece_value=PIECES['queen']['v
                 evaluation = cand['evaluation']
                 evaluation_moves = cand['moves'] + [move]
 
-        if deep > 0:
+        if deep > 2:
             # If deep == 0, consider all possible takes
             break
 

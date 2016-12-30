@@ -116,7 +116,7 @@ if __name__ == '__main__':
                     else:
                         # If evaluation changed too much
                         diff = first_line['evaluation'] - prev_first_line['evaluation']
-                        tolerance = 1.5
+                        tolerance = 0.5
                         if sign * diff > tolerance:
                             print 'Evaluation changed too much: {:.3f}'.format(sign * diff)
                             unexpected = True
