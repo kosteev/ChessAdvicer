@@ -155,8 +155,9 @@ class AlphaAnalyzer(Analyzer):
 
 class AlphaBetaAnalyzer(Analyzer):
     def __init__(self, *args, **kwargs):
-        max_time = kwargs.pop('max_time', 999999)
-        self.max_time = max_time
+        self.max_time = kwargs.pop('max_time', 999999)
+        self.max_deep_captures = kwargs.pop('max_deep_captures', 0)
+        self.max_deep_one_capture = kwargs.pop('max_deep_one_capture', 0)
 
         super(AlphaBetaAnalyzer, self).__init__(*args, **kwargs)
 
@@ -218,16 +219,24 @@ class AlphaBetaAnalyzer(Analyzer):
                     'moves': []
                 }], parent_ind
 
-        if deep == self.max_deep:
-            return self.board_evaluation(board), parent_ind
-
+        result = []
         move_color = board.move_color
         lines = self.lines if deep == 0 else 1
-        result = []
         is_any_move = False
-        board_moves = board.get_board_moves() if moves_to_consider is None else moves_to_consider
 
-        for move in board_moves:
+        if deep >= self.max_deep:
+            result = self.board_evaluation(board)
+            is_any_move = True
+            if deep == self.max_deep + self.max_deep_captures + self.max_deep_one_capture:
+                moves = []
+            else:
+                # Allow only takes
+                moves = board.get_board_captures(capture_sort_key=Board.sort_take_by_value)
+        else:
+            moves = board.get_board_moves(
+                capture_sort_key=Board.sort_take_by_value) if moves_to_consider is None else moves_to_consider
+
+        for move in moves:
             revert_info = board.make_move(move)
             if revert_info is None:
                 continue
@@ -260,6 +269,10 @@ class AlphaBetaAnalyzer(Analyzer):
 
             # Here is the first time it could happen
             if alpha >= beta:
+                break
+
+            if deep >= self.max_deep + self.max_deep_captures:
+                # Consider only one take
                 break
 
         if not is_any_move:

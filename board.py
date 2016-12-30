@@ -371,6 +371,7 @@ class Board(object):
 
         # capture_moves.sort(key=lambda x: (x['position'], x['new_position'], x['new_piece']))
         random.shuffle(capture_moves)
+
         # Sort captured moves
         if capture_sort_key is None:
             capture_sort_key = self.sort_take_by_value
@@ -406,9 +407,8 @@ class Board(object):
                     }
                     simple_moves.append(move)
 
-        # Shuffle to make generate function not-deterministic
-        random.shuffle(simple_moves)
         # simple_moves.sort(key=lambda x: (x['position'], x['new_position'], x['new_piece']))
+        random.shuffle(simple_moves)
 
         return simple_moves
 
