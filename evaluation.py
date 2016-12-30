@@ -69,11 +69,6 @@ def take_evaluation_dfs(board, stats, deep=0, max_piece_value=PIECES['queen']['v
         if revert_info is None:
             continue
 
-        if (captured_piece_value is not None and
-                deep != 0):
-            # If deep == 0, consider all possible takes
-            board.revert_move(revert_info)
-            break
         captured_piece_value = PIECES[move['captured_piece']]['value']
         if captured_piece_value > max_piece_value:
             board.revert_move(revert_info)
@@ -98,6 +93,10 @@ def take_evaluation_dfs(board, stats, deep=0, max_piece_value=PIECES['queen']['v
             if cand['evaluation'] < evaluation:
                 evaluation = cand['evaluation']
                 evaluation_moves = cand['moves'] + [move]
+
+        if deep > 0:
+            # If deep == 0, consider all possible takes
+            break
 
     return {
         'evaluation': evaluation,

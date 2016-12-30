@@ -1,14 +1,16 @@
-import pyautogui
-
+from pymouse import PyMouse
 
 from utils import normalize_cell
+
+
+MOUSE = PyMouse()
 
 
 def focus_board(board):
     x = board.lt_screen[0] - 1
     y = board.lt_screen[1] - 1
 
-    pyautogui.click(x, y)
+    MOUSE.click(x, y)
 
 
 def click_cell(board, position):
@@ -16,7 +18,7 @@ def click_cell(board, position):
     x = board.lt_screen[0] + (position[0] + 0.5) * board.cell_size
     y = board.lt_screen[1] + (7 - position[1] + 0.5) * board.cell_size
 
-    pyautogui.click(x, y)
+    MOUSE.click(x, y)
 
 
 def make_move(board, position, new_position):
