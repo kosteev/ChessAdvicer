@@ -39,6 +39,7 @@ if __name__ == '__main__':
     prev_hash = None
     first_line = None
     board = None
+    total_sleep = 0
     while True:
         # Should be in the beginning (continue issue)
         time.sleep(0.020)
@@ -77,6 +78,7 @@ if __name__ == '__main__':
             print '{} goes up'.format(move_up_color.upper())
             print '{} to move'.format(move_color.upper())
             print 'Evaluation: {}'.format(board.evaluation)
+            print 'Total sleep: {:.3f}'.format(total_sleep)
             # print_take_evaluation(board)
             print
 
@@ -127,6 +129,7 @@ if __name__ == '__main__':
                         print 'Unxepected line, expected: {}, sleeping: {:.3f}'.format(
                             moves_stringify(prev_first_line['moves'], board.move_color) if prev_first_line else None,
                             time_to_sleep)
+                        total_sleep += time_to_sleep
                         time.sleep(time_to_sleep)
 
                     make_move(board, move['position'], move['new_position'])
