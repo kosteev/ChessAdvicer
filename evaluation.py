@@ -65,19 +65,17 @@ def take_evaluation_dfs(board, stats, deep=0, max_piece_value=PIECES['queen']['v
     evaluation_moves = []
     captured_piece_value = None
     for move in board.get_board_captures(capture_sort_key=Board.sort_take_by_value):
-        revert_info = board.make_move(move)
-        if revert_info is None:
-            continue
-
         captured_piece_value = PIECES[move['captured_piece']]['value']
         if captured_piece_value > max_piece_value:
-            board.revert_move(revert_info)
-
             # Break recursion, do not consider line if opponent takes more valuable piece
             # Return something that will not affect result
             evaluation = sign * (Board.MAX_EVALUATION + 1)
             evaluation_moves = []
             break
+
+        revert_info = board.make_move(move)
+        if revert_info is None:
+            continue
 
         stats['longest_moves'] = [move] + stats['longest_moves']
         cand = take_evaluation_dfs(

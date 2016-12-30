@@ -20,5 +20,6 @@
 - get_board_moves improve performance
 - get_captured_moves
 - analyze first with integer values
-- ui faster
 
+
+- evaluation in analyze
