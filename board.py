@@ -278,7 +278,6 @@ class Board(object):
         # Revert castles
         self.castles = revert_info['old_castles']
 
-    #@line_profile()
     def get_board_captures(self, capture_sort_key=None):
         move_color = self.move_color
         opp_move_color = get_opp_color(move_color)

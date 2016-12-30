@@ -224,3 +224,11 @@ class Test(unittest.TestCase):
             board = get_mock(mock_id)
 
             assert_equal(sorted(board.get_board_moves()), sorted(board.get_board_moves_old()))
+            for move in board.get_board_moves():
+                revert_info = board.make_move(move)
+                if not revert_info:
+                    continue
+
+                assert_equal(sorted(board.get_board_moves()), sorted(board.get_board_moves_old()))
+
+                board.revert_move(revert_info)
