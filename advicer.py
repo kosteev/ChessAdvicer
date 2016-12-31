@@ -64,7 +64,6 @@ def run_analyzer(max_deep, lines, board, moves_to_consider=None):
     kwargs = {
         'max_deep': max_deep,
         'max_deep_captures': 2,
-        'max_deep_one_capture': 999,
         'lines': lines,
         'evaluation_func': simple_evaluation,
     }
