@@ -124,14 +124,16 @@ if __name__ == '__main__':
                             print 'Evaluation changed too much: {:.3f}'.format(sign * diff)
                             unexpected = True
 
+                    # By default
+                    time_to_sleep = 0.2
                     if unexpected:
                         move_time = 0.7 + random.random() * 0.2
                         time_to_sleep = max(move_time - spent_time, 0)
                         print 'Unxepected line, expected: {}, sleeping: {:.3f}'.format(
                             moves_stringify(prev_first_line['moves'], board.move_color) if prev_first_line else None,
                             time_to_sleep)
-                        total_sleep += time_to_sleep
-                        time.sleep(time_to_sleep)
+                    total_sleep += time_to_sleep
+                    time.sleep(time_to_sleep)
 
                     make_move(board, move['position'], move['new_position'])
                 else:

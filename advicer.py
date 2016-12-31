@@ -30,11 +30,11 @@ def run_advicer(mode, max_deep, lines, board, board_hashes):
     sign = color_sign(board.move_color)
     if first_line_moves:
         revert_info = board.make_move(first_line_moves[-1])
-        if board_hashes.get(board.hash) >= 2:
+        if board_hashes.get(board.hash) >= 1:
             board.revert_move(revert_info)
 
             print
-            print 'First line leads to three times repetition'
+            print 'First line leads to two times repetition'
             proper_evaluation = -2.5
             if sign * first_line['evaluation'] > proper_evaluation:
                 # If position is not so bad, prevent three times repetition
