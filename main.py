@@ -118,6 +118,7 @@ if __name__ == '__main__':
                             unexpected = True
                     else:
                         # If evaluation changed too much
+                        # TODO: check prev_moves???
                         diff = first_line['evaluation'] - prev_first_line['evaluation']
                         tolerance = 0.5
                         if sign * diff > tolerance:
