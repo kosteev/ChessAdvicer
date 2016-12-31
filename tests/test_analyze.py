@@ -173,3 +173,26 @@ class TestAnalyzer(unittest.TestCase):
             to_check.sort(reverse=True)
             assert_equal(to_check[0], (997, 'knight', (6, 0), (7, 2), 'king', (4, 0), (6, 0)))
             assert_true(to_check[1][0] != 997)
+
+    def test_promotions(self):
+        lines = 10
+        for analyzer_class in analyzer_classes:
+            analyzer = analyzer_class(
+                max_deep=2, evaluation_func=material_evaluation, lines=lines)
+            board = get_mock(18)
+
+            analysis = analyzer.analyze(board)
+            result = analysis['result']
+
+            to_check = []
+            for ind in xrange(4):
+                to_check.append(
+                    (result[ind]['evaluation'],
+                     result[ind]['moves'][-1]['piece'],
+                     result[ind]['moves'][-1]['new_position'],
+                     result[ind]['moves'][-1]['new_piece']))
+
+            to_check.sort(reverse=True)
+            assert_equal(to_check[0], (999, 'pawn', (5, 7), 'knight'))
+            assert_equal(to_check[1], (0, 'pawn', (5, 7), 'queen'))
+            assert_equal(to_check[2], (-4, 'pawn', (5, 7), 'rook'))
