@@ -19,7 +19,8 @@ FENS = {
     14: 'rnbqkb1r/pppp1p1p/4pnp1/8/8/4PN2/PPPPBPPP/RNBQK2R w Qkq - - -',
     15: '8/8/8/8/8/5P2/4QP2/k3K1NR w K - - -',
     16: 'r3k3/8/8/1B6/8/8/8/8 b q - - -',
-    17: 'r1bq1rk1/pp3pbp/3p1np1/2pN4/3pP3/3B4/PPPPQPPP/R1B2RK1 w - c6 - -'
+    17: 'r1bq1rk1/pp3pbp/3p1np1/2pN4/3pP3/3B4/PPPPQPPP/R1B2RK1 w - c6 - -',
+    18: '5rnn/4P1pk/3K2pp/8/8/8/8/8 w - - - -'
 }
 MOCKS_COUNT = len(FENS)
 

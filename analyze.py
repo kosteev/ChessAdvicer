@@ -4,7 +4,7 @@ import traceback
 from multiprocessing import Pool, cpu_count, Manager
 
 from board import Board
-from pieces import WHITE, BLACK
+from pieces import WHITE, BLACK, PIECES
 from utils import color_sign
 
 
@@ -198,7 +198,8 @@ class AlphaBetaAnalyzer(Analyzer):
         }
 
     def dfs(self, board, alpha, beta, analyze_launch_time, moves_to_consider=None,
-            deep=0, parent_alpha_beta=None, parent_ind=None):
+            deep=0, max_capture_value=PIECES['queen']['value'],
+            parent_alpha_beta=None, parent_ind=None):
         '''
         !!!! This function should be multi-thread safe.
         !!!! It always returns result of non-zero length
@@ -221,6 +222,7 @@ class AlphaBetaAnalyzer(Analyzer):
 
         result = []
         move_color = board.move_color
+        sign = color_sign(move_color)
         lines = self.lines if deep == 0 else 1
         is_any_move = False
 
@@ -242,8 +244,23 @@ class AlphaBetaAnalyzer(Analyzer):
                 continue
 
             is_any_move = True
+            kwargs = {
+                'deep': deep + 1
+            }
+            if deep >= self.max_deep:
+                captured_piece_value = PIECES[move['captured_piece']]['value']
+                if captured_piece_value > max_capture_value:
+                    board.revert_move(revert_info)
+                    # Break recursion, do not consider line if opponent takes more valuable piece
+                    # Return something that will not affect result
+                    result = [{
+                        'evaluation': sign * (Board.MAX_EVALUATION + 1),
+                        'moves': []
+                    }]
+                    break
+                kwargs['max_capture_value'] = captured_piece_value
             cand, _ = self.dfs(
-                board, alpha, beta, analyze_launch_time, deep=deep + 1)
+                board, alpha, beta, analyze_launch_time, **kwargs)
             board.revert_move(revert_info)
 
             result.append(cand[0])
@@ -276,7 +293,6 @@ class AlphaBetaAnalyzer(Analyzer):
                 break
 
         if not is_any_move:
-            sign = color_sign(move_color)
             if board.is_check(opposite=True):
                 # Checkmate
                 result = [{
