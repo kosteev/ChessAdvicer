@@ -16,3 +16,5 @@
 - len of pieces in evaluation
 
 - tests on max_deep_capture, ...
+- remove max_deep_one_capture
+- max_piece_value >= max_deep + max_deep_capture
