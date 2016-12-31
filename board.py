@@ -68,8 +68,10 @@ class Board(object):
 
     @property
     def evaluation(self):
-        return self.material + self.positional_eval / 1000.0 + \
-            color_sign(self.move_up_color) * len(self.pieces) / 1000.0
+        eval_ = self.material + self.positional_eval / 1000.0
+        eval_ += color_sign(self.move_up_color) * len(self.pieces) / 1000.0
+
+        return eval_
 
     def get_material_eval(self):
         '''

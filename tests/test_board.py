@@ -240,5 +240,5 @@ class Test(unittest.TestCase):
             moves = board.get_board_simple_moves()
             assert_true(any(
                 moves != board.get_board_simple_moves()
-                for _ in xrange(10)
+                for _ in xrange(5)
             ))
