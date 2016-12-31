@@ -8,10 +8,9 @@
 - openings tests
 - tests more
 - tests for moves_to_consider
-- test on shuffle
+- test on sorting capture_moves
 - test on repetitions
 - format_move with double pieces
 
 - 3 -> 4
-- tests on promotions
 - len of pieces in evaluation

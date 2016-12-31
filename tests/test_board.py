@@ -232,3 +232,13 @@ class Test(unittest.TestCase):
                 assert_equal(sorted(board.get_board_moves()), sorted(board.get_board_moves_old()))
 
                 board.revert_move(revert_info)
+
+    def test_get_board_simple_moves_shuffle(self):
+        for mock_id in xrange(MOCKS_COUNT):
+            board = get_mock(mock_id)
+
+            moves = board.get_board_simple_moves()
+            assert_true(any(
+                moves != board.get_board_simple_moves()
+                for _ in xrange(10)
+            ))
