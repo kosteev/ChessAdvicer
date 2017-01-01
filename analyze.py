@@ -157,6 +157,7 @@ class AlphaBetaAnalyzer(Analyzer):
     def __init__(self, *args, **kwargs):
         self.max_time = kwargs.pop('max_time', 999999)
         self.max_deep_captures = kwargs.pop('max_deep_captures', 0)
+        self.max_deep_one_capture = kwargs.pop('max_deep_one_capture', 0)
 
         super(AlphaBetaAnalyzer, self).__init__(*args, **kwargs)
 
@@ -228,7 +229,10 @@ class AlphaBetaAnalyzer(Analyzer):
         if deep >= self.max_deep:
             result = self.board_evaluation(board)
             is_any_move = True
-            moves = board.get_board_captures(capture_sort_key=Board.sort_take_by_value)
+            if deep == self.max_deep + self.max_deep_captures + self.max_deep_one_capture:
+                moves = []
+            else:
+                moves = board.get_board_captures(capture_sort_key=Board.sort_take_by_value)
         else:
             moves = board.get_board_moves(
                 capture_sort_key=Board.sort_take_by_value) if moves_to_consider is None else moves_to_consider

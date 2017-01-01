@@ -65,6 +65,7 @@ class TestAnalyzer(unittest.TestCase):
             analyzer = analyzer_class(
                 max_deep=3, evaluation_func=material_evaluation, lines=lines)
             board = get_mock(0)
+            print_board(board)
 
             analysis = analyzer.analyze(board)
             result = analysis['result']
