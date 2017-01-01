@@ -9,6 +9,31 @@ from utils import moves_stringify, format_move, color_sign
 
 def run_advicer(mode, max_deep, lines, board, board_hashes):
     print 'Run advicer...'
+#     a = time.time()
+#     pre_analysis = run_analyzer(max_deep, 2, board)
+#     for line in pre_analysis['result']:
+#         if line['moves']:
+#             move = line['moves'][-1]
+#             revert_info = board.make_move(move)
+#             run_analyzer(
+#                 max_deep, lines, board)
+#             board.revert_move(revert_info)
+#     print '{:.3f}'.format(time.time() - a)
+#     a = time.time()
+#     pre_analysis = None
+#     for move in board.get_board_moves():
+#         revert_info = board.make_move(move)
+#         if not revert_info:
+#             continue
+#         print 'Made', format_move(move)
+#         pre_analysis = run_analyzer(max_deep - 1, 1, board)
+#         board.revert_move(revert_info)
+#     if pre_analysis is not None:
+#         run_analyzer(max_deep, lines, board, alpha=pre_analysis['result'][0]['evaluation'])
+#     print '{:.3f}'.format(time.time() - a)
+#     print
+#     print
+
     analysis = run_analyzer(max_deep, lines, board)
 
     first_line = analysis['result'][0]
