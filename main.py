@@ -126,7 +126,7 @@ if __name__ == '__main__':
                             unexpected = True
 
                     # By default
-                    time_to_sleep = 0.0
+                    time_to_sleep = 0.2
                     if unexpected:
                         move_time = 0.7 + random.random() * 0.2
                         time_to_sleep = max(move_time - spent_time, 0)
