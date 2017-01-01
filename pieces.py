@@ -197,18 +197,18 @@ LINE_TYPES = range(4)
 (LINE_TYPE_V, LINE_TYPE_H, LINE_TYPE_LB, LINE_TYPE_LT) = LINE_TYPES
 
 LINES_INFO = {
-    LINE_TYPE_V: {
-        'pieces': ['rook', 'queen', 'king']
-    },
-    LINE_TYPE_H: {
-        'pieces': ['rook', 'queen', 'king']
-    },
-    LINE_TYPE_LB: {
-        'pieces': ['bishop', 'queen', 'king', 'pawn']
-    },
-    LINE_TYPE_LT: {
-        'pieces': ['bishop', 'queen', 'king', 'pawn']
-    }
+    LINE_TYPE_V: {},
+    LINE_TYPE_H: {},
+    LINE_TYPE_LB: {},
+    LINE_TYPE_LT: {}
+}
+PIECE_LINES = {
+    'rook': {LINE_TYPE_V, LINE_TYPE_H},
+    'bishop': {LINE_TYPE_LB, LINE_TYPE_LT},
+    'queen': {LINE_TYPE_V, LINE_TYPE_H, LINE_TYPE_LB, LINE_TYPE_LT},
+    'king': {LINE_TYPE_V, LINE_TYPE_H, LINE_TYPE_LB, LINE_TYPE_LT},
+    'pawn': {LINE_TYPE_LB, LINE_TYPE_LT},
+    'knight': set()
 }
 def cell_to_id(line_type, cell):
     if line_type == LINE_TYPE_V:
@@ -266,6 +266,8 @@ for c in xrange(8):
                     p2 -= 1
 
                 #print line_type, line_id, p1, p2
-                NEXT_CELL[cell][line_type][m] = (
-                    LINE_CELL_ID_TO_CELL[line_type][line_id][p1] if p1 < length else None,
-                    LINE_CELL_ID_TO_CELL[line_type][line_id][p2] if p2 >= 0 else None)
+                NEXT_CELL[cell][line_type][m] = []
+                if p1 < length:
+                    NEXT_CELL[cell][line_type][m].append(LINE_CELL_ID_TO_CELL[line_type][line_id][p1])
+                if p2 >= 0:
+                    NEXT_CELL[cell][line_type][m].append(LINE_CELL_ID_TO_CELL[line_type][line_id][p2])

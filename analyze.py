@@ -164,7 +164,7 @@ class AlphaBetaAnalyzer(Analyzer):
     @classmethod
     def pool(cls):
         if not hasattr(cls, '_pool'):
-            cls._pool = Pool(processes=cpu_count())
+            cls._pool = Pool(processes=1)
 
         return cls._pool
 
