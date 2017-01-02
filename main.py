@@ -8,7 +8,7 @@ from collections import defaultdict
 from advicer import run_advicer
 from board_detection import get_board
 from gui import make_move
-from utils import print_board, moves_stringify, color_sign
+from utils import print_board, color_sign
 from mocks import get_mock
 from pieces import WHITE
 
@@ -114,9 +114,7 @@ if __name__ == '__main__':
                     if unexpected:
                         move_time = 0.7 + random.random() * 0.2
                         time_to_sleep = max(move_time - spent_time, 0)
-                        print 'Unxepected line, expected: {}, sleeping: {:.3f}'.format(
-                            moves_stringify(board, prev_first_line['moves']) if prev_first_line else None,
-                            time_to_sleep)
+                        print 'Unxepected line: sleeping: {:.3f}'.format(time_to_sleep)
                     total_sleep += time_to_sleep
                     time.sleep(time_to_sleep)
 

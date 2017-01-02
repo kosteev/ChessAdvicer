@@ -3,7 +3,6 @@ import time
 from analyze import AlphaBetaAnalyzer
 from evaluation import simple_evaluation
 from openings import get_opening_info
-from pieces import get_opp_color, BLACK
 from utils import moves_stringify, format_move, color_sign
 
 
@@ -47,7 +46,7 @@ def run_advicer(mode, max_deep, lines, board, board_hashes):
                 abs(first_line['evaluation'] - opening_first_line['evaluation']) < 0.5):
             # If line is exist (moves != []) and evaluation is pretty close to best
             print 'Opening `{}` line selected: {}'.format(
-                opening_info['name'], format_move(opening_info['move']))
+                opening_info['name'], format_move(board, opening_info['move']))
             first_line = opening_first_line
 
     # Consider repetition
