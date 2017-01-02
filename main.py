@@ -7,25 +7,10 @@ from collections import defaultdict
 
 from advicer import run_advicer
 from board_detection import get_board
-from evaluation import take_evaluation
 from gui import make_move
 from utils import print_board, moves_stringify, color_sign
 from mocks import get_mock
 from pieces import WHITE
-
-
-def print_take_evaluation(board):
-    s = time.time()
-    take_eval = take_evaluation(board)
-    e = time.time()
-    print
-    print 'Time = {:.6f}, nodes = {}'.format(e - s, take_eval['stats']['nodes'])
-    print 'Longest seq = {}'.format(
-        moves_stringify(take_eval['stats']['longest_moves'], board.move_color))
-    print 'Take evaluation: {} ({})'.format(
-        take_eval['result']['evaluation'], moves_stringify(
-            take_eval['result']['moves'], board.move_color), moves_stringify(
-            take_eval['stats']['longest_moves'], board.move_color))
 
 
 if __name__ == '__main__':
@@ -80,7 +65,6 @@ if __name__ == '__main__':
             print 'Evaluation: {}'.format(board.evaluation)
             if play:
                 print 'Total sleep: {:.3f}'.format(total_sleep)
-            # print_take_evaluation(board)
             print
 
             if (play and
@@ -126,7 +110,7 @@ if __name__ == '__main__':
                             unexpected = True
 
                     # By default
-                    time_to_sleep = 0.2
+                    time_to_sleep = 0.1
                     if unexpected:
                         move_time = 0.7 + random.random() * 0.2
                         time_to_sleep = max(move_time - spent_time, 0)

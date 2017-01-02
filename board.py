@@ -11,7 +11,7 @@ class Board(object):
     # 999 - checkmate in one move, 998 - ...
 
     def __init__(self, pieces, move_color, en_passant=None, castles=[],
-                 move_up_color=WHITE, lt_screen=None, cell_size=None):
+                 move_up_color=None, lt_screen=None, cell_size=None):
         '''
             `pieces` - dict with pieces
                 pieces = {(1, 2): ('rook', 'white)}
@@ -68,8 +68,10 @@ class Board(object):
 
     @property
     def evaluation(self):
-        eval_ = self.material + self.positional_eval / 1000.0
-        eval_ += color_sign(self.move_up_color) * len(self.pieces) / 1000.0
+        eval_ = self.material
+        eval_ += self.positional_eval / 1000.0
+        if self.move_up_color:
+            eval_ += color_sign(self.move_up_color) * len(self.pieces) / 1000.0
 
         return eval_
 

@@ -45,10 +45,8 @@ class Analyzer(object):
     def board_evaluation(self, board):
         evaluation = self.evaluation_func(board)
         return [{
-            'evaluation': evaluation['result']['evaluation'],
-            'moves': [],
-            'evaluation_moves': evaluation['result']['moves'],
-            'evaluation_stats': evaluation['stats']
+            'evaluation': evaluation['evaluation'],
+            'moves': []
         }]
 
 

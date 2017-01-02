@@ -1,7 +1,7 @@
 import time
 
 from analyze import AlphaBetaAnalyzer
-from evaluation import take_evaluation, simple_evaluation
+from evaluation import simple_evaluation
 from openings import get_opening_info
 from pieces import get_opp_color, BLACK
 from utils import moves_stringify, format_move, color_sign
@@ -105,12 +105,9 @@ def run_analyzer(max_deep, lines, board, moves_to_consider=None):
     print 'Analyzer time = {:.6f}, nodes = {}'.format(end_time, stats['nodes'])
     # print 'Per node = {:.3f}ms'.format(1000.0 * end_time / stats['nodes'])
     for ind, line in enumerate(result):
-        eval_move_color = board.move_color if len(line['moves']) % 2 == 0 else get_opp_color(board.move_color)
-        eval_ind = (len(line['moves']) + (1 if board.move_color == BLACK else 0)) / 2 + 1
-        print '{}. ({}) {} ({})'.format(
+        print '{}. ({}) {}'.format(
             ind + 1,
             line['evaluation'],
-            moves_stringify(line['moves'], board.move_color),
-            moves_stringify(line.get('evaluation_moves', []), eval_move_color, ind=eval_ind))
+            moves_stringify(line['moves'], board.move_color))
 
     return analysis

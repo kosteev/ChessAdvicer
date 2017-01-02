@@ -15,7 +15,7 @@
 - 3 -> 4
 - tests on max_deep_capture, ...
 - preanalyze and then analyze deep with sorting
-
+- tests on evaluation
 
 - analyze 2 best moves then analyze them deeper
 - analyze one move fast and then with evaluation other moves
