@@ -105,9 +105,6 @@ class Board(object):
         for move in self.get_board_captures(capture_sort_key=capture_sort_key):
             yield move
 
-        for move in self.get_board_promotions():
-            yield move
-
         for move in self.get_board_simple_moves():
             yield move
 
@@ -287,6 +284,9 @@ class Board(object):
         self.castles = revert_info['old_castles']
 
     def get_board_captures(self, capture_sort_key=None):
+        '''
+        Captures + promotions without capture
+        '''
         move_color = self.move_color
         opp_move_color = get_opp_color(move_color)
         sign = color_sign(move_color)
@@ -322,6 +322,20 @@ class Board(object):
                         position[1] + sign in [0, 7]):
                     # Last rank
                     promotion_pieces = PROMOTION_PIECES
+
+                    # Add promotions without capture
+                    new_position = (position[0], position[1] + sign)
+                    if new_position not in self.pieces:
+                        for promote_piece in promotion_pieces:
+                            move = {
+                                'position': position,
+                                'new_position': new_position,
+                                'piece': piece,
+                                'new_piece': promote_piece,
+                                'captured_position': new_position,
+                                'captured_piece': None
+                            }
+                            capture_moves.append(move)
 
                 for line_type in LINE_TYPES:
                     if piece not in LINES_INFO[line_type]['pieces']:
@@ -386,31 +400,6 @@ class Board(object):
         capture_moves.sort(key=capture_sort_key)
 
         return capture_moves
-
-    def get_board_promotions(self):
-        move_color = self.move_color
-        sign = color_sign(move_color)
-        promotion_moves = []
-
-        for position, (piece, color) in self.pieces.items():
-            if (position[1] + sign not in [0, 7] or
-                color != move_color or
-                    piece != 'pawn'):
-                continue
-
-            new_position = (position[0], position[1] + sign)
-            if new_position not in self.pieces:
-                for promote_piece in PROMOTION_PIECES:
-                    promotion_moves.append({
-                        'position': position,
-                        'new_position': new_position,
-                        'piece': piece,
-                        'new_piece': promote_piece,
-                        'captured_position': new_position,
-                        'captured_piece': None
-                    })
-
-        return promotion_moves
 
     def get_board_simple_moves(self):
         move_color = self.move_color
@@ -655,7 +644,8 @@ class Board(object):
         '''
         The most valueable + by the most cheap
         '''
-        captured_piece = move['captured_piece']
+        # Consider promotions without capture also
+        captured_piece = move['captured_piece'] or move['new_piece']
         return [
             -PIECES[captured_piece]['value'], PIECES[move['piece']]['value']]
 

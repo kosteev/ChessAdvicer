@@ -245,7 +245,7 @@ class AlphaBetaAnalyzer(Analyzer):
                 'deep': deep + 1
             }
             if deep >= self.max_deep + self.max_deep_captures:
-                captured_piece_value = PIECES[move['captured_piece']]['value']
+                captured_piece_value = PIECES[move['captured_piece'] or move['new_piece']]['value']
                 if captured_piece_value > max_capture_value:
                     board.revert_move(revert_info)
                     # Break recursion, do not consider line if opponent takes more valuable piece
@@ -286,7 +286,7 @@ class AlphaBetaAnalyzer(Analyzer):
                 break
 
             if deep >= self.max_deep + self.max_deep_captures:
-                # Consider only one take
+                # Consider only one take/promotion
                 break
 
         if not is_any_move:
