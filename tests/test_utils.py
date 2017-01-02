@@ -128,7 +128,30 @@ class Test(unittest.TestCase):
             'captured_position': None
         }], get_mock(2), '1.Qe6 gxh6 2.Qg8+')
 
-        inputs = [input_1, input_2]
+        input_3 = ([{
+            'position': (3, 4),
+            'new_position': (6, 7),
+            'piece': 'queen',
+            'new_piece': 'queen',
+            'captured_piece': None,
+            'captured_position': None
+        }, {
+            'position': (5, 7),
+            'new_position': (6, 7),
+            'piece': 'rook',
+            'new_piece': 'rook',
+            'captured_piece': 'queen',
+            'captured_position': (6, 7)
+        }, {
+            'position': (7, 5),
+            'new_position': (5, 6),
+            'piece': 'knight',
+            'new_piece': 'knight',
+            'captured_piece': None,
+            'captured_position': None
+        }], get_mock(2), '1.Qg8+ Rxg8 2.Nf7#')
+
+        inputs = [input_1, input_2, input_3]
         for moves, board, text in inputs:
             assert_equal(moves_stringify(board, list(reversed(moves))), text)
 

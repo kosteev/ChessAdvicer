@@ -538,6 +538,25 @@ class Board(object):
 
         return False
 
+    def is_mate(self):
+        '''
+        Mate for self.move_color
+        '''
+        if not self.is_check(opposite=True):
+            return False
+
+        mate = True
+        for move in self.get_board_moves():
+            revert_info = self.make_move(move)
+            if revert_info is None:
+                continue
+            self.revert_move(revert_info)
+
+            mate = False
+            break
+
+        return mate
+
     def beaten_cell(self, position, by_color):
         '''
             `by_color` - color of side to beat.

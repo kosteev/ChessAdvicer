@@ -44,6 +44,9 @@ def format_move(board, move):
     check_mate = ''
     if board.is_check(opposite=True):
         check_mate = '+'
+        if board.is_mate():
+            check_mate = '#'
+
     board.revert_move(revert_info)
 
     if (move['piece'] == 'king' and
