@@ -19,3 +19,4 @@
 
 - analyze 2 best moves then analyze them deeper
 - analyze one move fast and then with evaluation other moves
+- promotions in captures

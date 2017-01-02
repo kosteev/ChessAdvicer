@@ -223,6 +223,7 @@ class Test(unittest.TestCase):
         for mock_id in xrange(MOCKS_COUNT):
             board = get_mock(mock_id)
 
+            print_board(board)
             assert_equal(sorted(board.get_board_moves()), sorted(board.get_board_moves_old()))
             for move in board.get_board_moves():
                 revert_info = board.make_move(move)

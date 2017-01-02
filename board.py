@@ -2,7 +2,8 @@ import json
 import random
 
 from pieces import get_opp_color, PIECES, PROBABLE_MOVES, WHITE, PIECE_CELL_VALUE, BEAT_LINES, \
-    get_castles, get_castle_id, LINE_TYPES, LINES_INFO, NEXT_CELL, CELL_TO_LINE_ID, LINE_TYPE_LT, get_promotion_pieces
+    get_castles, get_castle_id, LINE_TYPES, LINES_INFO, NEXT_CELL, CELL_TO_LINE_ID, LINE_TYPE_LT, \
+    FREE_MOVES, PROMOTION_PIECES
 from utils import color_sign, update_castles
 
 
@@ -317,7 +318,7 @@ class Board(object):
                 if (piece == 'pawn' and
                         position[1] + sign in [0, 7]):
                     # Last rank
-                    promotion_pieces = get_promotion_pieces()
+                    promotion_pieces = PROMOTION_PIECES
 
                 for line_type in LINE_TYPES:
                     if piece not in LINES_INFO[line_type]['pieces']:
@@ -385,28 +386,82 @@ class Board(object):
 
     def get_board_simple_moves(self):
         move_color = self.move_color
+        opp_move_color = get_opp_color(move_color)
+        sign = color_sign(move_color)
 
         simple_moves = []
         for position, (piece, color) in self.pieces.items():
             if color != move_color:
                 continue
 
-            # Get rid of takes
-            for variant in self.get_piece_probable_moves(position):
-                for move in variant:
-                    new_position = move['new_position']
-                    new_piece = move.get('new_piece') or piece
-                    captured_position = move.get('captured_position') or new_position
+            new_positions = []
+            if piece == 'knight':
+                for variant in PROBABLE_MOVES['knight'][position]:
+                    for move in variant:
+                        new_position = move['new_position']
 
-                    if captured_position in self.pieces:
-                        break
+                        captured_piece, _ = self.pieces.get(new_position, (None, None))
+                        if not captured_piece:
+                            new_positions.append(new_position)
+            elif piece == 'pawn':
+                new_position = (position[0], position[1] + sign)
+                if new_position not in self.pieces:
+                    new_positions.append(new_position)
 
+                    if position[1] - sign in [0, 7]:
+                        new_position = (position[0], position[1] + 2 * sign)
+                        if new_position not in self.pieces:
+                            new_positions.append(new_position)
+            else:
+                for line_type in LINE_TYPES:
+                    if piece not in LINES_INFO[line_type]['pieces']:
+                        continue
+
+                    line_id, _ = CELL_TO_LINE_ID[line_type][position]
+                    mask = self.masks[line_type][line_id]
+                    new_positions.extend(FREE_MOVES[position][line_type][mask][piece])
+
+                if piece == 'king':
+                    # Castles
+                    kc = self.castles[get_castle_id(move_color, 'k')]
+                    qc = self.castles[get_castle_id(move_color, 'q')]
+                    if (kc or
+                            qc):
+                        r = 0 if move_color == WHITE else 7
+                        if kc:
+                            assert(position == (4, r))
+                            assert(self.pieces[(7, r)] == ('rook', move_color))
+                        if qc:
+                            assert(position == (4, r))
+                            assert(self.pieces[(0, r)] == ('rook', move_color))
+
+                        is_under_check = self.beaten_cell(position, opp_move_color)
+                        if (kc and
+                                not is_under_check and
+                                not self.beaten_cell((position[0] + 1, r), opp_move_color)):
+                            if not any((x, r) in self.pieces for x in [5, 6]):
+                                new_positions.append((6, r))
+
+                        if (qc and
+                                not is_under_check and
+                                not self.beaten_cell((position[0] - 1, r), opp_move_color)):
+                            if not any((x, r) in self.pieces for x in [1, 2, 3]):
+                                new_positions.append((2, r))
+
+            new_pieces = [piece]
+            if (piece == 'pawn' and
+                    position[1] + sign in [0, 7]):
+                # Last rank
+                new_pieces = PROMOTION_PIECES
+
+            for new_piece in new_pieces:
+                for new_position in new_positions:
                     move = {
                         'position': position,
                         'new_position': new_position,
                         'piece': piece,
                         'new_piece': new_piece,
-                        'captured_position': captured_position,
+                        'captured_position': new_position,
                         'captured_piece': None
                     }
                     simple_moves.append(move)

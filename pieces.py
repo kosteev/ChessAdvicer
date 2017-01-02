@@ -53,12 +53,7 @@ PIECES = {
 }
 
 
-def get_promotion_pieces():
-    return [
-        piece
-        for piece in PIECES
-        if piece not in ['king', 'pawn']
-    ]
+PROMOTION_PIECES = ['queen', 'rook', 'knight', 'bishop']
 
 
 def get_piece_by_title(title):
@@ -244,28 +239,44 @@ def mask_to_list(m, l):
     ]
 
 NEXT_CELL = {}
+FREE_MOVES = {}
 for c in xrange(8):
     for r in xrange(8):
         cell = (c, r)
         NEXT_CELL[cell] = {}
+        FREE_MOVES[cell] = {}
         for line_type in LINE_TYPES:
             line_id, cell_id = cell_to_id(line_type, cell)
             length = LINES_INFO[line_type]['length'][line_id]
 
             NEXT_CELL[cell][line_type] = {}
+            FREE_MOVES[cell][line_type] = {}
             for m in xrange(1 << length):
                 m_list = mask_to_list(m, length)
 
                 p1 = cell_id + 1
+                free_moves = []
                 while (p1 < length and
                         not m_list[p1]):
+                    free_moves.append(LINE_CELL_ID_TO_CELL[line_type][line_id][p1])
                     p1 += 1
                 p2 = cell_id - 1
                 while (p2 >= 0 and
                         not m_list[p2]):
+                    free_moves.append(LINE_CELL_ID_TO_CELL[line_type][line_id][p2])
                     p2 -= 1
 
                 #print line_type, line_id, p1, p2
                 NEXT_CELL[cell][line_type][m] = (
                     LINE_CELL_ID_TO_CELL[line_type][line_id][p1] if p1 < length else None,
                     LINE_CELL_ID_TO_CELL[line_type][line_id][p2] if p2 >= 0 else None)
+                FREE_MOVES[cell][line_type][m] = {}
+                for piece in ['rook', 'bishop', 'queen', 'king']:
+                    if piece == 'king':
+                        FREE_MOVES[cell][line_type][m][piece] = [
+                            move
+                            for move in free_moves
+                            if max(abs(move[0] - cell[0]), abs(move[1] - cell[1])) <= 1
+                        ]
+                    else:
+                        FREE_MOVES[cell][line_type][m][piece] = free_moves
