@@ -76,7 +76,7 @@ def run_advicer(mode, max_deep, lines, board, board_hashes):
                     print 'Not found any other good line'
 
                 print 'Selected line: ({}) {}'.format(
-                    first_line['evaluation'], moves_stringify(first_line['moves'], board.move_color))
+                    first_line['evaluation'], moves_stringify(board, first_line['moves']))
             else:
                 print 'Position is not so good to prevent repetitions'
         else:
@@ -108,6 +108,6 @@ def run_analyzer(max_deep, lines, board, moves_to_consider=None):
         print '{}. ({}) {}'.format(
             ind + 1,
             line['evaluation'],
-            moves_stringify(line['moves'], board.move_color))
+            moves_stringify(board, line['moves']))
 
     return analysis

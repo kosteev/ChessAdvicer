@@ -39,7 +39,13 @@ def cell_name(cell):
     return '{}{}'.format(v_name(cell), h_name(cell))
 
 
-def format_move(move):
+def format_move(board, move):
+    revert_info = board.make_move(move)
+    check_mate = ''
+    if board.is_check(opposite=True):
+        check_mate = '+'
+    board.revert_move(revert_info)
+
     if (move['piece'] == 'king' and
             abs(move['position'][0] - move['new_position'][0]) == 2):
         # Castles
@@ -60,11 +66,11 @@ def format_move(move):
         is_take='x' if move['captured_piece'] else '',
         new_position=cell_name(move['new_position']),
         new_piece_title=('=' + PIECES[move['new_piece']]['title']) if move['piece'] != move['new_piece'] else '',
-        check_mate=''
+        check_mate=check_mate
     )
 
 
-def moves_stringify(moves, move_color, ind=1):
+def moves_stringify(board, moves, ind=1):
     if len(moves) == 0:
         return ''
 
@@ -72,28 +78,32 @@ def moves_stringify(moves, move_color, ind=1):
     moves = list(moves)
 
     result = ''
-    if move_color == BLACK:
-        result = format_move(moves[-1])
+    revert_infos = []
+    if board.move_color == BLACK:
+        move = moves.pop()
+        result = format_move(board, move)
+        revert_infos.append(board.make_move(move))
+
         ind += 1
-        moves = moves[:-1]
 
     while moves:
         move = moves.pop()
         if result:
             result += ' '
-        result += '{}.{}'.format(ind, format_move(move))
+        result += '{}.{}'.format(ind, format_move(board, move))
+        revert_infos.append(board.make_move(move))
 
         if moves:
             move = moves.pop()
-            result += ' {}'.format(format_move(move))
+            result += ' {}'.format(format_move(board, move))
+            revert_infos.append(board.make_move(move))
 
         ind += 1
 
-    return result
+    while revert_infos:
+        board.revert_move(revert_infos.pop())
 
-    return '; '.join(
-        [format_move(move)
-         for move in reversed(moves)])
+    return result
 
 
 def print_board(board):

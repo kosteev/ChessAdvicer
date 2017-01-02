@@ -6,7 +6,6 @@ from pieces import WHITE, BLACK
 from utils import name_to_cell, cell_name, format_move, moves_stringify, get_fen_from_board, get_board_from_fen
 
 
-
 class Test(unittest.TestCase):
     def test_name_cell(self):
         inputs = [
@@ -20,52 +19,60 @@ class Test(unittest.TestCase):
             assert_equal(cell_name(cell), name)
 
     def test_format_move(self):
+        board = get_mock(19)
         inputs = [
             ({
                 'position': (4, 1),
                 'new_position': (4, 3),
                 'piece': 'pawn',
                 'new_piece': 'pawn',
-                'captured_piece': None
+                'captured_piece': None,
+                'captured_position':None
             }, 'e4'),
             ({
-                'position': (4, 1),
-                'new_position': (3, 2),
+                'position': (3, 3),
+                'new_position': (4, 2),
                 'piece': 'pawn',
                 'new_piece': 'pawn',
-                'captured_piece': 'rook'
-            }, 'exd3'),
+                'captured_piece': 'pawn',
+                'captured_position': (4, 3)
+            }, 'dxe3'),
             ({
-                'position': (4, 6),
-                'new_position': (4, 7),
+                'position': (1, 6),
+                'new_position': (1, 7),
                 'piece': 'pawn',
                 'new_piece': 'knight',
-                'captured_piece': None
-            }, 'e8=N'),
+                'captured_piece': None,
+                'captured_position': None
+            }, 'b8=N'),
             ({
-                'position': (6, 2),
+                'position': (2, 6),
                 'new_position': (1, 7),
                 'piece': 'bishop',
                 'new_piece': 'bishop',
-                'captured_piece': 'queen'
+                'captured_piece': 'queen',
+                'captured_position': (1, 7)
             }, 'Bxb8'),
-            ({
-                'position': (4, 7),
-                'new_position': (6, 7),
-                'piece': 'king',
-                'new_piece': 'king',
-                'captured_piece': None
-            }, 'O-O'),
             ({
                 'position': (4, 0),
                 'new_position': (2, 0),
                 'piece': 'king',
                 'new_piece': 'king',
-                'captured_piece': None
+                'captured_piece': None,
+                'captured_position': None
             }, 'O-O-O'),
+            ({
+                'position': (4, 7),
+                'new_position': (6, 7),
+                'piece': 'king',
+                'new_piece': 'king',
+                'captured_piece': None,
+                'captured_position': None
+            }, 'O-O'),
         ]
         for move, text in inputs:
-            assert_equal(format_move(move), text)
+            assert_equal(format_move(board, move), text)
+            board.make_move(move)
 
     def test_moves_stringify(self):
         input_1 = ([{
@@ -73,44 +80,57 @@ class Test(unittest.TestCase):
             'new_position': (4, 3),
             'piece': 'pawn',
             'new_piece': 'pawn',
-            'captured_piece': None
+            'captured_piece': None,
+            'captured_position': None
         }, {
             'position': (3, 4),
             'new_position': (4, 3),
             'piece': 'pawn',
             'new_piece': 'pawn',
-            'captured_piece': 'pawn'
+            'captured_piece': 'pawn',
+            'captured_position': (4, 3)
         }, {
-            'position': (0, 6),
+            'position': (2, 1),
             'new_position': (0, 1),
             'piece': 'rook',
             'new_piece': 'rook',
-            'captured_piece': None
+            'captured_piece': None,
+            'captured_position': None
         }, {
-            'position': (2, 2),
+            'position': (1, 3),
             'new_position': (0, 1),
             'piece': 'knight',
             'new_piece': 'knight',
-            'captured_piece': 'rook'
-        }], WHITE, '1.e4 dxe4 2.Ra2 Nxa2')
+            'captured_piece': 'rook',
+            'captured_position': (0, 1)
+        }], get_mock(20), '1.e4 dxe4 2.Ra2 Nxa2')
 
         input_2 = ([{
+            'position': (3, 4),
+            'new_position': (4, 5),
+            'piece': 'queen',
+            'new_piece': 'queen',
+            'captured_piece': None,
+            'captured_position': None
+        }, {
             'position': (6, 6),
             'new_position': (7, 5),
             'piece': 'pawn',
             'new_piece': 'pawn',
-            'captured_piece': 'knight'
+            'captured_piece': 'knight',
+            'captured_position': (7, 5)
         }, {
-            'position': (4, 3),
-            'new_position': (7, 5),
+            'position': (4, 5),
+            'new_position': (6, 7),
             'piece': 'queen',
             'new_piece': 'queen',
-            'captured_piece': 'pawn'
-        }], BLACK, 'gxh6 2.Qxh6')
+            'captured_piece': None,
+            'captured_position': None
+        }], get_mock(2), '1.Qe6 gxh6 2.Qg8+')
 
         inputs = [input_1, input_2]
-        for moves, move_color, text in inputs:
-            assert_equal(moves_stringify(list(reversed(moves)), move_color), text)
+        for moves, board, text in inputs:
+            assert_equal(moves_stringify(board, list(reversed(moves))), text)
 
     def test_mock_fens(self):
         for ind in xrange(MOCKS_COUNT):
