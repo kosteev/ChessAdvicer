@@ -69,7 +69,7 @@ class Board(object):
 
     @property
     def evaluation(self):
-        eval_ = self.material
+        eval_ = self.material[0] - self.material[1]
         eval_ += self.positional_eval / 1000.0
         if self.move_up_color:
             eval_ += color_sign(self.move_up_color) * len(self.pieces) / 1000.0
@@ -80,9 +80,9 @@ class Board(object):
         '''
         pieces = {(1, 2): ('rook', 'white)}
         '''
-        total = 0
+        total = [0, 0]
         for (piece, color) in self.pieces.values():
-            total += color_sign(color) * PIECES[piece]['value']
+            total[0 if color == WHITE else 1] += PIECES[piece]['value']
 
         return total
 
@@ -204,12 +204,13 @@ class Board(object):
             self.update_mask_remove(rook_position)
 
         # Recalculate evaluation
-        delta_material = PIECES[move['new_piece']]['value']
-        delta_material -= PIECES[move['piece']]['value']
+        delta_material = [0, 0]
+        delta_material[0 if move_color == WHITE else 1] = PIECES[move['new_piece']]['value'] - \
+            PIECES[move['piece']]['value']
         if move['captured_piece']:
-            delta_material += PIECES[move['captured_piece']]['value']
-        delta_material *= sign
-        self.material += delta_material
+            delta_material[1 if move_color == WHITE else 0] = -PIECES[move['captured_piece']]['value']
+        self.material[0] += delta_material[0]
+        self.material[1] += delta_material[1]
         # Recalculate probable moves
         delta_positional_eval = PIECE_CELL_VALUE[move['new_piece']][move['new_position']]
         delta_positional_eval -= PIECE_CELL_VALUE[move['piece']][move['position']]
@@ -273,7 +274,8 @@ class Board(object):
             self.update_mask_remove(rook_new_position)
 
         # Revert evaluation
-        self.material -= revert_info['delta_material']
+        self.material[0] -= revert_info['delta_material'][0]
+        self.material[1] -= revert_info['delta_material'][1]
         # Revert probable moves
         self.positional_eval -= revert_info['delta_positional_eval']
         # Revert move color

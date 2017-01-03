@@ -49,7 +49,11 @@ if __name__ == '__main__':
             print 'Memory usage: {}mb'.format(process.memory_info().rss / 1000 / 1000)
             print 'Time: {:.3f}'.format(e - s)
             print 'Iteration: {}'.format(iteration)
-            print 'Max deep: {}'.format(max_deep)
+            analyze_max_deep = max_deep
+            if len(board.pieces) <= 16:
+                print 'Max deep increased by 1 due to low count of pieces'
+                analyze_max_deep += 1
+            print 'Max deep: {}'.format(analyze_max_deep)
             print 'Lines: {}'.format(lines)
             print 'Play: {}'.format(play)
             print
@@ -76,7 +80,7 @@ if __name__ == '__main__':
             start_time = time.time()
             first_line = run_advicer(
                 mode=mode,
-                max_deep=max_deep,
+                max_deep=analyze_max_deep,
                 lines=lines,
                 board=board,
                 board_hashes=board_hashes
@@ -110,7 +114,7 @@ if __name__ == '__main__':
                             unexpected = True
 
                     # By default
-                    time_to_sleep = 0.1
+                    time_to_sleep = max(0.2 + random.random() * 0.1 - spent_time, 0)
                     if unexpected:
                         move_time = 0.7 + random.random() * 0.2
                         time_to_sleep = max(move_time - spent_time, 0)
