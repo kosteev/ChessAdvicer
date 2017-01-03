@@ -40,15 +40,6 @@ def cell_name(cell):
 
 
 def format_move(board, move):
-    revert_info = board.make_move(move)
-    check_mate = ''
-    if board.is_check(opposite=True):
-        check_mate = '+'
-        if board.is_mate():
-            check_mate = '#'
-
-    board.revert_move(revert_info)
-
     if (move['piece'] == 'king' and
             abs(move['position'][0] - move['new_position'][0]) == 2):
         # Castles
@@ -64,8 +55,29 @@ def format_move(board, move):
     else:
         piece_title = PIECES[move['piece']]['title']
 
-    return '{piece_title}{is_take}{new_position}{new_piece_title}{check_mate}'.format(
+    ambiguous = ''
+    print_board(board)
+    for move_ in board.get_board_moves():
+        if (move_ != move and
+            move_['piece'] == move['piece'] and
+                move_['new_position'] == move['new_position'] and
+                move_['new_piece'] == move['new_piece']):
+            if move['position'][0] != move_['position'][0]:
+                ambiguous = v_name(move['position'])
+            else:
+                ambiguous = h_name(move['position'])
+
+    revert_info = board.make_move(move)
+    check_mate = ''
+    if board.is_check(opposite=True):
+        check_mate = '+'
+        if board.is_mate():
+            check_mate = '#'
+    board.revert_move(revert_info)
+
+    return '{piece_title}{ambiguous}{is_take}{new_position}{new_piece_title}{check_mate}'.format(
         piece_title=piece_title,
+        ambiguous=ambiguous,
         is_take='x' if move['captured_piece'] else '',
         new_position=cell_name(move['new_position']),
         new_piece_title=('=' + PIECES[move['new_piece']]['title']) if move['piece'] != move['new_piece'] else '',

@@ -22,12 +22,28 @@ class Test(unittest.TestCase):
         board = get_mock(19)
         inputs = [
             ({
+                'position': (5, 3),
+                'new_position': (6, 3),
+                'piece': 'queen',
+                'new_piece': 'queen',
+                'captured_piece': None,
+                'captured_position': (6, 3)
+            }, 'Qfg4'),
+            ({
+                'position': (7, 5),
+                'new_position': (6, 3),
+                'piece': 'knight',
+                'new_piece': 'knight',
+                'captured_piece': 'queen',
+                'captured_position': (6, 3)
+            }, 'N6xg4'),
+            ({
                 'position': (4, 1),
                 'new_position': (4, 3),
                 'piece': 'pawn',
                 'new_piece': 'pawn',
                 'captured_piece': None,
-                'captured_position':None
+                'captured_position': (4, 3)
             }, 'e4'),
             ({
                 'position': (3, 3),
@@ -41,10 +57,10 @@ class Test(unittest.TestCase):
                 'position': (1, 6),
                 'new_position': (1, 7),
                 'piece': 'pawn',
-                'new_piece': 'knight',
+                'new_piece': 'queen',
                 'captured_piece': None,
-                'captured_position': None
-            }, 'b8=N'),
+                'captured_position': (1, 7)
+            }, 'b8=Q+'),
             ({
                 'position': (2, 6),
                 'new_position': (1, 7),
@@ -59,7 +75,7 @@ class Test(unittest.TestCase):
                 'piece': 'king',
                 'new_piece': 'king',
                 'captured_piece': None,
-                'captured_position': None
+                'captured_position': (2, 0)
             }, 'O-O-O'),
             ({
                 'position': (4, 7),
@@ -67,7 +83,7 @@ class Test(unittest.TestCase):
                 'piece': 'king',
                 'new_piece': 'king',
                 'captured_piece': None,
-                'captured_position': None
+                'captured_position': (6, 7)
             }, 'O-O'),
         ]
         for move, text in inputs:
@@ -81,7 +97,7 @@ class Test(unittest.TestCase):
             'piece': 'pawn',
             'new_piece': 'pawn',
             'captured_piece': None,
-            'captured_position': None
+            'captured_position': (4, 3)
         }, {
             'position': (3, 4),
             'new_position': (4, 3),
@@ -95,7 +111,7 @@ class Test(unittest.TestCase):
             'piece': 'rook',
             'new_piece': 'rook',
             'captured_piece': None,
-            'captured_position': None
+            'captured_position': (0, 1)
         }, {
             'position': (1, 3),
             'new_position': (0, 1),
@@ -111,7 +127,7 @@ class Test(unittest.TestCase):
             'piece': 'queen',
             'new_piece': 'queen',
             'captured_piece': None,
-            'captured_position': None
+            'captured_position': (4, 5)
         }, {
             'position': (6, 6),
             'new_position': (7, 5),
@@ -125,7 +141,7 @@ class Test(unittest.TestCase):
             'piece': 'queen',
             'new_piece': 'queen',
             'captured_piece': None,
-            'captured_position': None
+            'captured_position': (6, 7)
         }], get_mock(2), '1.Qe6 gxh6 2.Qg8+')
 
         input_3 = ([{
@@ -134,7 +150,7 @@ class Test(unittest.TestCase):
             'piece': 'queen',
             'new_piece': 'queen',
             'captured_piece': None,
-            'captured_position': None
+            'captured_position': (6, 7)
         }, {
             'position': (5, 7),
             'new_position': (6, 7),
@@ -148,7 +164,7 @@ class Test(unittest.TestCase):
             'piece': 'knight',
             'new_piece': 'knight',
             'captured_piece': None,
-            'captured_position': None
+            'captured_position': (5, 6)
         }], get_mock(2), '1.Qg8+ Rxg8 2.Nf7#')
 
         inputs = [input_1, input_2, input_3]

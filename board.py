@@ -72,7 +72,8 @@ class Board(object):
         eval_ = self.material[0] - self.material[1]
         eval_ += self.positional_eval / 1000.0
         if self.move_up_color:
-            eval_ += color_sign(self.move_up_color) * len(self.pieces) / 1000.0
+            eval_ += color_sign(self.move_up_color) * 2 * len(self.pieces) / 1000.0
+                #(self.material[0] + self.material[1] - 2 * PIECES['king']['value']) / 2000.0
 
         return eval_
 
