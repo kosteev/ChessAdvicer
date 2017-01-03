@@ -102,9 +102,6 @@ class Board(object):
         Returns current valid moves.
         Checks are not considered.
         '''
-        for move in self.get_board_promotions():
-            yield move
-
         for move in self.get_board_captures(capture_sort_key=capture_sort_key):
             yield move
 
@@ -405,31 +402,6 @@ class Board(object):
         capture_moves.sort(key=capture_sort_key)
 
         return capture_moves
-
-    def get_board_promotions(self):
-        move_color = self.move_color
-        sign = color_sign(move_color)
-        promotion_moves = []
-
-        for position, (piece, color) in self.pieces.items():
-            if (position[1] + sign not in [0, 7] or
-                color != move_color or
-                    piece != 'pawn'):
-                continue
-
-            new_position = (position[0], position[1] + sign)
-            if new_position not in self.pieces:
-                for promote_piece in PROMOTION_PIECES:
-                    promotion_moves.append({
-                        'position': position,
-                        'new_position': new_position,
-                        'piece': piece,
-                        'new_piece': promote_piece,
-                        'captured_position': new_position,
-                        'captured_piece': None
-                    })
-
-        return promotion_moves
 
     def get_board_simple_moves(self):
         move_color = self.move_color
