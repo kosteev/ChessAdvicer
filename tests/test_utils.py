@@ -22,21 +22,29 @@ class Test(unittest.TestCase):
         board = get_mock(19)
         inputs = [
             ({
-                'position': (5, 3),
-                'new_position': (6, 3),
-                'piece': 'queen',
-                'new_piece': 'queen',
-                'captured_piece': None,
-                'captured_position': (6, 3)
-            }, 'Qfg4'),
-            ({
                 'position': (7, 5),
                 'new_position': (6, 3),
                 'piece': 'knight',
                 'new_piece': 'knight',
-                'captured_piece': 'queen',
+                'captured_piece': None,
                 'captured_position': (6, 3)
-            }, 'N6xg4'),
+            }, 'N6g4'),
+            ({
+                'position': (5, 3),
+                'new_position': (6, 3),
+                'piece': 'queen',
+                'new_piece': 'queen',
+                'captured_piece': 'knight',
+                'captured_position': (6, 3)
+            }, 'Qfxg4'),
+             ({
+                'position': (0, 5),
+                'new_position': (2, 4),
+                'piece': 'knight',
+                'new_piece': 'knight',
+                'captured_piece': None,
+                'captured_position': (2, 4)
+            }, 'Na6c5'),
             ({
                 'position': (4, 1),
                 'new_position': (4, 3),

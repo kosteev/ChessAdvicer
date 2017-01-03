@@ -56,16 +56,27 @@ def format_move(board, move):
         piece_title = PIECES[move['piece']]['title']
 
     ambiguous = ''
-    print_board(board)
+    ambiguous_move = False
+    ambiguous_file = False
+    ambiguous_rank = False
     for move_ in board.get_board_moves():
         if (move_ != move and
             move_['piece'] == move['piece'] and
                 move_['new_position'] == move['new_position'] and
                 move_['new_piece'] == move['new_piece']):
-            if move['position'][0] != move_['position'][0]:
-                ambiguous = v_name(move['position'])
-            else:
-                ambiguous = h_name(move['position'])
+            ambiguous_move = True
+            if move['position'][0] == move_['position'][0]:
+                ambiguous_file = True
+            if move['position'][1] == move_['position'][1]:
+                ambiguous_rank = True
+
+    if ambiguous_move:
+        if not ambiguous_file:
+            ambiguous = v_name(move['position'])
+        elif not ambiguous_rank:
+            ambiguous = h_name(move['position'])
+        else:
+            ambiguous = cell_name(move['position'])
 
     revert_info = board.make_move(move)
     check_mate = ''
