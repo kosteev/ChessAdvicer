@@ -22,3 +22,9 @@
 - len(pieces) -> total evaluation
 - better positions eval
 - fast checks
+
+
+- integer evaluation first
+- dp
+- two moves at once and then parallel
+- better evaluation function but 3-2->3-1

@@ -59,6 +59,7 @@ def format_move(board, move):
     ambiguous_move = False
     ambiguous_file = False
     ambiguous_rank = False
+    # FIXME: pawn captures should not be considered
     for move_ in board.get_board_moves():
         if (move_ != move and
             move_['piece'] == move['piece'] and
