@@ -50,9 +50,10 @@ def run_advicer(mode, max_deep, lines, board, board_hashes):
     sign = color_sign(board.move_color)
     if first_line_moves:
         revert_info = board.make_move(first_line_moves[-1])
-        if board_hashes.get(board.hash) >= 1:
-            board.revert_move(revert_info)
+        board_hash = board.hash
+        board.revert_move(revert_info)
 
+        if board_hashes.get(board_hash, 0) >= 1:
             print
             print 'First line leads to two times repetition'
             proper_evaluation = -2.5
@@ -60,14 +61,26 @@ def run_advicer(mode, max_deep, lines, board, board_hashes):
                 # If position is not so bad, prevent three times repetition
                 # Try to find another line
                 analysis = run_analyzer(
-                    max_deep=max_deep, max_deep_captures=max_deep_captures, lines=2, board=board)
+                    max_deep=max_deep, max_deep_captures=max_deep_captures, lines=3, board=board)
                 result = analysis['result']
-                if (first_line_moves[-1] != result[0]['moves'][-1] and
-                        sign * result[0]['evaluation'] > proper_evaluation):
-                    first_line = result[0]
-                elif (len(result) > 1 and
-                        sign * result[1]['evaluation'] > proper_evaluation):
-                    first_line = result[1]
+
+                candidates = []
+                for line in result:
+                    # It will always has moves, because at least one line has moves (first_line)
+                    revert_info = board.make_move(line['moves'][-1])
+                    board_hash = board.hash
+                    board.revert_move(revert_info)
+
+                    # Collect all appropriate lines
+                    if (sign * line['evaluation'] > proper_evaluation and
+                            board_hashes.get(board_hash, 0) <= 1):
+                        candidates.append((board_hashes.get(board_hash, 0), line))
+
+                # Use stability of sort
+                # Select the rarest proper line (with better evaluation)
+                candidates.sort(key=lambda x: x[0])
+                if candidates:
+                    first_line = candidates[0][1]
                 else:
                     print 'Not found any other good line'
 
@@ -75,8 +88,6 @@ def run_advicer(mode, max_deep, lines, board, board_hashes):
                     first_line['evaluation'], moves_stringify(board, first_line['moves']))
             else:
                 print 'Position is not so good to prevent repetitions'
-        else:
-            board.revert_move(revert_info)
 
     return first_line
 
