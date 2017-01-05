@@ -60,7 +60,7 @@ def run_advicer(mode, max_deep, lines, board, board_hashes):
                 # If position is not so bad, prevent three times repetition
                 # Try to find another line
                 analysis = run_analyzer(
-                    max_deep=max_deep, max_deep_captures=max_deep_captures, board=board)
+                    max_deep=max_deep, max_deep_captures=max_deep_captures, lines=2, board=board)
                 result = analysis['result']
                 if (first_line_moves[-1] != result[0]['moves'][-1] and
                         sign * result[0]['evaluation'] > proper_evaluation):
