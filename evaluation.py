@@ -1,6 +1,7 @@
 def material_evaluation(board):
+    material = board.evaluation_params()['material']
     result = {
-        'evaluation': board.material[0] - board.material[1]
+        'evaluation': material[0] - material[1]
     }
 
     return result

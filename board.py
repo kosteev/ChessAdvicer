@@ -42,9 +42,6 @@ class Board(object):
         self.lt_screen = lt_screen
         self.cell_size = cell_size
 
-        self.material = self.get_material_eval()
-        self.positional_eval = self.get_positional_eval()
-
     def copy(self):
         return Board(
             pieces=self.pieces.copy(),
@@ -67,15 +64,29 @@ class Board(object):
             [Board.pieces_hash(self.pieces)] +
             self.castles + [self.move_color, self.en_passant]))
 
+    def evaluation_params(self):
+        material = [0, 0]
+        positional_eval = 0
+        for position, (piece, color) in self.pieces.items():
+            sign = 1 if color == WHITE else -1
+            ind = 0 if color == WHITE else 1
+            material[ind] += PIECES[piece]['value']
+            positional_eval += sign * PIECE_CELL_VALUE[piece][position]
+        engine_eval = 0
+        if self.move_up_color:
+            engine_eval += color_sign(self.move_up_color) * len(self.pieces)
+
+        return {
+            'material': material,
+            'positional_eval': positional_eval,
+            'engine_eval': engine_eval
+        }
+
     @property
     def evaluation(self):
-        eval_ = self.material[0] - self.material[1]
-        eval_ += self.positional_eval / 1000.0
-        if self.move_up_color:
-            eval_ += color_sign(self.move_up_color) * 2 * len(self.pieces) / 1000.0
-                #(self.material[0] + self.material[1] - 2 * PIECES['king']['value']) / 2000.0
-
-        return eval_
+        params = self.evaluation_params()
+        return params['material'][0] - params['material'][1] + \
+            (params['positional_eval'] + params['engine_eval']) / 1000.0
 
     def get_material_eval(self):
         '''
@@ -176,7 +187,6 @@ class Board(object):
         '''
         move_color = self.move_color
         opp_move_color = get_opp_color(move_color)
-        sign = color_sign(move_color)
 
         # Make move
         del self.pieces[move['position']]
@@ -204,22 +214,6 @@ class Board(object):
             del self.pieces[rook_position]
             self.update_mask_remove(rook_position)
 
-        # Recalculate evaluation
-        delta_material = [0, 0]
-        delta_material[0 if move_color == WHITE else 1] = PIECES[move['new_piece']]['value'] - \
-            PIECES[move['piece']]['value']
-        if move['captured_piece']:
-            delta_material[1 if move_color == WHITE else 0] = -PIECES[move['captured_piece']]['value']
-        self.material[0] += delta_material[0]
-        self.material[1] += delta_material[1]
-        # Recalculate probable moves
-        delta_positional_eval = PIECE_CELL_VALUE[move['new_piece']][move['new_position']]
-        delta_positional_eval -= PIECE_CELL_VALUE[move['piece']][move['position']]
-        if move['captured_piece']:
-            delta_positional_eval += \
-                PIECE_CELL_VALUE[move['captured_piece']][move['captured_position']]
-        delta_positional_eval *= sign
-        self.positional_eval += delta_positional_eval
         # Move color
         self.move_color = opp_move_color
         # En passant
@@ -235,8 +229,6 @@ class Board(object):
 
         revert_info = {
             'move': move,
-            'delta_material': delta_material,
-            'delta_positional_eval': delta_positional_eval,
             'old_en_passant': old_en_passant,
             'castle_info': castle_info,
             'old_castles': old_castles
@@ -274,11 +266,6 @@ class Board(object):
             del self.pieces[rook_new_position]
             self.update_mask_remove(rook_new_position)
 
-        # Revert evaluation
-        self.material[0] -= revert_info['delta_material'][0]
-        self.material[1] -= revert_info['delta_material'][1]
-        # Revert probable moves
-        self.positional_eval -= revert_info['delta_positional_eval']
         # Revert move color
         self.move_color = move_color
         # Revert en passant

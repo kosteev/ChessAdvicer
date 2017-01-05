@@ -33,8 +33,8 @@ class Test(unittest.TestCase):
         for (piece, position), variants in d.items():
             assert_equal(sorted(variants), sorted(PROBABLE_MOVES[piece][position]))
 
-        assert_equal(PIECE_CELL_VALUE['rook'][(2, 2)], 14)
-        assert_equal(PIECE_CELL_VALUE['rook'][(4, 3)], 14)
+        assert_equal(PIECE_CELL_VALUE['rook'][(2, 2)], 3)
+        assert_equal(PIECE_CELL_VALUE['rook'][(4, 3)], 4)
 
         assert_equal(PIECE_CELL_VALUE['knight'][(0, 0)], 2)
         assert_equal(PIECE_CELL_VALUE['knight'][(3, 3)], 8)

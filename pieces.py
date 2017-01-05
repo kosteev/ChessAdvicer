@@ -121,7 +121,7 @@ for piece in PROBABLE_MOVES:
         if piece == 'king':
             value = 0
         elif piece =='rook':
-            value = max(min(cell[0], 7 - cell[0]), min(cell[1], 7 - cell[1])) + 1
+            value = min(cell[0], 7 - cell[0]) + min(cell[1], 7 - cell[1]) + 1
         else:
             value = sum(
                 len(v) for v in PROBABLE_MOVES[piece][cell])
