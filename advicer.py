@@ -8,38 +8,34 @@ from utils import moves_stringify, format_move, color_sign
 
 def run_advicer(mode, max_deep, lines, board, board_hashes):
     print 'Run advicer...'
+    max_deep_captures = 2
+
 #     a = time.time()
-#     pre_analysis = run_analyzer(max_deep, 2, board)
-#     for line in pre_analysis['result']:
-#         if line['moves']:
-#             move = line['moves'][-1]
-#             revert_info = board.make_move(move)
-#             run_analyzer(
-#                 max_deep, lines, board)
-#             board.revert_move(revert_info)
+#     pre_analysis = run_analyzer(
+#         max_deep=1, max_deep_captures=1, lines=999, board=board)
+#     pre_moves = [
+#         line['moves'][-1]
+#         for line in pre_analysis['result']
+#         if line['moves']
+#     ]
 #     print '{:.3f}'.format(time.time() - a)
-#     a = time.time()
-#     pre_analysis = None
-#     for move in board.get_board_moves():
-#         revert_info = board.make_move(move)
-#         if not revert_info:
-#             continue
-#         print 'Made', format_move(move)
-#         pre_analysis = run_analyzer(max_deep - 1, 1, board)
-#         board.revert_move(revert_info)
-#     if pre_analysis is not None:
-#         run_analyzer(max_deep, lines, board, alpha=pre_analysis['result'][0]['evaluation'])
+# 
+#     pre_analysis = run_analyzer(
+#         max_deep=max_deep, max_deep_captures=max_deep_captures, lines=lines,
+#         board=board, moves_to_consider=pre_moves)
 #     print '{:.3f}'.format(time.time() - a)
 #     print
 #     print
 
-    analysis = run_analyzer(max_deep, lines, board)
+    analysis = run_analyzer(
+        max_deep=max_deep, max_deep_captures=max_deep_captures, lines=lines, board=board)
 
     first_line = analysis['result'][0]
     opening_info = get_opening_info(board)
     if opening_info is not None:
         opening_analysis = run_analyzer(
-            max_deep, 1, board, moves_to_consider=[opening_info['move']])
+            max_deep=max_deep, max_deep_captures=max_deep_captures,
+            lines=1, board=board, moves_to_consider=[opening_info['move']])
         # TODO: check moves == []
         opening_first_line = opening_analysis['result'][0]
         if (opening_first_line['moves'] and
@@ -63,7 +59,8 @@ def run_advicer(mode, max_deep, lines, board, board_hashes):
             if sign * first_line['evaluation'] > proper_evaluation:
                 # If position is not so bad, prevent three times repetition
                 # Try to find another line
-                analysis = run_analyzer(max_deep, 2, board)
+                analysis = run_analyzer(
+                    max_deep=max_deep, max_deep_captures=max_deep_captures, board=board)
                 result = analysis['result']
                 if (first_line_moves[-1] != result[0]['moves'][-1] and
                         sign * result[0]['evaluation'] > proper_evaluation):
@@ -84,10 +81,10 @@ def run_advicer(mode, max_deep, lines, board, board_hashes):
     return first_line
 
 
-def run_analyzer(max_deep, lines, board, moves_to_consider=None):
+def run_analyzer(max_deep, max_deep_captures, lines, board, moves_to_consider=None):
     kwargs = {
         'max_deep': max_deep,
-        'max_deep_captures': 2,
+        'max_deep_captures': max_deep_captures,
         'max_deep_one_capture': 999,
         'lines': lines,
         'evaluation_func': simple_evaluation,

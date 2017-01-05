@@ -51,7 +51,10 @@ if __name__ == '__main__':
             print 'Iteration: {}'.format(iteration)
             analyze_max_deep = max_deep
             if len(board.pieces) <= 16:
-                print 'Max deep increased by 1 due to low count of pieces'
+                print 'Max deep increased by 1'
+                analyze_max_deep += 1
+            if len(board.pieces) <= 4:
+                print 'Max deep increased by 1'
                 analyze_max_deep += 1
             print 'Max deep: {}'.format(analyze_max_deep)
             print 'Lines: {}'.format(lines)

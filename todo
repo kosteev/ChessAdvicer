@@ -28,3 +28,4 @@
 - dp
 - two moves at once and then parallel
 - better evaluation function but 3-2->3-1
+- rook positional eval
