@@ -67,12 +67,14 @@ class Board(object):
     def evaluation_params(self):
         material = [0, 0]
         activeness = [0, 0]
-        space = [0, 0]
+        space = [32, 32]
         for position, (piece, color) in self.pieces.items():
             ind = 0 if color == WHITE else 1
             material[ind] += PIECES[piece]['value']
             activeness[ind] += PIECE_CELL_ACTIVENESS[piece][position]
-            space[ind] += 7 - position[1] if ind else position[1]
+            if piece == 'pawn':
+                space_value = min(7 - position[1] if ind else position[1], 4)
+                space[ind] += space_value - 4
 
         engine_eval = 0
         if self.move_up_color:
@@ -89,7 +91,8 @@ class Board(object):
     def evaluation(self):
         params = self.evaluation_params()
         return params['material'][0] - params['material'][1] + \
-            (params['activeness'][0] - params['activeness'][1] + params['engine_eval']) / 1000.0
+            (params['activeness'][0] - params['activeness'][1] + 2 * params['engine_eval'] + \
+             2 * (params['space'][0] - params['space'][1])) / 1000.0
 
     def get_board_moves(self, capture_sort_key=None):
         '''
