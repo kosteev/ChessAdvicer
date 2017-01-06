@@ -114,9 +114,9 @@ for piece in DIFFS:
                 if moves_variant:
                     PROBABLE_MOVES[piece][(c, r)].append(moves_variant)
 
-PIECE_CELL_VALUE = {}
+PIECE_CELL_ACTIVENESS = {}
 for piece in PROBABLE_MOVES:
-    PIECE_CELL_VALUE[piece] = {}
+    PIECE_CELL_ACTIVENESS[piece] = {}
     for cell in PROBABLE_MOVES[piece]:
         if piece == 'king':
             value = 0
@@ -125,12 +125,12 @@ for piece in PROBABLE_MOVES:
         else:
             value = sum(
                 len(v) for v in PROBABLE_MOVES[piece][cell])
-        PIECE_CELL_VALUE[piece][cell] = value
+        PIECE_CELL_ACTIVENESS[piece][cell] = value
 
-PIECE_CELL_VALUE['pawn'] = {}
+PIECE_CELL_ACTIVENESS['pawn'] = {}
 for c in xrange(8):
     for r in xrange(1, 7):
-        PIECE_CELL_VALUE['pawn'][(c, r)] = 1 if c in [0, 7] else 2
+        PIECE_CELL_ACTIVENESS['pawn'][(c, r)] = 1 if c in [0, 7] else 2
 
 # For all pieces, except pawn and king
 BEAT_VARIANTS = [{

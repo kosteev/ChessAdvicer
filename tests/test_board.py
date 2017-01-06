@@ -44,7 +44,7 @@ class Test(unittest.TestCase):
                 'captured_position': (2, 4)
             },
             'evaluation': [121, 103],
-            'positional_eval': 44
+            'activeness': 44
         }, {
             'move': {
                 'position': (6, 5),
@@ -55,7 +55,7 @@ class Test(unittest.TestCase):
                 'captured_position': (5, 6)
             },
             'evaluation': [121, 105],
-            'positional_eval': 38
+            'activeness': 38
         }, {
             'move': {
                 'position': (7, 7),
@@ -66,7 +66,7 @@ class Test(unittest.TestCase):
                 'captured_position': (5, 6)
             },
             'evaluation': [121, 105],
-            'positional_eval': 42
+            'activeness': 42
         }, {
             'move': {
                 'position': (6, 6),
@@ -77,7 +77,7 @@ class Test(unittest.TestCase):
                 'captured_position': (5, 6)
             },
             'evaluation': [121, 105],
-            'positional_eval': 38
+            'activeness': 38
         }]
 
         cnt = 0
@@ -90,7 +90,7 @@ class Test(unittest.TestCase):
             if cnt < len(d):
                 assert_equal(move, d[cnt]['move'])
                 assert_equal(board.evaluation_params()['material'], d[cnt]['evaluation'])
-                assert_equal(board.evaluation_params()['positional_eval'], d[cnt]['positional_eval'])
+                assert_equal(board.evaluation_params()['activeness'], d[cnt]['activeness'])
             else:
                 assert_equal(board.evaluation_params()['material'], [121, 108])
             cnt += 1
@@ -103,7 +103,7 @@ class Test(unittest.TestCase):
 
         assert_equal(board.en_passant, (6, 2))
         assert_equal(board.evaluation_params()['material'], [112, 108])
-        assert_equal(board.evaluation_params()['positional_eval'], 3)
+        assert_equal(board.evaluation_params()['activeness'], 3)
         assert_true(board.pieces[(6, 3)] == ('pawn', WHITE))
         cnt = 0
         for move in board.get_board_moves(capture_sort_key=Board.sort_take_by_value):
@@ -116,7 +116,7 @@ class Test(unittest.TestCase):
                 assert_equal(move['new_position'], (6, 2))
                 assert_equal(move['captured_piece'], 'pawn')
                 assert_equal(board.evaluation_params()['material'], [111, 108])
-                assert_equal(board.evaluation_params()['positional_eval'], 1)
+                assert_equal(board.evaluation_params()['activeness'], 1)
                 assert_true((6, 3) not in board.pieces)
             cnt += 1
 

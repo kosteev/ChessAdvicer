@@ -1,7 +1,7 @@
 import json
 import random
 
-from pieces import get_opp_color, PIECES, PROBABLE_MOVES, WHITE, PIECE_CELL_VALUE, BEAT_LINES, \
+from pieces import get_opp_color, PIECES, PROBABLE_MOVES, WHITE, PIECE_CELL_ACTIVENESS, BEAT_LINES, \
     get_castles, get_castle_id, LINE_TYPES, LINES_INFO, NEXT_CELL, CELL_TO_LINE_ID, LINE_TYPE_LT, \
     FREE_MOVES, PROMOTION_PIECES
 from utils import color_sign, update_castles
@@ -66,19 +66,22 @@ class Board(object):
 
     def evaluation_params(self):
         material = [0, 0]
-        positional_eval = 0
+        activeness = [0, 0]
+        space = [0, 0]
         for position, (piece, color) in self.pieces.items():
-            sign = 1 if color == WHITE else -1
             ind = 0 if color == WHITE else 1
             material[ind] += PIECES[piece]['value']
-            positional_eval += sign * PIECE_CELL_VALUE[piece][position]
+            activeness[ind] += PIECE_CELL_ACTIVENESS[piece][position]
+            space[ind] += 7 - position[1] if ind else position[1]
+
         engine_eval = 0
         if self.move_up_color:
             engine_eval += color_sign(self.move_up_color) * len(self.pieces)
 
         return {
             'material': material,
-            'positional_eval': positional_eval,
+            'activeness': activeness,
+            'space': space,
             'engine_eval': engine_eval
         }
 
@@ -86,28 +89,7 @@ class Board(object):
     def evaluation(self):
         params = self.evaluation_params()
         return params['material'][0] - params['material'][1] + \
-            (params['positional_eval'] + params['engine_eval']) / 1000.0
-
-    def get_material_eval(self):
-        '''
-        pieces = {(1, 2): ('rook', 'white)}
-        '''
-        total = [0, 0]
-        for (piece, color) in self.pieces.values():
-            total[0 if color == WHITE else 1] += PIECES[piece]['value']
-
-        return total
-
-    def get_positional_eval(self):
-        '''
-        Returns count of probable moves.
-        TODO: (kosteev) consider all chess rules
-        '''
-        total = 0
-        for position, (piece, color) in self.pieces.items():
-            total += color_sign(color) * PIECE_CELL_VALUE[piece][position]
-
-        return total
+            (params['activeness'][0] - params['activeness'][1] + params['engine_eval']) / 1000.0
 
     def get_board_moves(self, capture_sort_key=None):
         '''

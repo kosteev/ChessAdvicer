@@ -6,7 +6,7 @@ from pieces import PIECES, WHITE, BLACK, get_castles, WHITE_KC, WHITE_QC, BLACK_
 def color_sign(color):
     '''
     Returns 1 for white and -1 for black.
-    Used in many functions, e.g.: get_material_eval
+    Used in many functions, e.g.: get_board_moves
     '''
     return 1 if color == WHITE else -1
 
