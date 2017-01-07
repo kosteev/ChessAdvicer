@@ -7,50 +7,65 @@ from utils import name_to_cell, get_color_pieces
 
 
 OPENINGS = [{
-    'name': 'fiancetto_white',
-    'color': WHITE,
-    'from_to': [
-        ('g1', 'f3'),
-        ('g2', 'g3'),
-        ('f1', 'g2'),
-        ('e1', 'g1'),
-        ('e2', 'e4')
-    ]
-}, {
-    'name': 'fiancetto_black',
-    'color': BLACK,
-    'from_to': [
-        ('g8', 'f6'),
-        ('g7', 'g6'),
-        ('f8', 'g7'),
-        ('e8', 'g8'),
-        ('e7', 'e5')
-    ]
-}, {
-    'name': 'e2e3_castle',
-    'color': WHITE,
-    'from_to': [
-        ('g1', 'f3'),
-        ('e2', 'e3'),
-        ('f1', 'e2'),
-        ('e1', 'g1'),
-        ('d2', 'd4')
-    ]
-}, {
-    'name': 'e4d4',
+#     'name': 'fiancetto_white',
+#     'color': WHITE,
+#     'from_to': [
+#         ('g1', 'f3'),
+#         ('g2', 'g3'),
+#         ('f1', 'g2'),
+#         ('e1', 'g1'),
+#         ('e2', 'e4')
+#     ]
+# }, {
+#     'name': 'fiancetto_black',
+#     'color': BLACK,
+#     'from_to': [
+#         ('g8', 'f6'),
+#         ('g7', 'g6'),
+#         ('f8', 'g7'),
+#         ('e8', 'g8'),
+#         ('e7', 'e5')
+#     ]
+# }, {
+#     'name': 'e2e3_castle',
+#     'color': WHITE,
+#     'from_to': [
+#         ('g1', 'f3'),
+#         ('e2', 'e3'),
+#         ('f1', 'e2'),
+#         ('e1', 'g1'),
+#         ('d2', 'd4')
+#     ]
+# }, {
+#     'name': 'e4d4',
+#     'color': WHITE,
+#     'from_to': [
+#         ('e2', 'e4'),
+#         ('d2', 'd4')
+#     ]
+# }, {
+    'name': 'e4d3',
     'color': WHITE,
     'from_to': [
         ('e2', 'e4'),
-        ('d2', 'd4')
+        ('d2', 'd3')
     ]
 }, {
-    'name': 'e7e5',
+    'name': 'd6e5',
     'color': BLACK,
     'from_to': [
-        ('e7', 'e5'),
-        ('d7', 'd5')
+        ('d7', 'd6'),
+        ('e7', 'e5')
     ]
+# }, {
+#     'name': 'd5e6',
+#     'color': BLACK,
+#     'from_to': [
+#         ('d7', 'd5'),
+#         ('e7', 'e6')
+#     ]
 }]
+# TODO: think if this is enough?
 
 for opening in OPENINGS:
     board = get_mock(1)

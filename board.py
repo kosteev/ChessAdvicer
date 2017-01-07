@@ -1,5 +1,6 @@
 import json
 import random
+from collections import defaultdict
 
 from pieces import get_opp_color, PIECES, PROBABLE_MOVES, WHITE, PIECE_CELL_ACTIVENESS, BEAT_LINES, \
     get_castles, get_castle_id, LINE_TYPES, LINES_INFO, NEXT_CELL, CELL_TO_LINE_ID, LINE_TYPE_LT, \
@@ -65,34 +66,70 @@ class Board(object):
             self.castles + [self.move_color, self.en_passant]))
 
     def evaluation_params(self):
+        '''
+        - material
+        - development
+        - center
+        - activeness
+        - space
+        - king safety
+        '''
+        SPACE_MAX = 3
+
         material = [0, 0]
+        development = [0, 0]
+        center = [0, 0]
         activeness = [0, 0]
-        space = [32, 32]
+        space = [0, 0]
+        king_safety = [0, 0]
+
+#         stage = 0
+#         if len(self.pieces) <= 16:
+#             stage = 2
+
+#         pieces_by_name = [defaultdict(list), defaultdict(list)]
         for position, (piece, color) in self.pieces.items():
             ind = 0 if color == WHITE else 1
             material[ind] += PIECES[piece]['value']
             activeness[ind] += PIECE_CELL_ACTIVENESS[piece][position]
-            if piece == 'pawn':
-                space_value = min(7 - position[1] if ind else position[1], 4)
-                space[ind] += space_value - 4
+#             if piece == 'pawn':
+#                 space_y = min(7 - position[1] if ind else position[1], SPACE_MAX)
+#                 space_x = min(7 - position[0], position[0]) + 1
+#                 space[ind] += (space_y - SPACE_MAX) * space_x / 2.0
+#             pieces_by_name[ind][piece].append(position)
 
         engine_eval = 0
         if self.move_up_color:
-            engine_eval += color_sign(self.move_up_color) * len(self.pieces)
+            engine_eval += 2 * color_sign(self.move_up_color) * len(self.pieces)
+
+#         if stage <= 0:
+#             for ind in [0, 1]:
+#                 if len(pieces_by_name[ind]['rook']) == 2:
+#                     r1_p = pieces_by_name[ind]['rook'][0]
+#                     r2_p = pieces_by_name[ind]['rook'][1]
+#                     king_p = pieces_by_name[ind]['king'][0]
+#                     if r1_p[1] == r2_p[1] and r1_p[1] == king_p[1]:
+#                         if (r1_p[0] - king_p[0]) * (r2_p[0] - king_p[0]) >= 0:
+#                             development[ind] += 10
+
+        evaluation = material[0] - material[1] + \
+            (activeness[0] - activeness[1] + engine_eval + \
+             space[0] - space[1] + development[0] - development[1]) / 1000.0
 
         return {
             'material': material,
+            'development': development,
+            'center': center,
             'activeness': activeness,
             'space': space,
-            'engine_eval': engine_eval
+            'king_safety': king_safety,
+            'engine_eval': engine_eval,
+            'evaluation': evaluation
         }
 
     @property
     def evaluation(self):
-        params = self.evaluation_params()
-        return params['material'][0] - params['material'][1] + \
-            (params['activeness'][0] - params['activeness'][1] + 2 * params['engine_eval'] + \
-             2 * (params['space'][0] - params['space'][1])) / 1000.0
+        return self.evaluation_params()['evaluation']
 
     def get_board_moves(self, capture_sort_key=None):
         '''
