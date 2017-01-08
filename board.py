@@ -94,20 +94,17 @@ class Board(object):
             activeness[ind] += PIECE_CELL_ACTIVENESS[piece][position]
 
             if piece == 'pawn':
-                if (2 <= position[0] <= 5 and
-                        2 <= position[1] <= 5):
-                    center[ind] += min(position[0], 7 - position[0]) * min(position[1], 7 - position[1])
-#                 if 3 <= position[0] <= 4:
-#                     if ind == 0:
-#                         if position[1] == 3:
-#                             center[ind] += 15
-#                         elif position[1] == 2:
-#                             center[ind] += 7
-#                     else:
-#                         if position[1] == 4:
-#                             center[ind] += 15
-#                         elif position[1] == 5:
-#                             center[ind] += 7
+                if 3 <= position[0] <= 4:
+                    if ind == 0:
+                        if position[1] == 3:
+                            center[ind] += 15
+                        elif position[1] == 2:
+                            center[ind] += 7
+                    else:
+                        if position[1] == 4:
+                            center[ind] += 15
+                        elif position[1] == 5:
+                            center[ind] += 7
             elif piece == 'king':
                 king_safety[ind] = (7 - position[1]) if ind == 0 else position[1]
                 king_safety[ind] *= 10

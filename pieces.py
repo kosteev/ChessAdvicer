@@ -130,7 +130,9 @@ for piece in PROBABLE_MOVES:
 PIECE_CELL_ACTIVENESS['pawn'] = {}
 for c in xrange(8):
     for r in xrange(1, 7):
-        PIECE_CELL_ACTIVENESS['pawn'][(c, r)] = 1 if c in [0, 7] else 2
+        PIECE_CELL_ACTIVENESS['pawn'][(c, r)] = \
+            min(c, 7 - c) * min(r, 7 - r)
+
 
 # For all pieces, except pawn and king
 BEAT_VARIANTS = [{
