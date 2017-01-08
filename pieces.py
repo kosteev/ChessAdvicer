@@ -43,7 +43,7 @@ PIECES = {
         'title': 'Q',
     },
     'king': {
-        'value': 100,
+        'value': 0,
         'title': 'K',
     },
     'pawn': {

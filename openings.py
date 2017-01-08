@@ -65,6 +65,7 @@ OPENINGS = [{
 #         ('e7', 'e6')
 #     ]
 }]
+OPENINGS = []
 # TODO: think if this is enough?
 
 for opening in OPENINGS:
