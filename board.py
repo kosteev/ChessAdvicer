@@ -105,9 +105,9 @@ class Board(object):
                             center[ind] += 15
                         elif position[1] == 5:
                             center[ind] += 7
-            elif piece == 'king':
-                king_safety[ind] = (7 - position[1]) if ind == 0 else position[1]
-                king_safety[ind] *= 10
+#             elif piece == 'king':
+#                 king_safety[ind] = (7 - position[1]) if ind == 0 else position[1]
+#                 king_safety[ind] *= 10
 
         engine_eval = 0
         if self.move_up_color:
@@ -117,8 +117,7 @@ class Board(object):
             evaluation = material[0] - material[1] + \
                 (engine_eval + \
                  activeness[0] - activeness[1] + \
-                 center[0] - center[1] + \
-                 king_safety[0] - king_safety[1]) / 1000.0
+                 center[0] - center[1]) / 1000.0
         else:
             evaluation = material[0] - material[1] + \
                 (engine_eval + \
