@@ -65,8 +65,8 @@ OPENINGS = [{
 #         ('e7', 'e6')
 #     ]
 }]
-OPENINGS = []
 # TODO: think if this is enough?
+OPENINGS = []
 
 for opening in OPENINGS:
     board = get_mock(1)
