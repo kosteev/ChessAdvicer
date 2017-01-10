@@ -50,7 +50,8 @@ if __name__ == '__main__':
             print 'Time: {:.3f}'.format(e - s)
             print 'Iteration: {}'.format(iteration)
             analyze_max_deep = max_deep
-            if len(board.pieces) <= 14:
+            # TODO: use len(get_board_moves)
+            if len(board.pieces) <= 12:
                 print 'Max deep increased by 1'
                 analyze_max_deep += 1
             if len(board.pieces) <= 4:

@@ -31,6 +31,8 @@
 - rook positional eval
 - real evaluation function
 
+- if no captures due to check
+- kings evaluation from deep=3 forced checks
 
 
 - material
@@ -38,3 +40,8 @@
 - activeness
 - center
 - kings position
+
+
+- fix bug with board.evaluation break
+- rooks connection with mask
+- increase deep regarding to len(board_moves)

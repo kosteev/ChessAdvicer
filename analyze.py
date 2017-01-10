@@ -282,6 +282,7 @@ class AlphaBetaAnalyzer(Analyzer):
                     alpha = parent_alpha_beta.value
 
             # Here is the first time it could happen
+            # BUG: fix 
             if alpha >= beta:
                 break
 
