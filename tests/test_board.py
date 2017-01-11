@@ -243,3 +243,12 @@ class Test(unittest.TestCase):
                 moves != board.get_board_simple_moves()
                 for _ in xrange(5)
             ))
+
+    def test_sort_take_by_value(self):
+        board = get_mock(22)
+        moves = board.get_board_captures(Board.sort_take_by_value)
+
+        assert_equal(moves[0]['new_position'], (2, 7))
+        assert_equal(moves[0]['new_piece'], 'queen')
+        assert_equal(moves[1]['new_position'], (4, 7))
+        assert_equal(moves[1]['new_piece'], 'queen')

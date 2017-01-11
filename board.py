@@ -664,9 +664,15 @@ class Board(object):
         The most valueable + by the most cheap
         '''
         # Consider promotions without capture also
-        captured_piece = move['captured_piece'] or move['new_piece']
+        # FIXME: consider promotions with capturing
+        material_diff = 0
+        if move['captured_piece']:
+            material_diff += PIECES[move['captured_piece']]['value']
+        if move['new_piece'] != move['piece']:
+            material_diff += PIECES[move['new_piece']]['value']
+
         return [
-            -PIECES[captured_piece]['value'], PIECES[move['piece']]['value']]
+            -material_diff, PIECES[move['piece']]['value']]
 
     def update_mask_add(self, position):
         for line_type in LINE_TYPES:

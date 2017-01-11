@@ -196,13 +196,14 @@ class AlphaBetaAnalyzer(Analyzer):
         }
 
     def dfs(self, board, alpha, beta, analyze_launch_time, moves_to_consider=None,
-            deep=0, max_capture_value=PIECES['queen']['value'],
+            deep=0, max_material_diff=999,
             parent_alpha_beta=None, parent_ind=None):
         '''
         !!!! This function should be multi-thread safe.
         !!!! It always returns result of non-zero length
 
         `moves_to_consider` - moves to consider, if None than all valid moves are considered
+            only if deep < max_deep
         '''
         if time.time() - analyze_launch_time > self.max_time:
             # If alpha or beta is determined here, than there is calculated one variant already
@@ -254,17 +255,23 @@ class AlphaBetaAnalyzer(Analyzer):
                 'deep': deep + 1
             }
             if deep >= self.max_deep + self.max_deep_captures:
-                captured_piece_value = PIECES[move['captured_piece'] or move['new_piece']]['value']
-                if captured_piece_value > max_capture_value:
+                material_diff = 0
+                if move['captured_piece']:
+                    material_diff += PIECES[move['captured_piece']]['value']
+                if move['new_piece'] != move['piece']:
+                    material_diff += PIECES[move['new_piece']]['value']
+
+                if material_diff > max_material_diff:
                     board.revert_move(revert_info)
-                    # Break recursion, do not consider line if opponent takes more valuable piece
+                    # Break recursion, do not consider line if opponent takes more valuable piece or
+                    # promote something valuable or neither both of this
                     # Return something that will not affect result
                     result = [{
                         'evaluation': sign * (Board.MAX_EVALUATION + 1),
                         'moves': []
                     }]
                     break
-                kwargs['max_capture_value'] = captured_piece_value
+                kwargs['max_material_diff'] = material_diff
             cand, _ = self.dfs(
                 board, alpha, beta, analyze_launch_time, **kwargs)
             board.revert_move(revert_info)
