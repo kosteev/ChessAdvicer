@@ -54,9 +54,6 @@ if __name__ == '__main__':
             if len(board.pieces) <= 12:
                 print 'Max deep increased by 1'
                 analyze_max_deep += 1
-            if len(board.pieces) <= 4:
-                print 'Max deep increased by 1'
-                analyze_max_deep += 1
             print 'Max deep: {}'.format(analyze_max_deep)
             print 'Lines: {}'.format(lines)
             print 'Play: {}'.format(play)

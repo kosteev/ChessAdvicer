@@ -227,7 +227,16 @@ class AlphaBetaAnalyzer(Analyzer):
         if deep >= self.max_deep:
             result = self.board_evaluation(board)
             is_any_move = True
-            if deep == self.max_deep + self.max_deep_captures + self.max_deep_one_capture:
+
+            if len(result) == lines:
+                if move_color == WHITE:
+                    alpha = max(alpha, result[-1]['evaluation'])
+                else:
+                    beta = min(beta, result[-1]['evaluation'])
+
+            if (alpha >= beta or
+                    deep == self.max_deep + self.max_deep_captures + self.max_deep_one_capture):
+                # No moves should be considered
                 moves = []
             else:
                 moves = board.get_board_captures(capture_sort_key=Board.sort_take_by_value)
@@ -281,8 +290,6 @@ class AlphaBetaAnalyzer(Analyzer):
                 else:
                     alpha = parent_alpha_beta.value
 
-            # Here is the first time it could happen
-            # BUG: fix 
             if alpha >= beta:
                 break
 

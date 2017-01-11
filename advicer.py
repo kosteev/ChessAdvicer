@@ -8,7 +8,7 @@ from utils import moves_stringify, format_move, color_sign
 
 def run_advicer(mode, max_deep, lines, board, board_hashes):
     print 'Run advicer...'
-    max_deep_captures = 2
+    max_deep_captures = 1
 
 #     a = time.time()
 #     pre_analysis = run_analyzer(
