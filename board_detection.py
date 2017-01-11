@@ -88,7 +88,7 @@ def get_settings(mode):
             'moved_black_board_cell': (218 / 255.0, 195 / 255.0, 75 / 255.0),
             'letter': (152 / 255.0, 150 / 255.0, 149 / 255.0)
         }
-        cell_size = 64
+        cell_size = 74
         pixels = {
             'pawn': {
                 'white': [((43, 58), 'black_piece'), ((79, 91), ('white_piece'))],
@@ -115,8 +115,9 @@ def get_settings(mode):
                 'black': [((56, 79), 'white_piece'), ((110, 63), ('black_piece'))],
             }
         }
-        white_letter_count = 92
-        black_letter_count = 43
+        pixels = {"king": {"white": [[[62, 101], "white_piece"], [[74, 93], "black_piece"]], "black": [[[44, 101], "black_piece"], [[25, 73], "white_piece"]]}, "rook": {"white": [[[86, 106], "black_piece"], [[75, 35], "white_piece"]], "black": [[[35, 33], "black_piece"], [[104, 115], "black_piece"]]}, "pawn": {"white": [[[50, 102], "white_piece"], [[48, 106], "white_piece"]], "black": [[[97, 113], "black_piece"], [[43, 122], "black_piece"]]}, "knight": {"white": [[[102, 91], "white_piece"], [[41, 54], "black_piece"]], "black": [[[90, 124], "black_piece"], [[53, 33], "black_piece"]]}, "queen": {"white": [[[55, 125], "white_piece"], [[105, 30], "black_piece"]], "black": [[[127, 43], "black_piece"], [[72, 128], "black_piece"]]}, "bishop": {"white": [[[66, 71], "white_piece"], [[48, 105], "black_piece"]], "black": [[[86, 84], "white_piece"], [[99, 69], "black_piece"]]}}
+        white_letter_count = 112
+        black_letter_count = 60
 
     return {
         'board_radius_pixels': board_radius_pixels,
