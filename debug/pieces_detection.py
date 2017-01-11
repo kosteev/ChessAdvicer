@@ -6,6 +6,7 @@ from collections import defaultdict
 from board_detection import get_lt_screen_cell_size, get_screen_bitmap, get_pixel, \
     show_image, similiar_pixel, get_settings
 from utils import cell_name
+from mocks import get_mock
 
 
 if __name__ == '__main__':
@@ -44,14 +45,26 @@ if __name__ == '__main__':
                 stats[cell][(dx, dy)] = pixel 
 
     pixels = {}
+    init_board = get_mock(1)
+    pixels = {}
     for cell in cells:
         print
-        print cell_name(cell)
+        piece, color = init_board.pieces[cell]
+        print piece, color
         while True:
             p1 = random.choice(stats[cell].keys())
             p2 = random.choice(stats[cell].keys())
-            if (similiar_pixel(stats[cell][p1], [settings['colors']['white_piece'], settings['colors']['black_piece']])
-                    and similiar_pixel(stats[cell][p2], [settings['colors']['white_piece'], settings['colors']['black_piece']])):
+
+            p1_color = None
+            p2_color = None
+            for piece_color in ['white_piece', 'black_piece']:
+                if similiar_pixel(stats[cell][p1], [settings['colors'][piece_color]]):
+                    p1_color = piece_color
+                if similiar_pixel(stats[cell][p2], [settings['colors'][piece_color]]):
+                    p2_color = piece_color
+
+            if (p1_color and
+                    p2_color):
                 for cell_2 in cells:
                     if cell == cell_2:
                         continue
@@ -62,4 +75,11 @@ if __name__ == '__main__':
                 else:
                     print p1, stats[cell][p1]
                     print p2, stats[cell][p2]
+                    pixels.setdefault(piece, {})
+                    pixels[piece][color] = []
+
+                    pixels[piece][color].append((p1, p1_color))
+                    pixels[piece][color].append((p2, p2_color))
                     break
+
+    print json.dumps(pixels)
