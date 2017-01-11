@@ -117,7 +117,7 @@ if __name__ == '__main__':
                     # By default
                     time_to_sleep = max(0.2 + random.random() * 0.1 - spent_time, 0)
                     if unexpected:
-                        move_time = 0.7 + random.random() * 0.2
+                        move_time = 0.6 + random.random() * 0.4
                         time_to_sleep = max(move_time - spent_time, 0)
                         print 'Unxepected line: sleeping: {:.3f}'.format(time_to_sleep)
                     total_sleep += time_to_sleep
