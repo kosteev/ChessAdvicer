@@ -204,6 +204,13 @@ class AlphaBetaAnalyzer(Analyzer):
 
         `moves_to_consider` - moves to consider, if None than all valid moves are considered
             only if deep < max_deep
+
+        deep < max_deep
+            - all moves
+        max_deep <= deep  < max_deep + max_deep_captures
+            - captures (if check then all moves)
+        max_deep + max_deep_captures <= deep < max_deep + max_deep_captures + max_deep_one_capture
+            - one capture
         '''
         if time.time() - analyze_launch_time > self.max_time:
             # If alpha or beta is determined here, than there is calculated one variant already
@@ -226,21 +233,25 @@ class AlphaBetaAnalyzer(Analyzer):
         is_any_move = False
 
         if deep >= self.max_deep:
-            result = self.board_evaluation(board)
-            is_any_move = True
-
-            if len(result) == lines:
-                if move_color == WHITE:
-                    alpha = max(alpha, result[-1]['evaluation'])
-                else:
-                    beta = min(beta, result[-1]['evaluation'])
-
-            if (alpha >= beta or
-                    deep == self.max_deep + self.max_deep_captures + self.max_deep_one_capture):
-                # No moves should be considered
-                moves = []
+            if (deep < self.max_deep + self.max_deep_captures
+                    and board.is_check(opposite=True)):
+                moves = board.get_board_moves(capture_sort_key=Board.sort_take_by_value)
             else:
-                moves = board.get_board_captures(capture_sort_key=Board.sort_take_by_value)
+                result = self.board_evaluation(board)
+                is_any_move = True
+
+                if len(result) == lines:
+                    if move_color == WHITE:
+                        alpha = max(alpha, result[-1]['evaluation'])
+                    else:
+                        beta = min(beta, result[-1]['evaluation'])
+
+                if (alpha >= beta or
+                        deep == self.max_deep + self.max_deep_captures + self.max_deep_one_capture):
+                    # No moves should be considered
+                    moves = []
+                else:
+                    moves = board.get_board_captures(capture_sort_key=Board.sort_take_by_value)
         else:
             moves = board.get_board_moves(
                 capture_sort_key=Board.sort_take_by_value) if moves_to_consider is None else moves_to_consider

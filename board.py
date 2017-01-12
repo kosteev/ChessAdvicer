@@ -73,8 +73,6 @@ class Board(object):
         - space
         - king safety
         '''
-        SPACE_MAX = 3
-
         material = [0, 0]
         development = [0, 0]
         center = [0, 0]
@@ -96,11 +94,15 @@ class Board(object):
             if piece == 'pawn':
                 if 3 <= position[0] <= 4:
                     if ind == 0:
-                        if position[1] == 3:
+                        if position[1] == 4:
+                            center[ind] += 7
+                        elif position[1] == 3:
                             center[ind] += 15
                         elif position[1] == 2:
                             center[ind] += 7
                     else:
+                        if position[1] == 3:
+                            center[ind] += 7
                         if position[1] == 4:
                             center[ind] += 15
                         elif position[1] == 5:
