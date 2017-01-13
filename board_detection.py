@@ -76,6 +76,7 @@ def get_settings(mode):
                 'black': [((101, 62), 'black_piece'), ((71, 44), ('black_piece'))],
             }
         }
+        pixels = {"king": {"white": [[[94, 61], "white_piece"], [[72, 108], "white_piece"]], "black": [[[66, 93], "black_piece"], [[109, 53], "black_piece"]]}, "rook": {"white": [[[75, 103], "black_piece"], [[52, 106], "white_piece"]], "black": [[[59, 72], "black_piece"], [[94, 33], "black_piece"]]}, "pawn": {"white": [[[30, 103], "black_piece"], [[62, 41], "white_piece"]], "black": [[[35, 113], "black_piece"], [[62, 37], "black_piece"]]}, "knight": {"white": [[[42, 37], "white_piece"], [[31, 83], "black_piece"]], "black": [[[29, 44], "black_piece"], [[47, 44], "black_piece"]]}, "queen": {"white": [[[32, 67], "white_piece"], [[41, 49], "black_piece"]], "black": [[[105, 51], "black_piece"], [[83, 57], "black_piece"]]}, "bishop": {"white": [[[103, 109], "black_piece"], [[40, 104], "white_piece"]], "black": [[[106, 106], "black_piece"], [[61, 92], "black_piece"]]}}
         white_letter_count = 84
         black_letter_count = 59
     else:
@@ -88,7 +89,7 @@ def get_settings(mode):
             'moved_black_board_cell': (218 / 255.0, 195 / 255.0, 75 / 255.0),
             'letter': (152 / 255.0, 150 / 255.0, 149 / 255.0)
         }
-        cell_size = 68
+        cell_size = 74
         pixels = {
             'pawn': {
                 'white': [((43, 58), 'black_piece'), ((79, 91), ('white_piece'))],
@@ -116,6 +117,7 @@ def get_settings(mode):
             }
         }
         pixels = {"king": {"white": [[[27, 75], "white_piece"], [[80, 108], "black_piece"]], "black": [[[42, 60], "black_piece"], [[61, 75], "white_piece"]]}, "rook": {"white": [[[77, 75], "white_piece"], [[67, 42], "black_piece"]], "black": [[[86, 43], "white_piece"], [[52, 94], "black_piece"]]}, "pawn": {"white": [[[65, 77], "white_piece"], [[85, 112], "white_piece"]], "black": [[[73, 108], "black_piece"], [[44, 102], "black_piece"]]}, "knight": {"white": [[[82, 101], "white_piece"], [[46, 115], "black_piece"]], "black": [[[30, 44], "black_piece"], [[93, 100], "black_piece"]]}, "queen": {"white": [[[49, 84], "white_piece"], [[72, 51], "black_piece"]], "black": [[[111, 32], "black_piece"], [[68, 77], "black_piece"]]}, "bishop": {"white": [[[45, 57], "white_piece"], [[52, 91], "black_piece"]], "black": [[[22, 112], "black_piece"], [[42, 50], "black_piece"]]}}
+        pixels = {"king": {"white": [[[89, 80], "white_piece"], [[61, 54], "black_piece"]], "black": [[[120, 63], "white_piece"], [[97, 120], "white_piece"]]}, "rook": {"white": [[[39, 114], "black_piece"], [[38, 127], "white_piece"]], "black": [[[58, 56], "white_piece"], [[83, 83], "black_piece"]]}, "pawn": {"white": [[[108, 127], "white_piece"], [[55, 98], "white_piece"]], "black": [[[68, 86], "black_piece"], [[78, 119], "black_piece"]]}, "knight": {"white": [[[117, 61], "black_piece"], [[67, 43], "white_piece"]], "black": [[[113, 101], "black_piece"], [[89, 49], "black_piece"]]}, "queen": {"white": [[[42, 23], "black_piece"], [[102, 105], "white_piece"]], "black": [[[129, 40], "black_piece"], [[32, 94], "black_piece"]]}, "bishop": {"white": [[[58, 56], "white_piece"], [[31, 118], "black_piece"]], "black": [[[104, 123], "black_piece"], [[85, 85], "white_piece"]]}}
         white_letter_count = 112
         black_letter_count = 60
 
@@ -192,10 +194,10 @@ def get_lt_screen_cell_size(mode):
                     pixel = im.im.getpixel((x, y))
                     pixel = [c / 255.0 for c in pixel[:-1]]
                 cell_size = y / 2 - lt_screen[1]
-#                     xi = lt_screen[0] * 2
-#                     yi = lt_screen[1] * 2
-#                     show_image((xi, yi), (xi + cell_size * 8 * 2, yi + cell_size * 8 * 2))
-#                     raise
+#                 xi = lt_screen[0] * 2
+#                 yi = lt_screen[1] * 2
+#                 show_image((xi, yi), (xi + cell_size * 8 * 2, yi + cell_size * 8 * 2))
+#                 raise
                 break
 
         if lt_screen:
